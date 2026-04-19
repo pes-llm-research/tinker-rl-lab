@@ -29,6 +29,20 @@ SRC = ROOT / "paper" / "main.tex"
 DST = ROOT / "paper" / "main_anon.tex"
 LOG = ROOT / "blind_review" / "paper_changes.log"
 
+# Supplementary \input{} targets that also contain identifying information and
+# need parallel anonymized copies.  Each entry is (src, dst) relative to the
+# repository root.  The rewrite pass below also rewrites any \input{SRC}
+# references inside main_anon.tex to point at the DST copies.
+INCLUDE_FILES = [
+    ("paper/ethics_statement.tex",       "paper/ethics_statement_anon.tex"),
+    ("paper/sections/abstract.tex",      "paper/sections/abstract_anon.tex"),
+    ("paper/sections/intro.tex",         "paper/sections/intro_anon.tex"),
+    ("paper/sections/related_work_v2.tex", "paper/sections/related_work_v2_anon.tex"),
+    ("paper/sections/conclusion.tex",    "paper/sections/conclusion_anon.tex"),
+    ("paper/sections/stat_rigor_updates.tex", "paper/sections/stat_rigor_updates_anon.tex"),
+    ("paper/sections/checklist.tex",     "paper/sections/checklist_anon.tex"),
+]
+
 
 ANON_AUTHOR_BLOCK = """\\author{%
   Anonymous Author(s)\\\\
@@ -38,6 +52,7 @@ ANON_AUTHOR_BLOCK = """\\author{%
 
 
 ANON_ACKN_BLOCK = r"""\section*{Acknowledgments}
+\label{sec:acknowledgments}
 Acknowledgments are withheld for blind review. We thank the maintainers of the
 open-source libraries on which this work builds (TRL, Stable Baselines3,
 CleanRL, Tianshou, OpenRLHF, veRL, and the broader Hugging Face ecosystem),
@@ -71,7 +86,20 @@ def _record(changes, label, count):
     changes.append(f"- {label}: {count} replacement(s)")
 
 
-def anonymize(text: str) -> tuple[str, list[str]]:
+def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, list[str]]:
+    """Anonymize ``text``.
+
+    Parameters
+    ----------
+    text:
+        LaTeX source to process.
+    require_author_block:
+        ``True`` (default) for root documents where the real ``\\author{...}``
+        block must be present and rewritten.  ``False`` for included fragments
+        (abstract, ethics, checklist, etc.) that do not contain an author
+        block; in that mode step 1 is skipped but every other substitution
+        still runs.
+    """
     changes: list[str] = []
 
     # 1. Replace the real \author{...} block. We locate it by scanning for
@@ -83,7 +111,11 @@ def anonymize(text: str) -> tuple[str, list[str]]:
         if line.startswith("\\author{"):
             start = idx
             break
-    assert start is not None, "author block not found"
+    if start is None:
+        if require_author_block:
+            raise AssertionError("author block not found")
+        # included fragment: skip step 1 entirely and jump to the substitutions
+        return _run_substitutions(text, changes, skip_author_block=True)
     depth = 0
     end = None
     for idx in range(start, len(lines)):
@@ -105,7 +137,7 @@ def anonymize(text: str) -> tuple[str, list[str]]:
     # 2. Submission style flag: switch to anonymous / line-numbered mode.
     new_text, n = re.subn(
         r"\\usepackage\[preprint,nonatbib\]\{neurips_2026\}[^\n]*",
-        r"\\usepackage{neurips_2026} % anonymous submission mode",
+        r"\\usepackage[nonatbib]{neurips_2026} % anonymous submission mode",  # keep nonatbib so natbib is loaded exactly once
         text,
     )
     _record(changes, "neurips style flag switched to anonymous submission", n)
@@ -217,8 +249,13 @@ def anonymize(text: str) -> tuple[str, list[str]]:
     _record(changes, "\\begin{ack}..\\end{ack} environment anonymised", n)
     text = new_text
 
+    # Match the \section*{Acknowledgments} block.  The main.tex version now
+    # carries a \label{sec:acknowledgments} line between the heading and the
+    # first paragraph, so the previous pattern (which required `We thank` to
+    # start the very next line) no longer fired.  Tolerate any number of
+    # intervening whitespace/label lines before the real body.
     ack_section_pattern = re.compile(
-        r"\\section\*\{Acknowledgments\}\s*\nWe thank.*?(?=\n\\bibliographystyle|\n\\bibliography|\n\\begin\{thebibliography\})",
+        r"\\section\*\{Acknowledgments\}(?:\s*\\label\{[^}]*\})?\s*\nWe thank.*?(?=\n\\bibliographystyle|\n\\bibliography|\n\\begin\{thebibliography\})",
         re.DOTALL,
     )
     new_text, n = ack_section_pattern.subn(lambda _m: ANON_ACKN_BLOCK + "\n", text)
@@ -248,6 +285,35 @@ def anonymize(text: str) -> tuple[str, list[str]]:
         (r"Northwestern University",
          r"Anonymous Institution",
          "``Northwestern University'' redacted"),
+        # The ethics statement refers to the shared A100 node as ``PES A100''.
+        # After redacting ``PES University'' we still need to strip the node name.
+        (r"PES A100", r"Institutional A100",
+         "``PES A100'' node name redacted"),
+        # ``by collaborator <Name>'' / ``by <Surname>'' in ethics data-statement
+        # paragraphs must not reveal any team-member name.
+        (r"by collaborator Mohammad Rafi", r"by an anonymous collaborator",
+         "collaborator Mohammad Rafi redacted"),
+        (r"by collaborator Madhu\b", r"by an anonymous collaborator",
+         "collaborator Madhu redacted"),
+        (r"by collaborator Sandhya\b", r"by an anonymous collaborator",
+         "collaborator Sandhya redacted"),
+        (r"by collaborator Arumugam\b", r"by an anonymous collaborator",
+         "collaborator Arumugam redacted"),
+        (r"by collaborator Dhruva\b", r"by an anonymous collaborator",
+         "collaborator Dhruva redacted"),
+        # Residual mentions such as ``reported by Rafi'' / ``by Madhu''.
+        (r"reported by Rafi\b", r"reported by that collaborator",
+         "``reported by Rafi'' redacted"),
+        (r"\bby (Rafi|Madhu|Sandhya|Arumugam|Dhruva)\b", r"by that collaborator",
+         "bare ``by <surname>'' redacted"),
+        # The ``arvindcr4/tinker-rl-bench-*'' pattern still appears as a
+        # plain-text example in ethics_statement.tex.
+        (r"arvindcr4/tinker-rl-bench-\*", r"anonymous/tinker-rl-bench-*",
+         "``arvindcr4/tinker-rl-bench-*'' placeholder redacted"),
+        (r"pes-llm-research/tinker-rl-lab", r"anonymous-org/tinker-rl-lab",
+         "``pes-llm-research/tinker-rl-lab'' placeholder redacted"),
+        (r"arvindcr4/tinker-rl-lab", r"anonymous-mirror/tinker-rl-lab",
+         "``arvindcr4/tinker-rl-lab'' mirror placeholder redacted"),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -265,6 +331,8 @@ def anonymize(text: str) -> tuple[str, list[str]]:
          "dhruvanmurthy/* HF slug redacted"),
         (r"madhukumara1993", "anonymous",
          "madhukumara1993 GitHub handle redacted"),
+        (r"arvindcr4-pes-university", "anonymous",
+         "arvindcr4-pes-university wandb entity (bare) redacted"),
         (r"arvindcr4", "anonymous",
          "arvindcr4 handle redacted"),
         (r"pes-llm-research", "anonymous-org",
@@ -292,11 +360,66 @@ def anonymize(text: str) -> tuple[str, list[str]]:
     return text, changes
 
 
+def _run_substitutions(text: str, changes: list[str], *, skip_author_block: bool) -> tuple[str, list[str]]:
+    """Internal helper used by :func:`anonymize` to apply every substitution
+    pass *except* step 1 (author block rewrite).  Kept as a separate
+    function so included fragments can reuse the same pipeline without
+    requiring a ``\\author{}`` block."""
+    # Rerun :func:`anonymize` with a sentinel that lets it skip step 1.
+    # Implementation: temporarily prepend a synthetic author block, run the
+    # full pipeline, then strip the synthetic block back out.  This avoids
+    # duplicating the substitution list.
+    sentinel_block = "\\author{%\n  Arvind C R\\\\\n  PES University\\\\\n  \\texttt{arvindcr4@gmail.com}%\n}\n"
+    sentinel_tag = "%__ANON_SENTINEL_START__\n"
+    synthetic = sentinel_tag + sentinel_block + "%__ANON_SENTINEL_END__\n"
+    wrapped = synthetic + text
+    anon_wrapped, inc_changes = anonymize(wrapped, require_author_block=True)
+    # Strip anything from the top of the wrapped output down through the
+    # replaced author block.  The replacement is the fixed ANON_AUTHOR_BLOCK
+    # string, so locate the line that *follows* it.  We keep the sentinel
+    # comments so they act as fence posts.
+    marker = "%__ANON_SENTINEL_END__"
+    idx = anon_wrapped.find(marker)
+    if idx != -1:
+        # Drop through end of that line
+        newline = anon_wrapped.find("\n", idx)
+        anon_wrapped = anon_wrapped[newline + 1:]
+    # Extend the change log but drop the author-block line (it's synthetic)
+    filtered = [c for c in inc_changes if "author block replaced" not in c]
+    changes.extend(filtered)
+    return anon_wrapped, changes
+
+
 def main() -> None:
     src_text = SRC.read_text(encoding="utf-8")
     anon_text, changes = anonymize(src_text)
 
+    # Rewrite \input{SRC} references to point at their anonymized companions.
+    for src_rel, dst_rel in INCLUDE_FILES:
+        src_key = Path(src_rel).relative_to("paper").with_suffix("").as_posix()
+        dst_key = Path(dst_rel).relative_to("paper").with_suffix("").as_posix()
+        pat = re.compile(r"\\input\{" + re.escape(src_key) + r"\}")
+        new_anon_text, n = pat.subn(r"\\input{" + dst_key + r"}", anon_text)
+        anon_text = new_anon_text
+        changes.append(f"- rewrote \\input{{{src_key}}} -> \\input{{{dst_key}}}: {n} replacement(s)")
+
     DST.write_text(anon_text, encoding="utf-8")
+
+    # Anonymize each included file the same way as main.tex. They inherit the
+    # same substitution pipeline but we discard author-block / style-flag
+    # changes that only matter in the root document.
+    for src_rel, dst_rel in INCLUDE_FILES:
+        src_path = ROOT / src_rel
+        dst_path = ROOT / dst_rel
+        if not src_path.exists():
+            changes.append(f"- SKIPPED (missing): {src_rel}")
+            continue
+        inc_text = src_path.read_text(encoding="utf-8")
+        anon_inc_text, inc_changes = anonymize(inc_text, require_author_block=False)
+        dst_path.parent.mkdir(parents=True, exist_ok=True)
+        dst_path.write_text(anon_inc_text, encoding="utf-8")
+        changes.append(f"- wrote {dst_rel} ({len(inc_changes)} passes)")
+
     LOG.parent.mkdir(parents=True, exist_ok=True)
     LOG.write_text("\n".join(changes) + "\n", encoding="utf-8")
 

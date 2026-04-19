@@ -1,0 +1,264 @@
+% =============================================================================
+% Related Work v2 --- expanded related work for NeurIPS 2026 submission
+% Replaces the Related Work section in paper/main.tex (sec:related).
+% Grouped into five themes:
+%   (1) RL algorithms for LLMs
+%   (2) Reasoning RL (and process reward models)
+%   (3) Tool-use RL
+%   (4) Scaling laws for RL post-training
+%   (5) Frameworks, benchmarks, and reproducibility
+% Every paragraph references entries defined in paper/references.bib.
+% =============================================================================
+
+\section{Related Work}
+\label{sec:related}
+
+\ours{} sits at the intersection of five rapidly evolving lines of work:
+policy-gradient \emph{algorithms} for language models, RL for \emph{reasoning}
+(including process reward models), RL for \emph{tool use} and agentic behaviour,
+empirical \emph{scaling laws} for RL post-training, and the \emph{frameworks}
+and \emph{benchmarks} that instantiate these algorithms. We situate our
+contribution against more than fifty recent works; entries marked with
+\textsuperscript{\dag} appeared at NeurIPS, ICML, or ICLR in the 2025--2026 cycle.
+
+% -----------------------------------------------------------------------------
+\subsection{RL Algorithms for Large Language Models}
+\label{sec:related:algos}
+
+Proximal Policy Optimization (PPO)~\cite{schulman2017proximal} is the workhorse
+algorithm behind InstructGPT-style RLHF~\cite{ouyang2022training,
+christiano2017deeprlhf, stiennon2020summarize, bai2022hhrlhf, bai2022claudecai}
+and has dominated production deployments for five years. Direct Preference
+Optimization~\cite{rafailov2024direct} reframed preference learning as
+contrastive classification and spawned a large family of RL-free alternatives,
+including IPO~\cite{azar2024ipo}, KTO~\cite{ethayarajh2024kto},
+SimPO~\cite{meng2024simpo}, ORPO~\cite{hong2024orpo}, and
+SLiC~\cite{zhao2023slic}, all of which we consider as no-rollout baselines in
+our cross-library protocol.
+
+The current wave is defined by \emph{group-relative} policy gradient methods.
+GRPO was introduced with DeepSeekMath~\cite{shao2024deepseekmath} and
+popularised by DeepSeek-R1~\cite{guo2025deepseekr1,guo2025deepseekr1nature}, the
+first reasoning RL method published in \emph{Nature}, which showed that
+pure outcome-reward RL can elicit chain-of-thought behaviour from a base
+model without supervised cold-start data. A second wave of refinements
+dissects the biases of vanilla GRPO. Dr.~GRPO~\cite{liu2025drgrpo} removes a
+response-length bias and a question-difficulty amplification bias by using a
+constant loss normaliser and dropping the standard-deviation denominator in the
+advantage. GDPO~\cite{liu2026gdpo} decouples group-relative normalisation per
+reward component, preventing advantage collapse when rewards are multi-valued.
+MAD~GRPO~\cite{wang2025madgrpo} replaces the standard-deviation advantage
+scaler with the Median Absolute Deviation for heavy-tailed reward
+distributions. G$^{2}$RPO~\cite{hu2026openvlthinker} forces per-prompt
+advantages to match $\mathcal{N}(0,1)$ to fix reward-topology variance in
+multimodal settings. Wu et al.~\cite{wu2025grpo_dpo} prove that GRPO is
+``secretly DPO'' --- the group-level advantage is an implicit contrastive
+objective --- and show that 2-GRPO retains $98.1\%$ of the performance of
+16-GRPO at $12.5\%$ of the rollout budget. iGRPO~\cite{hatamizadeh2026igrpo}
+adds a two-stage self-feedback loop that conditions subsequent rollouts on the
+policy's best draft, reaching $85.6\%$ on AIME24. AERO~\cite{zhang2026aero}
+combines adaptive rollout sizing, rejection sampling, and a Bayesian posterior
+over prompt difficulty to eliminate zero-advantage dead zones, cutting RL
+compute by $48\%$. Target Policy Optimization (TPO)~\cite{kaddour2026tpo}
+decouples target-distribution construction from policy fitting: given scored
+completions, TPO builds a target $q \propto p_{\text{old}} \exp(u)$ and fits
+the policy via cross-entropy, giving a zero-gradient fixed point once the
+policy matches the target. RGRA~\cite{carrino2026rgra} shows that PPO-style
+clipping is unnecessary on top of group relative advantages, outperforming
+GRPO on 17 of 27 comparisons. EFRame~\cite{wang2025eframe} augments GRPO with
+exploration rollouts and experience replay for rare trajectories.
+
+A parallel thread focuses on \emph{production-scale} refinements. GSPO, from
+the Qwen team~\cite{qwen2025gspo}, redefines the importance ratio at the
+sequence level (rather than token level) and was credited with stabilising the
+Qwen3 series, especially its Mixture-of-Experts variants. DAPO, from
+ByteDance~\cite{yu2025dapo}, contributes asymmetric Clip-Higher, dynamic
+sampling, token-level loss normalisation, and overlong filtering, reaching
+$50$ points on AIME~2024 with a 32B model. Kimi-K1.5~\cite{team2025kimi15,
+team2025kimik2} and DeepSeek-V3~\cite{deepseek2024v3} both report their own
+GRPO variants and online mirror-descent-style updates. Orthogonal
+production variants include
+Flow-GRPO~\cite{liu2025flowgrpo}, VAPO~\cite{bytedance2025vapo}, and
+Dr.~SAC~\cite{ahmadian2024backtobasics}; the last argues that classical
+REINFORCE with a value baseline, when carefully implemented, matches GRPO on
+several RLHF tasks.
+
+A third thread attacks the \emph{zero-variance failure mode} (ZVF) directly.
+AERO~\cite{zhang2026aero} and GRESO~\cite{zhang2026greso} pre-screen prompts
+before sampling; CPPO~\cite{lin2025cppo} prunes completions post-rollout,
+giving up to $7.98\times$ speedup on GSM8K. NGRPO~\cite{nan2025ngrpo} adds
+Advantage Calibration and asymmetric clipping so that all-incorrect groups
+still carry gradient. Scaf-GRPO~\cite{zhang2025scaffgrpo} injects tiered
+scaffolding hints when learning stagnates, boosting AIME~2024 by $44.3\%$
+relative. EBPO~\cite{han2026ebpo} uses a Bayesian shrinkage estimator that
+guarantees non-vanishing penalties in saturated failure scenarios with formal
+MSE bounds. MO-GRPO~\cite{ichihara2025mogrpo} addresses vanilla GRPO's
+collapse to a single reward component under multiple objectives via
+variance-based reward re-weighting. Finally, Demystifying
+GRPO~\cite{zhou2026demystify} proves that the GRPO policy gradient is a
+$U$-statistic, deriving a universal scaling law for optimal group size;
+MinPRO~\cite{lei2026minpro} shows that token-level importance sampling in
+GRPO is only an approximation to the rigorous prefix importance ratio;
+SSPO~\cite{yang2025sspo} operates at sentence granularity to balance the
+stability of GSPO against the expressiveness of token-level GRPO, improving
+by $3.56$ points on math benchmarks. Taken together, these results explain at
+a theoretical level why implementation details at the granularity of the
+importance ratio have such large empirical effects --- an explanation our
+benchmark complements with a $73\,\mathrm{pp}$ cross-library measurement.
+
+% -----------------------------------------------------------------------------
+\subsection{Reasoning RL and Process Reward Models}
+\label{sec:related:reasoning}
+
+The shift from outcome rewards to \emph{process} supervision has reshaped
+reasoning RL. Let's-Verify-Step-by-Step~\cite{lightman2024stepbystep} showed
+that step-level PRMs dramatically outperform outcome reward models on GSM8K
+and MATH. Math-Shepherd~\cite{wang2024mathshepherd} derives process rewards
+from auto-generated process annotations, avoiding costly human labels.
+PRM800K~\cite{uesato2022prm800k} and PRMBench~\cite{song2024prmbench} provide
+evaluation data for step-level scoring. OmegaPRM~\cite{luo2024omegaprm} uses
+Monte-Carlo tree search to supervise process rewards without human-in-the-loop,
+while ReasonEval~\cite{xia2024reasoneval} introduces reasoning-specific reward
+models. Implicit PRM~\cite{yuan2024implicitprm} learns PRMs implicitly from
+outcome labels, and VersaPRM~\cite{yuan2025versaprm} extends process rewards
+to multi-domain tasks. These supervision signals are the backbone of recent
+reasoning models, including OpenAI's o1/o3 family~\cite{openai2024o1,
+openai2025o3}, DeepSeek-R1~\cite{guo2025deepseekr1, guo2025deepseekr1nature},
+Qwen2.5-Math~\cite{yang2024qwen25math}, Qwen3~\cite{qwen2025qwen3},
+Gemini~2.5 Pro's deliberative mode~\cite{google2025gemini25}, and
+Kimi-K2~\cite{team2025kimik2}. Complementary results demonstrate that
+self-consistency~\cite{wang2023selfconsistency}, tree-of-thought
+search~\cite{yao2024tot}, and critic-style post-hoc
+verifiers~\cite{mcaleese2024criticgpt} all benefit from or substitute for
+process reward supervision. VerifyBench~\cite{zhang2025verifybench} and
+A~Sober Look~\cite{hochlehnert2025sober} warn, however, that reward hacking
+and evaluation artefacts can inflate perceived gains, motivating our
+insistence on binary verifiable rewards for mathematical reasoning.
+
+Reasoning-specific algorithmic contributions also continue to accumulate.
+ReFT~\cite{luong2024reft} studies supervised fine-tuning versus RL for
+reasoning. Let's Reward Step~\cite{zhang2025rewardstep} and
+STaR~\cite{zelikman2022star} bootstrap reasoning chains from weak
+supervisors. rStar-Math~\cite{guan2025rstarmath} combines MCTS-based PRMs
+with self-evolved reasoning. ReST-EM~\cite{singh2024restem} alternates
+expectation and maximisation steps over self-generated rationales.
+Self-Taught Evaluator~\cite{wang2024stevaluator} adapts an LLM to score its
+own reasoning chains. GRPO-Lead~\cite{lu2025grpolead}, LCPO~\cite{lu2025lcpo},
+and LIMR~\cite{li2025limr} each tune reasoning depth with length-aware
+rewards. Search-R1~\cite{jin2025searchr1} trains reasoning agents to
+interleave search queries with chain-of-thought. TTRL~\cite{pu2025ttrl}
+performs test-time RL against self-generated verifiers. We use the
+Dr.~GRPO~\cite{liu2025drgrpo} and GSPO~\cite{qwen2025gspo} formulations as
+reference implementations when measuring reasoning accuracy across the
+0.6B--235B frontier.
+
+% -----------------------------------------------------------------------------
+\subsection{Tool-Use and Agentic RL}
+\label{sec:related:tooluse}
+
+Tool-use RL trains LLMs to interleave natural-language reasoning with external
+API calls. Toolformer~\cite{schick2023toolformer} introduced self-supervised
+tool-call insertion for a small set of APIs; Gorilla~\cite{patil2023gorilla}
+retrieved from a large API catalogue; and ToolLLM~\cite{qin2024toolllm} scaled
+training to thousands of real-world REST APIs. ReAct~\cite{yao2023react}
+established the interleaved reason--act--observe pattern that most subsequent
+agents inherit. RL specifically for tool use was pioneered by
+ToolACE~\cite{liu2024toolace}, which couples a tool-calling reward with a
+self-evolving synthesis pipeline; ToolRL~\cite{qian2025toolrl} applies GRPO
+with verifiable tool-call rewards; ToRL~\cite{li2025torl} optimises the joint
+reasoning--action trajectory. Further advances include
+APIGen~\cite{lin2024apigen} (high-quality synthetic API data),
+Nexus-Raven~\cite{nexusflow2024nexusraven}, and
+Octopus~\cite{chen2024octopus}. Agentic RL extends tool use to long-horizon
+tasks: WebGPT~\cite{nakano2021webgpt} and
+WebShop~\cite{yao2022webshop} were the first large-scale web agents,
+Reflexion~\cite{shinn2023reflexion} and Voyager~\cite{wang2023voyager} add
+episodic self-reflection, and AutoGPT-style agents have been formalised by
+AgentBench~\cite{liu2024agentbench}. 2025--2026 produced a wave of RL-trained
+agents: SWE-RL~\cite{wei2025swerl} trains coding agents with execution
+rewards; SWE-Gym~\cite{pan2025swegym} provides an RL training environment for
+real GitHub issues; ARTIST~\cite{singh2025artist} trains tool-integrated
+reasoning agents with GRPO; RAGEN~\cite{wang2025ragen} studies multi-turn
+RL with tool access; OpenAI's Deep Research~\cite{openai2025deepresearch}
+and Perplexity Deep Research~\cite{perplexity2025deepresearch} both report
+GRPO-style training over web-browsing traces. Our benchmark currently focuses
+on single-turn verifiable mathematical reasoning; we adopt Tinker's
+\texttt{message\_with\_tool} interface as the neutral substrate for future
+tool-use extensions and explicitly cite these works as concurrent settings in
+which \ours{}'s ZVF measurements will need to be re-evaluated.
+
+% -----------------------------------------------------------------------------
+\subsection{Scaling Laws for RL Post-Training}
+\label{sec:related:scaling}
+
+Compute-optimal training of base language models is governed by
+well-known scaling laws~\cite{kaplan2020scalinglaws, hoffmann2022chinchilla,
+muennighoff2023datascaling}, but RL post-training is much less well
+characterised. Hilton et al.~\cite{hilton2023rlscaling} first derived
+compute-efficiency frontiers for RL in games and robotics. For RLHF,
+Gao et al.~\cite{gao2023reward} characterise the over-optimisation curve of
+reward models, and Rafailov et al.~\cite{rafailov2024rlhfscaling} provide
+scaling laws for DPO and PPO that show a strong dependence on reward-model
+quality. Nimmaturi et al.~\cite{nimmaturi2025scalinglaws} derive an
+empirical scaling law specifically for GRPO, identifying three training
+phases (slow start, rapid improvement, plateau) and showing that most
+benefit is exhausted by roughly $80\%$ of one epoch. Liu et
+al.~\cite{liu2025rlsubnetworks} find that RL fine-tuning updates only
+$5$--$30\%$ of model parameters across seven algorithms and ten model
+families, suggesting RL activates a sparse ``RL subnetwork.''
+MiniCPM~\cite{hu2024minicpm} and the SLM survey of
+Subramanian et al.~\cite{subramanian2025slm} characterise scaling in the
+sub-8B regime that forms the bulk of our frontier. Schaeffer et
+al.~\cite{schaeffer2024emergent} caution that apparent emergent abilities may
+be metric artefacts, a concern that persists into RL. Our measurements
+extend these works by providing cross-family scaling data for RL from
+0.6B to 235B across five families and four frameworks, supplying empirical
+ground truth against which future RL scaling laws can be calibrated.
+
+% -----------------------------------------------------------------------------
+\subsection{Frameworks, Benchmarks, and Reproducibility}
+\label{sec:related:frameworks}
+
+The proliferation of algorithms has been matched by a proliferation of
+training \emph{frameworks}: TRL~\cite{vonwerra2022trl},
+OpenRLHF~\cite{hu2024openrlhf}, veRL~\cite{sheng2024verl},
+NeMo-RL~\cite{nvidia2024nemorl}, DeepSpeed-Chat~\cite{yao2023deepspeedchat},
+trlX~\cite{havrilla2023trlx}, Axolotl~\cite{axolotl2024}, and
+\tinker{}~\cite{thinkingmachines2024tinker}. Each framework makes different
+default choices about advantage normalisation, KL estimators, tokenisation
+loss masking, rollout batching, and importance-sampling granularity; those
+differences are the principal source of the cross-library gap we quantify.
+On the inference side, vLLM~\cite{kwon2023vllm} and
+SGLang~\cite{zheng2024sglang} provide the rollout backends on which all
+modern frameworks depend; FlashAttention~\cite{dao2022flashattention} and
+LoRA~\cite{hu2022lora} are load-bearing kernels.
+
+In the RL \emph{benchmarking} tradition, Henderson et
+al.~\cite{henderson2018deep} first exposed the fragility of deep-RL results
+to implementation choices and seeds;
+\texttt{rliable}~\cite{agarwal2021deep} introduced interquartile-mean
+reporting and performance profiles; BenchMARL~\cite{bettini2023benchmarl}
+unified multi-agent RL benchmarks; Patterson et
+al.~\cite{patterson2024empirical} surveyed empirical design practices;
+Jordan et al.~\cite{jordan2024benchmarking} argued that most published RL
+comparisons lack statistical power; and Madaan et
+al.~\cite{zhang2024benchvariance} quantified LLM evaluation variance along
+seed, monotonicity, and scaling axes. Pineau et
+al.~\cite{pineau2020improving} formalised NeurIPS reproducibility criteria
+and ACM's Artifact Review and Badging~\cite{acm2020badges} established
+community standards for available, evaluated, and reproduced artifacts.
+Reproducibility studies in adjacent fields include
+\cite{cavenaghi2023systematic, lynnerup2019survey, yamerenko2025generating,
+paparella2023reproducibility, huang2022state, lopezibañez2021reproducibility,
+leeser2026artifact, sedghpour2024artifact, colas2019hitchhiker}, alongside
+Hoffman et al.'s Acme~\cite{hoffman2022acme}. Classical evaluations rest on
+GSM8K~\cite{cobbe2021gsm8k}, MATH~\cite{hendrycks2021math},
+AIME~\cite{maa2024aime}, MMLU~\cite{hendrycks2021mmlu},
+HumanEval~\cite{chen2021codex}, MBPP~\cite{austin2021mbpp}, and
+BBH~\cite{suzgun2023bbh}. \ours{} ports these statistical traditions to the
+LLM RL post-training regime, contributing the first cross-library
+measurement protocol for GRPO-family algorithms, a ZVF diagnostic that
+scales from 0.6B to 235B parameters, and an empirical grounding for the
+scaling laws, frameworks, and algorithmic refinements surveyed above.
+
+% =============================================================================

@@ -80,6 +80,9 @@ EXCLUDE_FILES = {
     "scripts/anonymize.sh",
     "verify_links_entities.txt",
     "autoresearch-dashboard.md",
+    # Citation metadata file lists real author names -- excluded from blind
+    # bundle. A reviewer-facing citation block lives in the paper itself.
+    "CITATION.cff",
     # Binary slide decks carry team names inside pptx xml; dropped entirely.
     "experiments/collab-results/LLM_Tool_Call_Finetuning.pptx",
     "experiments/collab-results/exp3_multiturn.pptx",

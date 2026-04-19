@@ -1,0 +1,384 @@
+% =============================================================================
+% NeurIPS 2026 Paper Checklist — FINAL (Task 9 audited pass)
+% -----------------------------------------------------------------------------
+% Self-contained.  Replace the current inline checklist block in main.tex with
+%   \input{sections/checklist}
+% (the file lives at paper/sections/checklist.tex so the relative path is
+% correct when main.tex is compiled from paper/).
+%
+% Requirements already present in main.tex:
+%   \newcommand{\answerPartial}[1][]{\textcolor{purple}{[Partial] #1}}
+%   neurips_2026.sty provides \answerYes, \answerNo, \answerNA.
+%
+% The matching human-readable audit with page references lives at
+%   NEURIPS_CHECKLIST_FINAL.md in the repository root.
+% =============================================================================
+
+\section*{NeurIPS Paper Checklist}
+
+\begin{enumerate}
+
+% -- 1. Claims -----------------------------------------------------------------
+\item {\bf Claims}
+    \begin{enumerate}
+    \item Do the main claims made in the abstract and introduction
+          accurately reflect the paper's contributions and scope?
+    \answerYes{The abstract and Section~\ref{sec:intro} state five
+    contributions: (i)~a 73-percentage-point implementation gap across
+    7~libraries, (ii)~model-dependent GRPO/PPO preference, (iii)~frontier
+    collapse on Nemotron-120B, (iv)~zero-variance fraction (ZVF) as a
+    leading diagnostic of GRPO failure, and (v)~reward-trajectory
+    proxies for KL-free monitoring.  Empirical support is given in
+    Section~\ref{sec:results}: the cross-library gap in
+    Section~\ref{sec:main_results}; the algorithm$\times$model
+    interaction in Section~\ref{sec:ppo_grpo}; the frontier regime in
+    Section~\ref{sec:frontier}; ZVF analysis in
+    Section~\ref{sec:zvf-analysis}; and proxy metrics in
+    Sections~\ref{sec:length_bias} and~\ref{sec:discuss_kl}.  Evidence is
+    drawn from the 44~controlled experiments tabulated in
+    Section~\ref{sec:results} and the 32-run Bitter Lesson extension of
+    Section~\ref{sec:bitter_lesson}.  The scope is explicitly restricted
+    to LoRA fine-tuning on three task families (math, code, tool-use)
+    with evaluated scales of 0.6B--235B parameters
+    (Section~\ref{sec:setup}); Section~\ref{sec:limitations} records
+    that 11 of 14 Tinker runs were interrupted by JWT token expiry and
+    4 of 6 Modal runs timed out, so reported numbers reflect the
+    \emph{available} data and partial runs are marked $\dagger$.}
+    \end{enumerate}
+
+% -- 2. Limitations ------------------------------------------------------------
+\item {\bf Limitations}
+    \begin{enumerate}
+    \item Does the paper discuss the limitations of the work performed by
+          the authors?
+    \answerYes{Section~\ref{sec:limitations} enumerates the limitations
+    in detail:
+    \begin{itemize}
+      \item \textbf{Platform opacity.} Tinker API is a closed, serverless
+            platform; GPU type, driver version, CUDA runtime, and
+            scheduler are undisclosed, so Tinker-derived results cannot be
+            independently reproduced without Tinker access
+            (Section~\ref{sec:infra_failures}).
+      \item \textbf{Infrastructure failures.} 11~of 14 Tinker runs were
+            interrupted by JWT token expiry; 4~of 6 Modal runs hit
+            timeouts or gradient-norm blow-ups.  Specific failed runs are
+            named in Section~\ref{sec:infra_failures}.
+      \item \textbf{Single-seed Tinker runs.} Cost constraints precluded
+            multi-seed replication on Tinker; these results are treated
+            as descriptive only (Section~\ref{sec:method_limits}).
+      \item \textbf{LoRA-only evaluation.} Full fine-tuning and
+            quantisation-aware training are not evaluated
+            (Section~\ref{sec:method_limits}).
+      \item \textbf{Train-set reward metric.} Primary Tinker metrics are
+            training rewards, not held-out accuracy, with held-out
+            evaluation only completed for the Modal Qwen3-32B / Qwen3.5-27B
+            arms (Section~\ref{sec:method_limits}).
+      \item \textbf{Proxy metrics in place of direct KL.}
+            Section~\ref{sec:discuss_kl} discusses the limits of
+            trajectory-based stability indices as substitutes for direct
+            KL divergence.
+    \end{itemize}}
+    \end{enumerate}
+
+% -- 3. Theory ------------------------------------------------------------------
+\item {\bf Theory Assumptions and Proofs}
+    \begin{enumerate}
+    \item For each theoretical result, does the paper provide the full
+          set of assumptions and a complete (or correct) proof?
+    \answerNA{This is an empirical benchmarking paper; no formal theorems
+    are claimed.  GRPO and PPO objectives stated in
+    Section~\ref{sec:benchmark} are background definitions, not original
+    theoretical results.}
+    \end{enumerate}
+
+% -- 4. Reproducibility ---------------------------------------------------------
+\item {\bf Experimental Result Reproducibility}
+    \begin{enumerate}
+    \item Does the paper fully disclose all the information needed to
+          reproduce the main experimental results of the paper to the
+          extent that it affects the main claims and/or conclusions of
+          the paper?
+    \answerPartial{Reproducibility is \emph{partial by design} due to
+    platform heterogeneity.
+    \begin{itemize}
+      \item \textbf{Modal experiments (fully reproducible).} Complete
+            source code, a pinned \texttt{Dockerfile}, centralised seed
+            management (\texttt{utils/seed.py}), and step-by-step
+            commands are documented in \texttt{REPRODUCE.md} at
+            \url{https://anonymous.4open.science/r/tinker-rl-lab}.  Modal
+            jobs run on explicitly provisioned NVIDIA H100~SXM5 (80\,GB)
+            workers; TRL baselines run on NVIDIA L4 (24\,GB).  All
+            Modal/TRL arms use 5~seeds ($s \in \{42, 123, 456, 789, 1024\}$)
+            with mean $\pm$ SE and 95\,\% bootstrap CIs via
+            \texttt{rliable}.
+      \item \textbf{Tinker API experiments (not fully reproducible).}
+            Tinker is closed-source with serverless GPU dispatch; GPU
+            type, driver version, and scheduling policy are not exposed.
+            We release our exact API scripts and configuration files, but
+            independent replication requires a Tinker account and is
+            subject to the same JWT expiry issues we observed
+            (Section~\ref{sec:infra_failures}).  All Tinker-derived
+            numbers in figures and tables are flagged with a ``$\dagger$''.
+    \end{itemize}
+    We claim \emph{Partial} rather than \emph{Yes}: the Tinker subset is
+    irreducibly platform-dependent.}
+    \end{enumerate}
+
+% -- 5. Open access -------------------------------------------------------------
+\item {\bf Open access to data and code}
+    \begin{enumerate}
+    \item Does the paper provide open access to the data and code, with
+          sufficient instructions to faithfully reproduce the main
+          experimental results, as described above?
+    \answerYes{All code is publicly released under the
+    \textbf{Apache License~2.0} at
+    \url{https://anonymous.4open.science/r/tinker-rl-lab} (mirrored at
+    \url{https://anonymous.4open.science/r/tinker-rl-lab}).  LoRA
+    adapter checkpoints from the successful Modal experiments are on
+    HuggingFace Hub under
+    \url{https://huggingface.co/anonymous/tinker-rl-bench-*} with model
+    cards generated from \texttt{huggingface/MODEL\_CARD\_TEMPLATE.md}.
+    All experiment runs are logged publicly at
+    \url{https://wandb.ai/anonymous/tinker-rl-bench};
+    per-step reward, loss, gradient-norm, and (where available) KL
+    metrics are visible without login.  Training datasets (GSM8K,
+    HumanEval, NoRobots, synthetic tool-use) are public and cited in
+    Table~\ref{tab:tasks}.  Tinker API credentials are \emph{not}
+    included for security reasons; \texttt{README.md} explains how to
+    obtain a Tinker API key.}
+    \end{enumerate}
+
+% -- 6. Experimental setting ---------------------------------------------------
+\item {\bf Experimental Setting/Details}
+    \begin{enumerate}
+    \item Does the paper specify all the training and test details
+          (e.g., data splits, hyperparameters, how they were chosen,
+          type of optimizer) necessary to understand the results?
+    \answerYes{Section~\ref{sec:setup} gives models, data splits, LoRA
+    configuration (rank~32), optimiser (Adam, $\beta_1{=}0.9$,
+    $\beta_2{=}0.95$, $\epsilon{=}10^{-8}$, learning rate $10^{-4}$),
+    and the 5-seed Modal protocol.  Table~\ref{tab:hyperparams} maps
+    these hyperparameters across all 7~libraries.
+    Appendix~\ref{app:hyperparams} reports sweep ranges.  Per-task
+    YAML configurations are version-controlled under
+    \texttt{atropos/configs/}.  GSM8K uses the standard
+    train/test partitions; HumanEval uses the full pass@1 suite.
+    Tinker hyperparameters are released as API call scripts; the only
+    unavailable information is the Tinker platform's internal hardware.}
+    \end{enumerate}
+
+% -- 7. Statistical significance -----------------------------------------------
+\item {\bf Experiment Statistical Significance}
+    \begin{enumerate}
+    \item Does the paper report error bars suitably and correctly
+          defined or other appropriate information about the statistical
+          significance of the experiments?
+    \answerPartial{For Modal/TRL arms with 5~seeds we report mean
+    $\pm$ SE with 95\,\% bootstrap confidence intervals via
+    \texttt{rliable}~\cite{agarwal2021deep}; a full power analysis
+    (Table~\ref{tab:power-analysis}) and Benjamini--Hochberg-adjusted
+    pairwise significance (Table~\ref{tab:bh-pvalues}) are reported in
+    Section~\ref{sec:setup}.  The TRL-GRPO reference characterisation
+    (Qwen2.5-0.5B, 5~seeds) reports $\bar{x}=0.734$,
+    $\sigma=0.0703$, IQM $=0.747$, bootstrap 95\,\% CI $[0.672, 0.782]$.
+    Tinker API experiments are single-seed (cost-constrained) and are
+    explicitly labelled so in Sections~\ref{sec:main_results}
+    and~\ref{sec:method_limits}; no statistical significance is claimed
+    for Tinker-only comparisons.  We follow the recommendations of
+    \citet{colas2019hitchhiker} and \citet{jordan2024benchmarking} on
+    the limits of single-seed evaluation.  Because a meaningful subset
+    of headline results is Tinker-only, the honest answer is
+    \emph{Partial}.}
+    \end{enumerate}
+
+% -- 8. Compute resources ------------------------------------------------------
+\item {\bf Experiments Compute Resources}
+    \begin{enumerate}
+    \item For each experiment, does the paper provide sufficient
+          information on the computer resources (type of compute
+          workers, memory, time of execution) needed to reproduce the
+          experiments?
+    \answerPartial{Section~4.4 and Appendix~\ref{app:compute} list GPU
+    types and estimated GPU-hours for each experiment group; the
+    complete per-experiment breakdown with wall-clock time and
+    estimated cost is in \texttt{COMPUTE.md}.
+    \begin{itemize}
+      \item \textbf{Modal experiments.} Fully specified:
+            H100~SXM5 (80\,GB) for recent runs and L4 (24\,GB) for the
+            TRL reference sweep.  Wall-clock and GPU-hour estimates are
+            reported.
+      \item \textbf{Tinker API experiments.} Serverless dispatch masks
+            the exact GPU type; GPU-hour figures are inferred from
+            billing records and are flagged as approximate.
+    \end{itemize}
+    Total project cost is approximately 1{,}200 A100-equivalent GPU-hours
+    across both platforms.  \emph{Partial} reflects the Tinker-side
+    hardware opacity, which is a platform property we cannot resolve.}
+    \end{enumerate}
+
+% -- 9. Code of Ethics ---------------------------------------------------------
+\item {\bf Code Of Ethics}
+    \begin{enumerate}
+    \item Does the research conducted in the paper conform, in every
+          respect, with the NeurIPS Code of Ethics?
+    \answerYes{The authors have reviewed the NeurIPS Code of Ethics and
+    confirm compliance.  This work involves no human subjects, no
+    private or sensitive data, and no models trained on proprietary
+    corpora.  All training datasets are public research datasets
+    (GSM8K, HumanEval, NoRobots, synthetic tool-use).  Broader societal
+    impacts---including reward hacking, alignment failure modes of
+    RLHF, and equity of compute access---are discussed in
+    Section~\ref{sec:impact} and in \texttt{ethics\_statement.tex}.}
+    \end{enumerate}
+
+% -- 10. Broader Impacts -------------------------------------------------------
+\item {\bf Broader Impacts}
+    \begin{enumerate}
+    \item Does the paper discuss both potential positive societal
+          impacts and negative societal impacts of the work performed?
+    \answerYes{Section~\ref{sec:impact} (plus
+    \texttt{ethics\_statement.tex} and \texttt{LIMITATIONS\_AND\_IMPACT.md})
+    discusses:
+    \begin{itemize}
+      \item \textbf{Positive.} Lowering the barrier to RL post-training
+            research; enabling reproducibility audits; surfacing
+            platform-dependent variance that is typically hidden in
+            single-platform papers.
+      \item \textbf{Negative / risks.} RLHF reward hacking; alignment
+            concerns when optimising proxy rewards; potential misuse of
+            fine-tuned models; compute-access disparities that could
+            limit replication to well-resourced groups.
+      \item \textbf{Environmental.} Estimated 0.4--1.2\,kg
+            CO$_2$-equivalent for the Modal H100 experiments; the Tinker
+            API footprint is unestimable because the hardware mix is
+            undisclosed.
+    \end{itemize}}
+    \end{enumerate}
+
+% -- 11. Safeguards ------------------------------------------------------------
+\item {\bf Safeguards}
+    \begin{enumerate}
+    \item Does the paper describe safeguards that have been put in place
+          for responsible release of data or models that have been
+          identified as requiring safeguards?
+    \answerNA{The released artefacts are LoRA adapters fine-tuned from
+    already-public base models (Qwen, Llama, Nemotron, GPT-OSS,
+    Kimi-K2) on standard research datasets (GSM8K, HumanEval, synthetic
+    tool-use).  No new high-risk capabilities are introduced relative to
+    the base models; released checkpoints inherit the base models'
+    licence terms and include standard usage disclaimers in the
+    HuggingFace model cards
+    (\texttt{huggingface/MODEL\_CARD\_TEMPLATE.md}).}
+    \end{enumerate}
+
+% -- 12. Licenses --------------------------------------------------------------
+\item {\bf Licenses for existing assets}
+    \begin{enumerate}
+    \item Are the creators or original owners of assets (e.g., code,
+          data, models) used in the paper properly credited, and are
+          the licence and terms of use explicitly mentioned and properly
+          respected?
+    \answerYes{All third-party assets are credited with their licences:
+    \begin{itemize}
+      \item \textbf{GSM8K}~\cite{cobbe2021training}: MIT licence.
+      \item \textbf{HumanEval} (OpenAI): MIT licence.
+      \item \textbf{NoRobots} (HuggingFaceH4): CC-BY-NC-4.0 (used for
+            the chat-SFT task only).
+      \item \textbf{Synthetic tool-use data}: self-generated from public
+            API documentation; no upstream licence restrictions.
+      \item \textbf{Qwen model family}: Apache-2.0.
+      \item \textbf{Llama model family}: Meta Llama Community Licence.
+      \item \textbf{Nemotron, GPT-OSS, Kimi-K2}: used under their
+            respective published licences; credits in
+            Section~\ref{sec:setup}.
+      \item \textbf{TRL, PEFT, Transformers}: Apache-2.0 (HuggingFace).
+      \item \textbf{Modal}: commercial platform; terms of service
+            respected.
+      \item \textbf{Tinker API}: proprietary; used under standard API
+            terms of service.
+      \item \textbf{Our code}: \textbf{Apache-2.0} (see \texttt{LICENSE}
+            in the repository root).
+    \end{itemize}}
+    \end{enumerate}
+
+% -- 13. New Assets ------------------------------------------------------------
+\item {\bf New Assets}
+    \begin{enumerate}
+    \item Are new assets introduced in the paper well documented and is
+          the documentation provided alongside the assets?
+    \answerYes{New assets and their documentation:
+    \begin{itemize}
+      \item The \ours{} benchmark suite (harness, evaluation scripts,
+            analysis notebooks) at
+            \url{https://anonymous.4open.science/r/tinker-rl-lab}, released
+            under Apache-2.0 and documented by \texttt{README.md},
+            \texttt{REPRODUCE.md}, \texttt{ARTIFACT.md},
+            \texttt{COMPUTE.md}, \texttt{BASELINES.md},
+            \texttt{BENCHMARKS\_COMPARISON.md}, and
+            \texttt{LIMITATIONS\_AND\_IMPACT.md}.
+      \item LoRA adapter checkpoints from the successful Modal
+            experiments at
+            \url{https://huggingface.co/anonymous/tinker-rl-bench-*},
+            each accompanied by a HuggingFace model card generated from
+            \texttt{huggingface/MODEL\_CARD\_TEMPLATE.md}
+            (intended use, training data, evaluation results, known
+            limitations).
+      \item All experiment logs on the public Weights~\&~Biases project
+            \texttt{anonymous/tinker-rl-bench}.
+    \end{itemize}
+    Checkpoints from JWT-interrupted Tinker runs are \emph{not} uploaded,
+    because those jobs did not reach a valid final state
+    (Section~\ref{sec:infra_failures}).}
+    \end{enumerate}
+
+% -- 14. Crowdsourcing ---------------------------------------------------------
+\item {\bf Crowdsourcing and Research with Human Subjects}
+    \begin{enumerate}
+    \item For crowdsourcing experiments and research with human
+          subjects, does the paper include the full text of instructions
+          given to participants and screenshots, if applicable, as well
+          as details about compensation?
+    \answerNA{No crowdsourcing or human subjects research was
+    conducted.}
+    \end{enumerate}
+
+% -- 15. IRB -------------------------------------------------------------------
+\item {\bf Institutional Review Board (IRB) Approvals or Equivalent for
+       Research with Human Subjects}
+    \begin{enumerate}
+    \item Does the paper describe potential risks incurred by study
+          participants, whether compensation was provided to study
+          participants, and whether informed consent was obtained?
+    \answerNA{No human subjects research was conducted; IRB approval is
+    not applicable.}
+    \end{enumerate}
+
+% -- 16. LLM usage -------------------------------------------------------------
+\item {\bf Declaration of LLM usage}
+    \begin{enumerate}
+    \item Does the paper describe the usage of LLMs if it is an
+          important, original, or non-standard component of the core
+          methods?
+    \answerYes{LLMs appear in this work in two distinct roles, both
+    declared:
+    \begin{itemize}
+      \item \textbf{As subjects of evaluation.} The Qwen, Llama,
+            Nemotron, GPT-OSS, and Kimi-K2 model families are the
+            primary \emph{subjects} of the benchmark; their role as RL
+            fine-tuning targets is described in
+            Sections~\ref{sec:benchmark} and~\ref{sec:setup}.
+      \item \textbf{As authoring/editing aids.} GitHub Copilot was used
+            for boilerplate experiment scripts and LaTeX/BibTeX
+            scaffolding.  ChatGPT Pro was used during revision to
+            obtain reviewer-style critique of drafts; resulting
+            suggestions were evaluated and, where accepted, manually
+            incorporated.  All scientific claims, experimental design,
+            numerical results, figures, and statistical analyses are
+            human-authored and independently verified against the logged
+            Weights~\&~Biases traces.
+    \end{itemize}
+    LLMs are not an \emph{original} or \emph{non-standard} component of
+    the core methodology.}
+    \end{enumerate}
+
+\end{enumerate}
