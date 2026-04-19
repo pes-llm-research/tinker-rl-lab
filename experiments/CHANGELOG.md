@@ -55,3 +55,14 @@ fields (`group, task, platform, finding, hf_checkpoint_url, zero_reward_pct`).
 Empty-string sentinels are used for fields that are genuinely unknown for a
 given experiment (e.g. `group_size` and `lr` for PPO runs that do not use
 GRPO groups or use policy-default learning rates).
+
+## 2026-04-19 (step-5 amendment)
+
+- **Fix `ppo_qwen3-8b` row** — the Task-13 step-2 consolidation had populated this row from
+  a different Modal PPO experiment (`peak=1.0, last10=0.35`) than the one cited in
+  `paper/main.tex` L907 and the abstract F4 claim (`peak=0.75, last10=0.225`). The Task-13
+  step-5 Qwen3-8B reproducibility check surfaced the discrepancy (delta 12.5 pp vs.
+  ±2 pp tolerance). Row replaced with the canonical trace from
+  `experiments/modal/results/modal_parallel_results.json:ppo_gsm8k_Qwen3-8B_s42`. Prior
+  row archived under `experiments/_archive/ppo_qwen3-8b_superseded_2026-04-19.json`.
+- Row count unchanged at 62. `master_results.csv` regenerated. No paper edits.
