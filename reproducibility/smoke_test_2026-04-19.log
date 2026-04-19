@@ -1,0 +1,57 @@
+[1;34m[smoke][0m TinkerRL-Bench smoke test — target <10 min
+[1;34m[smoke][0m Repo:      2fc2a44
+[1;34m[smoke][0m Python:    Python 3.12.8
+[1;34m[smoke][0m Host:      Linux 6.1.158 x86_64
+[1;34m[smoke][0m Log file:  /tmp/tinker-rl-lab/reproducibility/smoke_test_2026-04-19.log
+
+[1;35m[1/6][0m Core library imports
+  required torch          2.11.0+cpu
+  required numpy          2.4.4
+  required transformers   5.5.4
+  required datasets       4.8.4
+  required accelerate     1.13.0
+  required trl            1.2.0
+  optional tinker         MISSING (ModuleNotFoundError)
+  optional wandb          MISSING (ModuleNotFoundError)
+  optional rliable        ?
+  optional peft           0.19.1
+  optional scipy          1.17.1
+  torch.cuda.is_available=False device_count=0
+  elapsed=5.7s
+[1;32m  ✓[0m imports
+
+[1;35m[2/6][0m Seed determinism (utils.seed)
+  determinism verified for seeds {42, 43}
+[1;32m  ✓[0m seeds
+
+[1;35m[3/6][0m Unit tests (pytest tests/)
+============================= test session starts ==============================
+platform linux -- Python 3.12.8, pytest-9.0.3, pluggy-1.6.0
+rootdir: /tmp/tinker-rl-lab
+configfile: pyproject.toml
+plugins: anyio-4.13.0, ddtrace-4.7.1
+collected 8 items
+
+tests/test_experiments.py ..                                             [ 25%]
+tests/test_seed.py ....                                                  [ 75%]
+tests/test_stats.py ..                                                   [100%]
+
+============================== 8 passed in 10.22s ==============================
+[1;32m  ✓[0m pytest
+
+[1;35m[4/6][0m GSM8K dataset load (openai/gsm8k, split=test, first 8 rows)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating train split:   0%|          | 0/7473 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 7473/7473 [00:00<00:00, 496901.25 examples/s]
+Generating test split:   0%|          | 0/1319 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1319/1319 [00:00<00:00, 370300.33 examples/s]
+  loaded 8 rows in 2.5s; sample answer = 160
+[1;32m  ✓[0m gsm8k
+
+[1;35m[5/6][0m GRPO reward + advantage round-trip
+  reward fn: 4/4 cases passed
+  advantages (rewards=[1.0, 0.0, 0.0, 1.0]) = [1.0, -1.0, -1.0, 1.0]
+[1;32m  ✓[0m grpo math
+
+[1;35m[6/6][0m Docstring / script surface check
+  required artifact files present and parseable
+[1;32m  ✓[0m surface
+[1;34m[smoke][0m TINKER_API_KEY not set → skipping live Tinker smoke (step 7/7)
