@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-04-19T16:25:08.130337+00:00",
+  "repo_root": "/tmp/tinker-rl-lab",
+  "all_passed": true,
+  "total_checks": 7,
+  "passed_count": 7,
+  "checks": [
+    {
+      "name": "abstract_numbers_in_body",
+      "passed": true,
+      "checked": 23,
+      "found": 23,
+      "missing": [],
+      "detail": "Every numeric claim in abstract.tex must also appear in the body of the paper."
+    },
+    {
+      "name": "models_in_master",
+      "passed": true,
+      "total_candidates": 38,
+      "matched": 32,
+      "discussed_only": [
+        "Qwen2-0.5B",
+        "Qwen2-0.5B-Inst",
+        "Qwen2.5-3B",
+        "Qwen3-0.6B",
+        "Qwen3-0.6B-Instruct",
+        "Qwen3-14B"
+      ],
+      "unmatched": [],
+      "detail": "Every model family mentioned must either (a) map to a master_results.json entry or (b) be on the documented discussed-only allowlist."
+    },
+    {
+      "name": "bib_integrity",
+      "passed": true,
+      "entries": 157,
+      "cites": 157,
+      "undefined_cites": [],
+      "unused_entries": []
+    },
+    {
+      "name": "ref_resolution",
+      "passed": true,
+      "labels_defined": 93,
+      "refs_used": 49,
+      "undefined_refs": [],
+      "total_undefined": 0
+    },
+    {
+      "name": "compute_budget",
+      "passed": true,
+      "subrow_sum_usd": [
+        157,
+        187
+      ],
+      "claimed_total_usd": [
+        130,
+        140
+      ],
+      "rows_parsed": 9,
+      "detail": "Sum of sub-row USD ranges must overlap with claimed total (\u00b130% tolerance for per-person rows)."
+    },
+    {
+      "name": "carbon_accounting",
+      "passed": true,
+      "rows_checked": 5,
+      "grid_factors": {
+        "US_kgCO2_per_kWh": 0.367,
+        "IN_kgCO2_per_kWh": 0.716
+      },
+      "per_row": [
+        {
+          "platform": "Tinker (assumed H100)",
+          "reported_kwh": 732.0,
+          "computed_kwh": 731.5,
+          "reported_co2_kg": 269.0,
+          "computed_co2_us_kg": 268.46,
+          "computed_co2_in_kg": 523.75,
+          "row_ok": true
+        },
+        {
+          "platform": "Modal H100 (US-East)",
+          "reported_kwh": 14.0,
+          "computed_kwh": 13.86,
+          "reported_co2_kg": 5.1,
+          "computed_co2_us_kg": 5.09,
+          "computed_co2_in_kg": 9.92,
+          "row_ok": true
+        },
+        {
+          "platform": "PES A100 (in-kind)",
+          "reported_kwh": 26.0,
+          "computed_kwh": 26.4,
+          "reported_co2_kg": 19.0,
+          "computed_co2_us_kg": 9.69,
+          "computed_co2_in_kg": 18.9,
+          "row_ok": true
+        },
+        {
+          "platform": "Colab Pro T4 (asia-south1)",
+          "reported_kwh": 3.4,
+          "computed_kwh": 3.36,
+          "reported_co2_kg": 2.4,
+          "computed_co2_us_kg": 1.23,
+          "computed_co2_in_kg": 2.41,
+          "row_ok": true
+        },
+        {
+          "platform": "NVIDIA L4 (TRL baseline)",
+          "reported_kwh": 0.8,
+          "computed_kwh": 0.79,
+          "reported_co2_kg": 0.3,
+          "computed_co2_us_kg": 0.29,
+          "computed_co2_in_kg": 0.57,
+          "row_ok": true
+        }
+      ],
+      "detail": "Energy = GPU-h \u00d7 TDP \u00d7 PUE / 1000.  CO2 = Energy \u00d7 grid intensity (US or IN); rounded to 1 sig fig in paper."
+    },
+    {
+      "name": "author_consistency",
+      "passed": true,
+      "canonical": [
+        "Arvind C R",
+        "Sandhya Jeyaraj",
+        "Madhu Kumara L",
+        "Mohammad Rafi",
+        "Dhruva N Murthy",
+        "Arumugam K",
+        "Anwesh Reddy Paduri",
+        "Narayana Darapaneni"
+      ],
+      "missing_per_source": {
+        "paper/main.tex": [],
+        "reports/final/capstone_final_report.md": [],
+        "README.md": [],
+        "CITATION.cff": []
+      },
+      "detail": "All 8 canonical authors must appear in every source. CITATION.cff is created in step 7 \u2014 expect initial fail."
+    }
+  ]
+}

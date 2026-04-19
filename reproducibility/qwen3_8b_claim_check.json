@@ -1,0 +1,25 @@
+{
+  "claim": "Qwen3-8B / GSM8K \u2014 GRPO last-10 = 34.4%, PPO last-10 = 22.5% (Task 13 step 5 headline claim)",
+  "tolerance_pp": 2.0,
+  "all_passed": true,
+  "checks": [
+    {
+      "algo": "grpo",
+      "row": "scale_gsm8k_qwen3-8b",
+      "claimed_last10": 0.344,
+      "recomputed_last10": 0.3438,
+      "delta_percentage_points": 0.025,
+      "tolerance_pp": 2.0,
+      "passed": true
+    },
+    {
+      "algo": "ppo",
+      "row": "ppo_qwen3-8b",
+      "claimed_last10": 0.225,
+      "recomputed_last10": 0.225,
+      "delta_percentage_points": 0.0,
+      "tolerance_pp": 2.0,
+      "passed": true
+    }
+  ]
+}

@@ -50,7 +50,8 @@ GRPO (tool-use) & Qwen3-32B & 30 & 0.0\% [0.0\%, 0.0\%] & 0.0\% [0.0\%, 0.0\%] &
 \centering
 \caption{\textbf{Cross-Library Comparison (Table~2, rigor pass).} Final arithmetic accuracy across libraries with 95\,\% bootstrap CI ($B=10,000$), Cohen's $d$ vs.\ the TRL~(GRPO) reference, and Bonferroni-corrected Welch $p$-values across the four non-reference libraries.}
 \label{tab:results_arithmetic_stats}
-\small
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{@{}l r l l c l c c@{}}
 \toprule
 \textbf{Library} & $N$ & \textbf{Mean [95\% CI]} & \textbf{Source} & \textbf{Cohen's $d$} & \textbf{$d$ 95\% CI} & \textbf{$p$ (raw)} & \textbf{$p$ (Bonf.)} \\
@@ -69,7 +70,8 @@ Tianshou (PPO) & 5 & 0.008 [0.006, 0.011] & \textit{5 seeds} & +14.58 & [8.07, 2
 \centering
 \caption{\textbf{GSM8K Results (Table~3, rigor pass).} Post-RL accuracy vs.\ baseline with bootstrap 95\,\% CI on $\Delta$, Cohen's $d$ for the paired effect, and Bonferroni-corrected one-sample $t$-test $p$-values across the $k=7$ model pairs.}
 \label{tab:results_gsm8k_stats}
-\small
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{@{}l r r l l c l c c@{}}
 \toprule
 \textbf{Model} & \textbf{Baseline} & \textbf{Post-RL} & \textbf{$\Delta$} & \textbf{$\Delta$ 95\% CI} & \textbf{Cohen's $d$} & \textbf{$d$ 95\% CI} & \textbf{$p$ (raw)} & \textbf{$p$ (Bonf.)} \\
@@ -187,7 +189,7 @@ artefacts produce byte-identical \texttt{statistical\_analysis.json} and
 \texttt{stat\_rigor\_tables.json}. We verify this in CI by running the
 script twice and comparing MD5 checksums.
 
-\subsection{Family-Wide $p$-Value Summary}
+\subsection{Family-Wide \texorpdfstring{$p$}{p}-Value Summary}
 Table~\ref{tab:family_wide_stats} lists every comparison contributing to
 the $k$-test family used for Bonferroni correction.
 
@@ -195,8 +197,9 @@ the $k$-test family used for Bonferroni correction.
 \centering
 \caption{\textbf{Family-wide $p$-value table (Appendix~G).} Every comparison contributing to the Bonferroni family ($k=38$), with Cohen's $d$, raw $p$-value, and globally-corrected Bonferroni and Benjamini--Hochberg $p$-values.}
 \label{tab:family_wide_stats}
-\scriptsize
-\begin{tabular}{@{}r l p{5.8cm} c c c c@{}}
+\tiny
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}r l p{4.8cm} c c c c@{}}
 \toprule
 \textbf{\#} & \textbf{Src.} & \textbf{Comparison} & \textbf{Test} & \textbf{Cohen's $d$} & \textbf{$p$ (raw)} & \textbf{$p$ (Bonf., global)} \\
 \midrule

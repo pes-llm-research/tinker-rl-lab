@@ -101,247 +101,10 @@
 \input{sections/intro}
 
 % =============================================================================
-\section{Related Work}
-\label{sec:related}
+% Related Work (v2)
+\input{sections/related_work_v2}
+
 % =============================================================================
-
-\paragraph{RL for Language Models.}
-Proximal Policy Optimization~\cite{schulman2017proximal} remains the dominant
-algorithm for RLHF~\cite{ouyang2022training}, offering stable on-policy updates
-via a clipped surrogate objective.
-GRPO~\cite{shao2024deepseekmath} eliminates the value model by normalizing
-rewards within a sampled group, halving memory overhead relative to PPO;
-DPO~\cite{rafailov2024direct} bypasses RL entirely through preference
-contrastive optimization.
-DeepSeek-R1~\cite{guo2025deepseekr1} demonstrated that pure RL training
-can elicit human-level reasoning without supervised cold-start data,
-spurring rapid and widespread adoption of GRPO for reasoning tasks; the
-same work subsequently appeared as the first RL-for-reasoning paper
-published in \emph{Nature}~\cite{guo2025deepseekr1nature}, marking a
-landmark for the field.
-Practitioner analyses have illuminated the gap between theory and
-implementation: Wolfe~\cite{wolfe2026grpotricks} surveys eight practical
-GRPO improvements---clip-higher, dynamic sampling, token-level loss,
-overlong reward shaping, importance-sampling correction, and others---that
-are necessary for stable training at scale.
-Liu et al.~\cite{liu2025drgrpo} identify two optimization biases in
-vanilla GRPO (response-level length bias and question-level difficulty
-amplification) and propose \emph{Dr.~GRPO}, which corrects both by using
-a fixed-constant loss normalization and removing the standard-deviation
-denominator from the advantage.
-A complementary proposal, MAD GRPO~\cite{wang2025madgrpo}, replaces the
-standard-deviation advantage scaler with a Median Absolute Deviation (MAD)
-estimator, improving robustness to heavy-tailed reward distributions while
-retaining per-token normalization.
-Situating these advances in context, Raschka~\cite{raschka2025statellms}
-identifies RLVR+GRPO as the defining methodological advance of 2025,
-analogous to how RLHF+PPO defined 2022.
-Multiple training frameworks have emerged to operationalize these
-algorithms---TRL, OpenRLHF~\cite{hu2024openrlhf}, veRL~\cite{sheng2024verl},
-and \tinker{}---each with differing implementation choices that affect
-reproducibility and cross-framework comparability, a gap our benchmark
-directly targets.
-
-\paragraph{GRPO Variants and Extensions.}
-The rapid adoption of GRPO has produced a rich literature of algorithmic
-extensions.
-Wu et al.~\cite{wu2025grpo_dpo} prove that GRPO is \emph{secretly} DPO:
-the group-level advantage is equivalent to an implicit contrastive
-objective, and group size influences only the Monte Carlo variance of that
-objective.
-A direct consequence is that 2-GRPO retains 98.1\% of 16-GRPO performance
-while requiring only 12.5\% of rollouts and 21\% of training time.
-iGRPO~\cite{hatamizadeh2026igrpo} extends GRPO with a two-stage
-iterative self-feedback loop: the policy first selects its best draft
-(Stage 1) and then conditions subsequent rollouts on that draft (Stage 2),
-achieving state-of-the-art 85.6\% on AIME24 and 79.6\% on AIME25.
-For multi-reward settings, GDPO~\cite{liu2026gdpo} decouples the
-group-relative normalization per reward component, preventing distinct
-reward signals from collapsing to identical advantage values---a failure
-mode we empirically reproduce across three of our five families.
-G\textsuperscript{2}RPO~\cite{hu2026openvlthinker} addresses extreme
-reward-topology variance in multimodal tasks by replacing linear advantage
-scaling with a distributional matching step that forces advantages to
-follow \(\mathcal{N}(0,1)\), ensuring inter-task gradient equity.
-AERO~\cite{zhang2026aero} combines adaptive rollout sizing, selective
-rejection sampling, and a Bayesian posterior over prompt difficulty to
-avoid zero-advantage dead zones, reducing total training compute by 48\%
-and wall-clock time per step by 45\% while matching or improving GRPO
-performance across Qwen2.5 models.
-EFRame~\cite{wang2025eframe} augments GRPO with exploration rollouts,
-an online quality filter, and experience replay for rare trajectories,
-achieving a 37.9\% relative gain on Geometry3K.
-Target Policy Optimization (TPO)~\cite{kaddour2026tpo} takes a different
-approach by decoupling target-distribution construction from policy fitting:
-given scored completions, TPO builds a target \(q \propto p_{\text{old}}
-\exp(u)\) and fits the policy via cross-entropy, yielding zero gradient
-once the policy matches the target.
-Carrino et al.~\cite{carrino2026rgra} show that PPO-style clipping is
-unnecessary: their simplified REINFORCE with Group Relative Advantage
-(RGRA) removes clipping and policy-ratio terms, outperforming GRPO on
-17 of 27 benchmark comparisons.
-
-\paragraph{Zero-Variance and Gradient Dead Zones.}
-A structurally important failure mode in GRPO arises when all rollouts
-for a given prompt receive identical rewards: the group-normalized
-advantage collapses to zero, contributing no gradient signal while still
-consuming rollout compute.
-AERO~\cite{zhang2026aero} provides the first formal Bayesian treatment of
-this zero-advantage dead zone, using a Beta posterior over per-prompt pass
-rates to pre-screen prompts before sampling.
-GRESO~\cite{zhang2026greso} addresses the same problem with a lightweight
-probabilistic pre-rollout filter: it tracks reward-dynamics consistency
-across epochs and skips prompts predicted (with high probability) to be
-zero-variance, achieving up to 2.4$\times$ wall-clock speedup in rollout
-without accuracy loss.
-CPPO~\cite{lin2025cppo} takes a post-rollout approach, pruning completions
-with low absolute advantage values before gradient computation and
-introducing a dynamic completion-allocation strategy to maximize GPU
-utilization; it achieves up to 7.98$\times$ speedup on GSM8K relative to
-vanilla GRPO.
-Our work complements these algorithmic contributions by providing the first
-cross-library, cross-scale empirical measurement of zero-variance fraction
-under controlled conditions (0.6B--235B, five model families, four RL
-frameworks), quantifying how the phenomenon varies with scale, prompt
-difficulty, and implementation.
-
-\paragraph{Scaling Laws for RL Post-Training.}
-Understanding how RL post-training scales with model size and compute is
-essential for efficient resource allocation.
-Nimmaturi et al.~\cite{nimmaturi2025scalinglaws} derive an empirical
-scaling law for GRPO that identifies three consistent training phases---slow
-start, rapid improvement, and plateau---and show that training beyond the
-plateau onset (approximately 80\% of one epoch) wastes substantial compute,
-enabling principled early stopping across Llama and Qwen models.
-Liu et al.~\cite{liu2025rlsubnetworks} find that RL fine-tuning updates
-only 5--30\% of model parameters, with the remaining weights effectively
-frozen; this sparsity is intrinsic (not enforced), emerges across all
-seven RL algorithms tested (including PPO, GRPO, and DPO), and holds
-across ten LLMs from different families---suggesting that RL post-training
-activates a small but critical subnetwork rather than diffuse weight
-changes.
-MiniCPM~\cite{hu2024minicpm} demonstrates that small language models
-trained with Warmup-Stable-Decay learning rate schedules and careful
-data-model ratio selection can match 7B--13B models, providing methodological
-foundations for scaling studies at sub-1B scales.
-The broader landscape of small language models is surveyed by
-Subramanian et al.~\cite{subramanian2025slm}, who characterize the
-1B--8B parameter range that forms our primary evaluation frontier.
-Our benchmark is, to our knowledge, the first to validate cross-family
-scaling behavior for RL post-training spanning 0.6B to 235B parameters
-across five model families, providing empirical ground truth against which
-these theoretical scaling laws can be calibrated.
-
-\paragraph{Reward Verification.}
-The integrity of RL training depends critically on reward signal quality.
-VerifyBench~\cite{zhang2025verifybench} (ICLR 2026) provides a systematic
-evaluation framework for reward model verification, demonstrating that
-reward hacking and spurious reward signals substantially inflate perceived
-performance gains in LLM RL post-training.
-Hochlehnert et al.~\cite{hochlehnert2025sober} similarly argue that many
-claimed reasoning improvements stem from evaluation artifacts rather than
-genuine capability gains.
-Fu et al.~\cite{li2025reward_shaping} study reward-shaping strategies
-for stabilizing RLHF and propose Preference As Reward (PAR), which
-leverages latent preferences embedded in the reward model as the RL
-signal; PAR exhibits two variance-reduction properties that extend the
-tolerance window for early stopping, achieving at least a 5 percentage-point
-win-rate improvement over competing methods on AlpacaEval 2.0.
-In multi-objective settings, MO-GRPO~\cite{ichihara2025mogrpo} identifies
-that vanilla GRPO collapses to optimizing only one reward component when
-multiple objectives are present, and proposes automatic variance-based
-reward reweighting to restore balanced learning.
-Our benchmark adopts binary verifiable rewards for mathematical reasoning,
-motivated directly by these findings on reward hacking, while
-providing ground truth for comparing cross-framework reward fidelity.
-
-\paragraph{GRPO Production-Scale Adoption.}
-The rapid maturation of GRPO has produced production-validated variants
-now deployed at scale in major model releases.
-GSPO~\cite{qwen2025gspo} (Group Sequence Policy Optimization), developed
-by the Alibaba/Qwen team, redefines the importance ratio at the
-\emph{sequence level} rather than the token level, yielding improved training
-stability for Mixture-of-Experts architectures; GSPO is credited as a key
-contributor to ``remarkable improvements'' in the Qwen3 model series.
-DAP{}O~\cite{yu2025dapo} (Decoupled Clip and Dynamic Sampling Policy Optimization),
-developed by ByteDance, introduces four practical improvements over vanilla GRPO:
-asymmetric clipping (Clip-Higher), dynamic sampling to filter zero-variance
-prompts, token-level loss normalization, and overlong filtering.
-DAP{}O achieves 50 points on AIME 2024 with a 32B model and is fully
-open-sourced via the veRL framework.
-The convergence of these production-scale deployments on the same failure modes
-(zero-variance prompts, importance ratio granularity, length bias) that we
-identify in our benchmark validates the generality of \ours{}'s diagnostic
-findings beyond the laboratory setting.
-
-\paragraph{ZVF Solutions: Emerging Remediation Literature.}
-Multiple concurrent papers independently identify and address the zero-variance
-failure mode that our benchmark diagnoses and measures.
-NGRPO~\cite{nan2025ngrpo} proposes Advantage Calibration (virtual maximum-reward
-samples for all-incorrect groups) and Asymmetric Clipping, outperforming GRPO,
-DAP{}O, and PPO on MATH500 and AIME 2025.
-Scaf-GRPO~\cite{zhang2025scaffgrpo} addresses the same phenomenon as a
-``learning cliff'' --- problems too hard for the model create zero-reward
-groups --- and injects tiered scaffolding hints when learning stagnates,
-boosting AIME 2024 performance by 44.3\% relative over vanilla GRPO on
-Qwen2.5-Math-7B.
-EBPO~\cite{han2026ebpo} takes a Bayesian approach, using a shrinkage estimator
-that balances local group statistics with a global prior to guarantee
-non-vanishing penalties in saturated failure scenarios, providing formal MSE
-bounds.
-AERO~\cite{zhang2026aero} pre-screens prompts using a Beta posterior over
-per-prompt pass rates before sampling, providing the first formal treatment
-of zero-advantage dead zones and reducing training compute by 48\%.
-The convergence of four independent algorithmic solutions on the same failure
-mode provides strong external validation of ZVF as the right diagnostic
-concept; our cross-scale measurements (0.6B--671B, five model families) provide
-the empirical ground truth these approaches are designed to address.
-
-\paragraph{Statistical Foundations of GRPO.}
-Demystifying GRPO~\cite{zhou2026demystify} proves that GRPO's policy gradient
-is a U-statistic, enabling formal MSE analysis, asymptotic equivalence to an
-oracle policy gradient, and a universal scaling law for optimal group size ---
-providing the first principled guidance for choosing $G$.
-MinPRO~\cite{lei2026minpro} identifies that the token-level importance sampling
-used in GRPO is mathematically incorrect: the rigorous correction is a prefix
-importance ratio, whose approximation induces instability that compounds as
-models grow larger.
-SSPO~\cite{yang2025sspo} operates at sentence level to balance the stability of
-sequence-level ratios (GSPO) against the expressiveness of token-level ratios
-(GRPO), achieving improvements of 3.56 points over GRPO on mathematical
-benchmarks.
-Together, these results explain at a theoretical level why implementation details
-at the granularity of the importance ratio have such large empirical effects ---
-an explanation that directly complements our empirical measurement of the 73pp
-cross-library gap.
-
-\paragraph{RL Benchmarking and Reproducibility.}
-Henderson et al.~\cite{henderson2018deep} first exposed the fragility of
-deep RL results to implementation choices and random seeds.
-The \texttt{rliable} framework~\cite{agarwal2021deep} established rigorous
-statistical methodology---interquartile mean, performance profiles, and
-probability of improvement---for comparing RL algorithms across runs.
-BenchMARL~\cite{bettini2023benchmarl} provides unified multi-agent
-benchmarks, while Patterson et al.~\cite{patterson2024empirical} survey
-empirical design choices in RL experiments.
-Jordan et al.~\cite{jordan2024benchmarking} argue that the computational
-requirements for statistically rigorous benchmarking in RL are frequently
-underestimated, and that most published comparisons lack sufficient power
-to detect meaningful differences.
-Madaan et al.~\cite{zhang2024benchvariance} quantify variance in LLM
-evaluation benchmarks along multiple axes---seed variance, monotonicity,
-and scaling behavior---finding that simple reframings of tasks (e.g., choice
-to completion format) can substantially reduce variance for sub-7B models;
-their methodology informs our statistical reporting protocol.
-Pineau et al.~\cite{pineau2020improving} formalized ML reproducibility
-criteria through the NeurIPS Reproducibility Program, and ACM's Artifact
-Review and Badging policy~\cite{acm2020badges} established community
-standards for evaluated and available artifacts.
-\ours{} extends these traditions to the emerging domain of LLM RL
-post-training, where cross-library reproducibility gaps---arising from
-differing tokenization, advantage normalization, and rollout
-implementations---have not previously been measured at scale.
-
 % =============================================================================
 \section{Benchmark Design}
 \label{sec:benchmark}
@@ -687,7 +450,8 @@ Partial experiments (fewer steps than planned) are marked $\dagger$.
 All Tinker runs are single-seed; all Modal runs are single-seed on H100.
 $\dagger$~Training interrupted; reported metrics are from available steps.}
 \label{tab:main_results}
-\small
+\scriptsize
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}l l l l r c c@{}}
 \toprule
 \textbf{Algo} & \textbf{Plat.} & \textbf{Model} & \textbf{Size} & \textbf{Steps} & \textbf{Peak} & \textbf{Last-10} \\
@@ -769,7 +533,7 @@ four-bar last-10-reward chart (Figure~\ref{fig:framework_gap}).
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\columnwidth]{../experiments/results/framework_comparison.pdf}
+\includegraphics[width=0.8\columnwidth]{figures/v2/framework_comparison.pdf}
 \caption{Task~4 framework-gap deep-dive. Identical GRPO config
 (Qwen3-8B, $G{=}8$, lr${=}10^{-5}$, GSM8K-500, 30 steps, seed~42) run through
 four launchers (\texttt{verl/}, \texttt{openrlhf/}, \texttt{trl\_integrations/}
@@ -813,7 +577,7 @@ data from Modal GPU runs (NVIDIA L4/T4).}
 % Figure 6: Performance profiles
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/performance_profiles.pdf}
+\includegraphics[width=0.85\linewidth]{figures/v2/performance_profiles.pdf}
 \caption{Performance profiles showing the fraction of runs above a given normalized
 score threshold, following the methodology of Agarwal et al.~\cite{agarwal2021deep}.}
 \label{fig:performance_profiles}
@@ -979,7 +743,7 @@ requiring fewer steps to converge.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/scaling_law_figure}
+\includegraphics[width=0.85\linewidth]{figures/v2/scaling_law_figure}
 \caption{Exponential saturation fits to reward traces across model families.
 Each curve shows the fitted $R(t)$ with observed data points overlaid.
 DeepSeek and Qwen3-MoE show the strongest saturation behavior.}
@@ -988,7 +752,7 @@ DeepSeek and Qwen3-MoE show the strongest saturation behavior.}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/scaling_params_figure}
+\includegraphics[width=0.85\linewidth]{figures/v2/scaling_params_figure}
 \caption{Fitted scaling parameters ($R_{\max}$ and $k$) as a function of model
 size (log scale). Pearson correlations shown; both are statistically significant
 at $p < 0.05$.}
@@ -1281,7 +1045,7 @@ Tinker vs TRL (LLM-native) & $20$ & $5$ & $1.17$ & $[0.13, 2.21]$ & 0.016$^\dag$
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/effect_sizes_forest}
+\includegraphics[width=0.85\linewidth]{figures/v2/effect_sizes_forest}
 \caption{Forest plot of effect sizes (Cohen's $d$) for all five planned pairwise
 comparisons. Error bars show 95\% confidence intervals. The LLM-native vs.\ Classic RL
 comparison is the largest effect by two orders of magnitude.}
@@ -1417,7 +1181,7 @@ for more than 10 consecutive steps~\cite{zhang2026aero,zhang2026greso}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/zvf_heatmap}
+\includegraphics[width=\textwidth]{figures/v2/zvf_heatmap}
 \caption{Per-step ZVF heatmap. Red: ZVF$=1$ (zero gradient); blue: ZVF$=0$ (gradient
 flows); grey: no data. Experiments sorted by aggregate ZVF (descending).}
 \label{fig:zvf-heatmap}
@@ -1425,7 +1189,7 @@ flows); grey: no data. Experiments sorted by aggregate ZVF (descending).}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/zvf_correlation}
+\includegraphics[width=\textwidth]{figures/v2/zvf_correlation}
 \caption{\textbf{Left:} ZVF vs.\ final performance scatter ($r = -0.769$,
 $p = 0.0008$). \textbf{Right:} Mean ZVF by model family. Llama's high mean
 ZVF is driven entirely by tool-use experiments.}
@@ -1762,7 +1526,7 @@ represented in the current experiment set and constitute a natural next ablation
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/reward_stability}
+\includegraphics[width=0.85\linewidth]{figures/v2/reward_stability}
 \caption{Reward stability analysis across experiments. GRPO runs (blue) and PPO runs
 (orange) plotted by instability index vs.\ monotonicity score. Verbosity-trap
 experiments (flag=1) are marked with a star.}
@@ -2013,6 +1777,9 @@ natural and important next step.
 % Conclusion reframed around F1--F5 (see sections/conclusion.tex)
 \input{sections/conclusion}
 
+% Ethics, Limitations, and Broader Impact (Task 10)
+\input{ethics_statement}
+
 \begin{ack}
 We thank the Tinker team for API access and the Modal team for GPU compute credits
 (H100 cluster). We thank Weights \& Biases for experiment tracking infrastructure
@@ -2026,6 +1793,7 @@ broader Hugging Face ecosystem.
 % References
 % =============================================================================
 \section*{Acknowledgments}
+\label{sec:acknowledgments}
 We thank our project guides \textbf{Prof.~Narayana Darapaneni}
 (Northwestern University / Great Learning) and
 \textbf{Mr.~Anwesh Reddy Paduri} (Great Learning / PES University)
@@ -2034,304 +1802,7 @@ We also acknowledge PES University's LLM Research Group for compute access,
 Tinker for API credits, and Modal for GPU infrastructure.
 
 \bibliographystyle{plainnat}
-% \bibliography{references}  % Uncomment when references.bib is ready
-
-\begin{thebibliography}{10}
-
-\bibitem[Henderson et~al.(2018)]{henderson2018deep}
-Peter Henderson, Riashat Islam, Philip Bachman, Joelle Pineau, Doina Precup, and David Meger.
-\newblock Deep reinforcement learning that matters.
-\newblock In \emph{AAAI}, 2018.
-
-\bibitem[Shao et~al.(2024)]{shao2024deepseekmath}
-Zhihong Shao et al.
-\newblock DeepSeekMath: Pushing the limits of mathematical reasoning in open language models.
-\newblock \emph{arXiv:2402.03300}, 2024.
-
-\bibitem[Rafailov et~al.(2024)]{rafailov2024direct}
-Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher Manning, and Chelsea Finn.
-\newblock Direct preference optimization: Your language model is secretly a reward model.
-\newblock In \emph{NeurIPS}, 2024.
-
-\bibitem[Colas et~al.(2019)]{colas2019hitchhiker}
-C{\'e}dric Colas, Olivier Sigaud, and Pierre-Yves Oudeyer.
-\newblock A hitchhiker's guide to statistical comparisons of reinforcement learning algorithms.
-\newblock \emph{arXiv:1904.06979}, 2019.
-
-\bibitem[Agarwal et~al.(2021)]{agarwal2021deep}
-Rishabh Agarwal, Max Schwarzer, Pablo Samuel Castro, Aaron Courville, and Marc G. Bellemare.
-\newblock Deep reinforcement learning at the edge of the statistical precipice.
-\newblock In \emph{NeurIPS}, 2021.
-
-\bibitem[Jordan et~al.(2024)]{jordan2024benchmarking}
-Emma Jordan, Adam White, Bruno Castro da Silva, Martha White, and Philip S. Thomas.
-\newblock Position: Benchmarking is limited in reinforcement learning research.
-\newblock \emph{arXiv:2406.16241}, 2024.
-
-\bibitem[Pineau et~al.(2020)]{pineau2020improving}
-Joelle Pineau et al.
-\newblock Improving reproducibility in machine learning research.
-\newblock \emph{JMLR}, 22(164):1--20, 2021.
-
-\bibitem[Hu et~al.(2022)]{hu2022lora}
-Edward J. Hu et al.
-\newblock LoRA: Low-rank adaptation of large language models.
-\newblock In \emph{ICLR}, 2022.
-
-\bibitem[Schulman et~al.(2017)]{schulman2017proximal}
-John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov.
-\newblock Proximal policy optimization algorithms.
-\newblock \emph{arXiv:1707.06347}, 2017.
-
-\bibitem[Ouyang et~al.(2022)]{ouyang2022training}
-Long Ouyang et al.
-\newblock Training language models to follow instructions with human feedback.
-\newblock In \emph{NeurIPS}, 2022.
-
-\bibitem[Lynnerup et~al.(2019)]{lynnerup2019survey}
-Tue Lynnerup, Laura Nolling, Rasmus Hasle, and John Hallam.
-\newblock A survey on reproducibility in reinforcement learning.
-\newblock \emph{arXiv:1901.09223}, 2019.
-
-\bibitem[Bettini et~al.(2023)]{bettini2023benchmarl}
-Matteo Bettini, Amanda Prorok, and Vincent Moens.
-\newblock BenchMARL: Benchmarking multi-agent reinforcement learning.
-\newblock \emph{JMLR}, 25(217):1--10, 2024.
-
-\bibitem[Patterson et~al.(2024)]{patterson2024empirical}
-Andrew Patterson, Samuel Neumann, Martha White, and Adam White.
-\newblock Empirical design in reinforcement learning.
-\newblock \emph{arXiv:2304.01315}, 2024.
-
-\bibitem[Hochlehnert et~al.(2025)]{hochlehnert2025sober}
-Andreas Hochlehnert et al.
-\newblock A sober look at progress in language model reasoning.
-\newblock \emph{arXiv:2504.07086}, 2025.
-
-\bibitem[{ACM}(2020)]{acm2020badges}
-{ACM}.
-\newblock Artifact review and badging --- Version 1.1.
-\newblock \url{https://www.acm.org/publications/policies/artifact-review-and-badging-current}, 2020.
-
-\bibitem[Cobbe et~al.(2021)]{cobbe2021training}
-Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun,
-Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano,
-Christopher Hesse, and John Schulman.
-\newblock Training verifiers to solve math word problems.
-\newblock \emph{arXiv:2110.14168}, 2021.
-
-\bibitem[Chen et~al.(2021)]{chen2021codex}
-Mark Chen, Jerry Tworek, Heewoo Jun, Qiming Yuan, Henrique Ponde de Oliveira Pinto,
-Jared Kaplan, Harri Edwards, Yuri Burda, Nicholas Joseph, Greg Brockman, et~al.
-\newblock Evaluating large language models trained on code.
-\newblock \emph{arXiv:2107.03374}, 2021.
-
-\bibitem[Guo et~al.(2025)]{guo2025deepseekr1}
-Daya Guo et al.
-\newblock DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning.
-\newblock \emph{arXiv:2501.12948}, 2025.
-
-\bibitem[Hu et~al.(2024)]{hu2024openrlhf}
-Jian Hu, Xibin Wu, Weixun Wang, Xianyu, Dehao Zhang, and Yu Cao.
-\newblock OpenRLHF: An easy-to-use, scalable and high-performance RLHF framework.
-\newblock \emph{arXiv:2405.11143}, 2024.
-
-\bibitem[Sheng et~al.(2024)]{sheng2024verl}
-Guangming Sheng et al.
-\newblock HybridFlow: A flexible and efficient RLHF framework.
-\newblock \emph{arXiv:2409.19256}, 2024.
-
-\bibitem[Zhang et~al.(2025)]{zhang2025verifybench}
-Xiaoyu Zhang et al.
-\newblock VerifyBench: Benchmarking reference-based reward models for reinforcement learning from human feedback.
-\newblock In \emph{ICLR}, 2026.
-
-\bibitem[Guo et~al.(2025)]{guo2025deepseekr1nature}
-{DeepSeek-AI}, Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Peiyi Wang, Qihao Zhu, Runxin Xu, Ruoyu Zhang, Shirong Ma, Xiao Bi, Xiaokang Zhang, Xingkai Yu, Yu Wu, et al.
-\newblock {DeepSeek-R1}: Incentivizing Reasoning in {LLMs} through Reinforcement Learning.
-\newblock \emph{Nature}, 645:633--638, 2025.
-\newblock doi:10.1038/s41586-025-09422-z.
-
-\bibitem[Wu et~al.(2025)]{wu2025grpo_dpo}
-Yihong Wu, Liheng Ma, Lei Ding, Muzhi Li, Xinyu Wang, Kejia Chen, Zhan Su, Zhanguang Zhang, Chenyang Huang, Yingxue Zhang, Mark Coates, and Jian-Yun Nie.
-\newblock It Takes Two: Your {GRPO} Is Secretly {DPO}.
-\newblock \emph{arXiv:2510.00977}, 2025.
-
-\bibitem[Hatamizadeh et~al.(2026)]{hatamizadeh2026igrpo}
-Ali Hatamizadeh, Shrimai Prabhumoye, Igor Gitman, Ximing Lu, Seungju Han, Wei Ping, Yejin Choi, and Jan Kautz.
-\newblock {iGRPO}: Self-Feedback-Driven {LLM} Reasoning.
-\newblock \emph{arXiv:2602.09000}, 2026.
-
-\bibitem[Liu et~al.(2026)]{liu2026gdpo}
-Shih-Yang Liu, Xin Dong, Ximing Lu, Shizhe Diao, Peter Belcak, Mingjie Liu, Min-Hung Chen, Hongxu Yin, Yu-Chiang Frank Wang, Kwang-Ting Cheng, Yejin Choi, Jan Kautz, and Pavlo Molchanov.
-\newblock {GDPO}: Group Reward-Decoupled Normalization Policy Optimization for Multi-Reward {RL} Optimization.
-\newblock \emph{arXiv:2601.05242}, 2026.
-
-\bibitem[Hu et~al.(2026)]{hu2026openvlthinker}
-Wenbo Hu, Xin Chen, Yan Gao, Yihe Deng, Nanyun Peng, and Kai-Wei Chang.
-\newblock {OpenVLThinkerV2}: A Generalist Multimodal Reasoning Model for Multi-Domain Visual Tasks.
-\newblock \emph{arXiv:2604.08539}, 2026.
-
-\bibitem[Zhang et~al.(2026)]{zhang2026aero}
-Zhi Zhang, Zhen Han, Costas Mavromatis, Qi Zhu, Yunyi Zhang, Sheng Guan, Dingmin Wang, Xiong Zhou, Shuai Wang, Soji Adeshina, Vassilis Ioannidis, and Huzefa Rangwala.
-\newblock Train Less, Learn More: Adaptive Efficient Rollout Optimization for Group-Based Reinforcement Learning.
-\newblock \emph{arXiv:2602.14338}, 2026.
-
-\bibitem[Wang et~al.(2025)]{wang2025eframe}
-Chen Wang, Lai Wei, Yanzhi Zhang, Chenyang Shao, Zedong Dan, Weiran Huang, Yuzhi Zhang, and Yue Wang.
-\newblock {EFRame}: Deeper Reasoning via Exploration-Filter-Replay Reinforcement Learning Framework.
-\newblock \emph{arXiv:2506.22200}, 2025.
-
-\bibitem[Kaddour(2026)]{kaddour2026tpo}
-Jean Kaddour.
-\newblock Target Policy Optimization.
-\newblock \emph{arXiv:2604.06159}, 2026.
-
-\bibitem[Carrino et~al.(2026)]{carrino2026rgra}
-Gabriele Carrino, Andrea Sassella, Nicol{\`o} Brunello, Federico Toschi, and Mark James Carman.
-\newblock Are Complicated Loss Functions Necessary for Teaching {LLMs} to Reason?
-\newblock \emph{arXiv:2603.18756}, 2026.
-
-\bibitem[Wolfe et~al.(2026)]{wolfe2026grpotricks}
-Cameron R. Wolfe.
-\newblock {GRPO}++: Tricks for Making {RL} Actually Work.
-\newblock Deep (Learning) Focus (Substack), January 2026.
-\newblock \url{https://cameronrwolfe.substack.com/p/grpo-tricks}.
-
-\bibitem[Liu et~al.(2025)]{liu2025drgrpo}
-Zichen Liu, Changyu Chen, Wenjun Li, Penghui Qi, Tianyu Pang, Chao Du, Wee Sun Lee, and Min Lin.
-\newblock Understanding {R1-Zero}-Like Training: A Critical Perspective.
-\newblock \emph{arXiv:2503.20783}, 2025.
-
-\bibitem[Wang et~al.(2025)]{wang2025madgrpo}
-Telcom Wang.
-\newblock {MAD GRPO}: Treating {Dr.~GRPO} that tried to fix {GRPO} but brought new issues.
-\newblock Hugging Face Blog, January 2026.
-\newblock \url{https://huggingface.co/blog/telcom/mad-grpo}.
-
-\bibitem[Raschka(2025)]{raschka2025statellms}
-Sebastian Raschka.
-\newblock The State of {LLMs} 2025: Progress, Problems, and Predictions.
-\newblock Ahead of AI (Substack), December 2025.
-\newblock \url{https://magazine.sebastianraschka.com/p/state-of-llms-2025}.
-
-\bibitem[Zhang et~al.(2026)]{zhang2026greso}
-Haizhong Zheng, Yang Zhou, Brian R. Bartoldson, Bhavya Kailkhura, Fan Lai, Jiawei Zhao, and Beidi Chen.
-\newblock Act Only When It Pays: Efficient Reinforcement Learning for {LLM} Reasoning via Selective Rollouts.
-\newblock \emph{arXiv:2506.02177}, 2025.
-
-\bibitem[Lin et~al.(2025)]{lin2025cppo}
-Zhihang Lin, Mingbao Lin, Yuan Xie, and Rongrong Ji.
-\newblock {CPPO}: Accelerating the Training of Group Relative Policy Optimization-Based Reasoning Models.
-\newblock In \emph{Advances in Neural Information Processing Systems}, 2025.
-
-\bibitem[Nimmaturi et~al.(2025)]{nimmaturi2025scalinglaws}
-Datta Nimmaturi, Vaishnavi Bhargava, Rajat Ghosh, Johnu George, and Debojyoti Dutta.
-\newblock Predictive Scaling Laws for Efficient {GRPO} Training of Large Reasoning Models.
-\newblock \emph{arXiv:2507.18014}, 2025.
-
-\bibitem[Liu et~al.(2025)]{liu2025rlsubnetworks}
-Sagnik Mukherjee, Lifan Yuan, Dilek Hakkani-Tur, and Hao Peng.
-\newblock Reinforcement Learning Finetunes Small Subnetworks in Large Language Models.
-\newblock \emph{arXiv:2505.11711}, 2025.
-
-\bibitem[Hu et~al.(2024)]{hu2024minicpm}
-Shengding Hu, Yuge Tu, Xu Han, Chaoqun He, Ganqu Cui, Xiang Long, Zhi Zheng, Yewei Fang, Yuxiang Huang, Weilin Zhao, Xinrong Zhang, Zheng Leng Thai, Kaihuo Zhang, Chongyi Wang, Yuan Yao, Chenyang Zhao, Jie Zhou, Jie Cai, Zhongwu Zhai, Ning Ding, Chao Jia, Guoyang Zeng, Dahai Li, Zhiyuan Liu, and Maosong Sun.
-\newblock {MiniCPM}: Unveiling the Potential of Small Language Models with Scalable Training Strategies.
-\newblock \emph{arXiv:2404.06395}, 2024.
-
-\bibitem[Subramanian et~al.(2025)]{subramanian2025slm}
-Shreyas Subramanian, Vikram Elango, and Mecit Gungor.
-\newblock Small Language Models ({SLMs}) Can Still Pack a Punch: A Survey.
-\newblock \emph{arXiv:2501.05465}, 2025.
-
-\bibitem[Li et~al.(2025)]{li2025reward_shaping}
-Jiayi Fu, Xuandong Zhao, Chengyuan Yao, Heng Wang, Qi Han, and Yanghua Xiao.
-\newblock Reward Shaping to Mitigate Reward Hacking in {RLHF}.
-\newblock \emph{arXiv:2502.18770}, 2025.
-
-\bibitem[Ichihara et~al.(2025)]{ichihara2025mogrpo}
-Yuki Ichihara, Yuu Jinnai, Tetsuro Morimura, Mitsuki Sakamoto, Ryota Mitsuhashi, and Eiji Uchibe.
-\newblock {MO-GRPO}: Mitigating Reward Hacking of Group Relative Policy Optimization on Multi-Objective Problems.
-\newblock \emph{arXiv:2509.22047}, 2025.
-
-\bibitem[Zhang et~al.(2024)]{zhang2024benchvariance}
-Lovish Madaan, Aaditya K. Singh, Rylan Schaeffer, Andrew Poulton, Sanmi Koyejo, Pontus Stenetorp, Sharan Narang, and Dieuwke Hupkes.
-\newblock Quantifying Variance in Evaluation Benchmarks.
-\newblock \emph{arXiv:2406.10229}, 2024.
-
-\bibitem[Benjamini \& Hochberg(1995)]{benjamini1995controlling}
-Yoav Benjamini and Yosef Hochberg.
-\newblock Controlling the false discovery rate: A practical and powerful approach to multiple testing.
-\newblock \emph{Journal of the Royal Statistical Society: Series B}, 57(1):289--300, 1995.
-
-\bibitem[Yu et~al.(2025)]{yu2025dapo}
-{ByteDance Seed Team}.
-\newblock {DAPO}: An Open-Source {LLM} Reinforcement Learning System at Scale.
-\newblock \emph{arXiv:2503.14476}, 2025.
-\newblock \url{https://arxiv.org/abs/2503.14476}.
-
-\bibitem[Qwen Team(2025)]{qwen2025gspo}
-{Qwen Team}.
-\newblock Group Sequence Policy Optimization.
-\newblock \emph{arXiv:2507.18071}, 2025.
-\newblock \url{https://arxiv.org/abs/2507.18071}.
-
-\bibitem[Zhou et~al.(2026)]{zhou2026demystify}
-Hongyi Zhou, Kai Ye, Erhan Xu, Jin Zhu, Shijin Gong, and Chengchun Shi.
-\newblock Demystifying Group Relative Policy Optimization: Its Policy Gradient is a {U}-Statistic.
-\newblock \emph{arXiv:2603.01162}, 2026.
-\newblock \url{https://arxiv.org/abs/2603.01162}.
-
-\bibitem[Nan et~al.(2025)]{nan2025ngrpo}
-Gongrui Nan, Siye Chen, et al.
-\newblock {NGRPO}: Negative-Enhanced Group Relative Policy Optimization.
-\newblock \emph{arXiv:2509.18851}, 2025.
-\newblock \url{https://arxiv.org/abs/2509.18851}.
-
-\bibitem[Zhang et~al.(2025)]{zhang2025scaffgrpo}
-Xichen Zhang, Sitong Wu, et al.
-\newblock {Scaf-GRPO}: Scaffolded Group Relative Policy Optimization.
-\newblock \emph{arXiv:2510.19807}, 2025.
-\newblock \url{https://arxiv.org/abs/2510.19807}.
-
-\bibitem[Han et~al.(2026)]{han2026ebpo}
-Kevin Han, Yuhang Zhou, et al.
-\newblock {EBPO}: Empirical Bayes Shrinkage for Stabilizing {GRPO}.
-\newblock \emph{arXiv:2602.05165}, 2026.
-\newblock \url{https://arxiv.org/abs/2602.05165}.
-
-\bibitem[Lei et~al.(2026)]{lei2026minpro}
-Shiye Lei, Zhihao Cheng, and Dacheng Tao.
-\newblock A Step Back: Prefix Importance Ratio Stabilizes Policy Optimization ({MinPRO}).
-\newblock \emph{arXiv:2601.22718}, 2026.
-\newblock \url{https://arxiv.org/abs/2601.22718}.
-
-\bibitem[Yang et~al.(2025)]{yang2025sspo}
-Kun Yang, Zikang Chen, Yanmeng Wang, and Zhigen Li.
-\newblock {SSPO}: Subsentence-Level Policy Optimization.
-\newblock \emph{arXiv:2511.04256}, 2025.
-\newblock \url{https://arxiv.org/abs/2511.04256}.
-
-\bibitem[Liu et~al.(2025)]{liu2025luspo}
-Fanfan Liu, Youyang Yin, et al.
-\newblock {LUSPO}: Length-Unbiased Sequence Policy Optimization.
-\newblock \emph{arXiv:2602.05261}, 2026.
-\newblock \url{https://arxiv.org/abs/2602.05261}.
-
-\bibitem[Cheng et~al.(2026)]{cheng2026isocompute}
-Zhoujun Cheng, Yutao Xie, et al.
-\newblock {IsoCompute} Playbook: Optimally Scaling Sampling Compute for {LLM RL}.
-\newblock \emph{arXiv:2603.12151}, 2026.
-\newblock \url{https://arxiv.org/abs/2603.12151}.
-
-\bibitem[Hong et~al.(2025)]{hong2025cooper}
-Haitao Hong, Yuchen Yan, et al.
-\newblock Cooper: Co-Optimizing Policy and Reward Models in {RL} for {LLMs}.
-\newblock \emph{arXiv:2508.05613}, 2025.
-\newblock \url{https://arxiv.org/abs/2508.05613}.
-
-\end{thebibliography}
+\bibliography{references}
 
 % =============================================================================
 \appendix
@@ -2411,7 +1882,7 @@ PPO-REINFORCE = 4 runs; Tinker GRPO frontier = 9 runs; team members =
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.5\linewidth]{figures/old_trl_seeds.pdf}
+\includegraphics[width=0.5\linewidth]{figures/v2/old_trl_seeds.pdf}
 \caption{Cross-seed reproducibility analysis for TRL GRPO on Qwen2.5-0.5B (GSM8K, 125 steps, NVIDIA L4). Five seeds show mean accuracy 73.4\% with CV = 0.096. Violin plot shows the distribution; individual seeds are labeled. The mean is significantly above 50\% ($t = 7.44$, $p < 0.001$), confirming that GRPO produces reliable learning signal even at 0.5B scale.}
 \label{fig:trl_seeds}
 \end{figure}

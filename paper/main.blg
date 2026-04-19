@@ -2,97 +2,54 @@ This is BibTeX, Version 0.99d (TeX Live 2025/dev/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: plainnat.bst
-I found no \bibdata command---while reading file main.aux
-Warning--I didn't find a database entry for "henderson2018deep"
-Warning--I didn't find a database entry for "shao2024deepseekmath"
-Warning--I didn't find a database entry for "rafailov2024direct"
-Warning--I didn't find a database entry for "jordan2024benchmarking"
-Warning--I didn't find a database entry for "agarwal2021deep"
-Warning--I didn't find a database entry for "wu2025grpo_dpo"
-Warning--I didn't find a database entry for "kaddour2026tpo"
-Warning--I didn't find a database entry for "nimmaturi2025scalinglaws"
-Warning--I didn't find a database entry for "zhang2026aero"
-Warning--I didn't find a database entry for "zhang2026greso"
-Warning--I didn't find a database entry for "schulman2017proximal"
-Warning--I didn't find a database entry for "ouyang2022training"
-Warning--I didn't find a database entry for "guo2025deepseekr1"
-Warning--I didn't find a database entry for "guo2025deepseekr1nature"
-Warning--I didn't find a database entry for "wolfe2026grpotricks"
-Warning--I didn't find a database entry for "liu2025drgrpo"
-Warning--I didn't find a database entry for "wang2025madgrpo"
-Warning--I didn't find a database entry for "raschka2025statellms"
-Warning--I didn't find a database entry for "hu2024openrlhf"
-Warning--I didn't find a database entry for "sheng2024verl"
-Warning--I didn't find a database entry for "hatamizadeh2026igrpo"
-Warning--I didn't find a database entry for "liu2026gdpo"
-Warning--I didn't find a database entry for "hu2026openvlthinker"
-Warning--I didn't find a database entry for "wang2025eframe"
-Warning--I didn't find a database entry for "carrino2026rgra"
-Warning--I didn't find a database entry for "lin2025cppo"
-Warning--I didn't find a database entry for "liu2025rlsubnetworks"
-Warning--I didn't find a database entry for "hu2024minicpm"
-Warning--I didn't find a database entry for "subramanian2025slm"
-Warning--I didn't find a database entry for "zhang2025verifybench"
-Warning--I didn't find a database entry for "hochlehnert2025sober"
-Warning--I didn't find a database entry for "li2025reward_shaping"
-Warning--I didn't find a database entry for "ichihara2025mogrpo"
-Warning--I didn't find a database entry for "qwen2025gspo"
-Warning--I didn't find a database entry for "yu2025dapo"
-Warning--I didn't find a database entry for "nan2025ngrpo"
-Warning--I didn't find a database entry for "zhang2025scaffgrpo"
-Warning--I didn't find a database entry for "han2026ebpo"
-Warning--I didn't find a database entry for "zhou2026demystify"
-Warning--I didn't find a database entry for "lei2026minpro"
-Warning--I didn't find a database entry for "yang2025sspo"
-Warning--I didn't find a database entry for "bettini2023benchmarl"
-Warning--I didn't find a database entry for "patterson2024empirical"
-Warning--I didn't find a database entry for "zhang2024benchvariance"
-Warning--I didn't find a database entry for "pineau2020improving"
-Warning--I didn't find a database entry for "acm2020badges"
-Warning--I didn't find a database entry for "hu2022lora"
-Warning--I didn't find a database entry for "colas2019hitchhiker"
-Warning--I didn't find a database entry for "benjamini1995controlling"
-Warning--I didn't find a database entry for "cobbe2021training"
-Warning--I didn't find a database entry for "chen2021codex"
-You've used 0 entries,
+Database file #1: references.bib
+Warning--empty journal in azar2024ipo
+Warning--empty journal in havrilla2023trlx
+Warning--can't use both volume and number fields in henderson2018deep
+Warning--empty journal in luong2024reft
+Warning--empty booktitle in sedghpour2024artifact
+Warning--empty booktitle in schulman2017proximal
+Warning--empty booktitle in yao2023deepspeedchat
+Warning--empty journal in zhang2025verifybench
+You've used 157 entries,
             2773 wiz_defined-function locations,
-            642 strings with 5666 characters,
-and the built_in function-call counts, 33 in all, are:
-= -- 0
-> -- 0
-< -- 0
-+ -- 0
-- -- 0
-* -- 2
-:= -- 10
-add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
-chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 1
-format.name$ -- 0
-if$ -- 1
-int.to.chr$ -- 1
+            1324 strings with 38337 characters,
+and the built_in function-call counts, 89162 in all, are:
+= -- 7162
+> -- 8325
+< -- 56
++ -- 2828
+- -- 2649
+* -- 7800
+:= -- 14749
+add.period$ -- 663
+call.type$ -- 157
+change.case$ -- 1297
+chr.to.int$ -- 135
+cite$ -- 322
+duplicate$ -- 3187
+empty$ -- 5327
+format.name$ -- 2840
+if$ -- 17926
+int.to.chr$ -- 23
 int.to.str$ -- 1
-missing$ -- 0
-newline$ -- 8
-num.names$ -- 0
-pop$ -- 0
+missing$ -- 136
+newline$ -- 983
+num.names$ -- 628
+pop$ -- 2649
 preamble$ -- 1
-purify$ -- 0
+purify$ -- 1140
 quote$ -- 0
-skip$ -- 1
+skip$ -- 2801
 stack$ -- 0
-substring$ -- 0
-swap$ -- 0
-text.length$ -- 0
+substring$ -- 600
+swap$ -- 262
+text.length$ -- 6
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 0
-warning$ -- 0
-while$ -- 0
+type$ -- 1727
+warning$ -- 8
+while$ -- 494
 width$ -- 0
-write$ -- 7
-(There was 1 error message)
+write$ -- 2280
+(There were 8 warnings)

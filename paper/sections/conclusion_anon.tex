@@ -1,0 +1,47 @@
+% =============================================================================
+% Conclusion — reframed around the five empirical discoveries (F1--F5)
+% Drop-in include: \input{sections/conclusion}
+% Target: <= 0.75 page
+% =============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We asked a simple question---\emph{what actually drives performance in RL
+post-training?}---and answered it with 79 controlled runs.  Five findings
+stand.
+\textbf{F1 (ZVF dominance):} the share of zero-gradient groups predicts final
+reward at $r{=}{-}0.769$ ($p{=}0.0008$), outperforming scale, algorithm, and
+library combined, and it elevates 5--10 steps before reward collapses.
+\textbf{F2 (inverted-U in group size):} $G{=}32$ is the sweet spot; both
+smaller and larger $G$ waste compute, refuting the ``more rollouts is better''
+folklore.
+\textbf{F3 (base vs.\ instruct dichotomy):} the $+0.922$ SFT delta dwarfs
+every RL contribution we measure and gates trainability below 8B-instruct
+across Qwen and Llama.
+\textbf{F4 (PPO vs.\ GRPO is model-dependent):} the ranking reverses between
+Qwen3-8B and Llama-3.1-8B ($p{<}10^{-10}$), so universal algorithm
+recommendations are incorrect by construction.
+\textbf{F5 (Kimi-K2 sustained ceiling):} scale alone does not buy stability,
+but Kimi-K2-class pre-training recipes do---Nemotron-120B collapses where
+Kimi-K2 and Qwen3-235B-A22B hold their ceilings.
+
+\paragraph{The open question.}
+Why does the model--algorithm interaction (F4) exist at all?  We conjecture
+that initial reward-landscape geometry---proxied by zero-shot task
+accuracy---determines whether GRPO's variance-reduced group contrast or PPO's
+value-function smoothing is preferable.  This is directly testable with the
+LoRA adapters and step-level traces we release, and would convert F4 from an
+empirical curiosity into a predictive rule.
+
+\paragraph{What the artifacts enable.}
+Every run, log, and checkpoint in this paper is public.  Researchers can
+(i)~calibrate AERO~\citep{zhang2026aero}'s Beta prior against our cross-scale
+ZVF traces; (ii)~test whether the 2-GRPO/DPO
+equivalence~\citep{wu2025grpo_dpo} extrapolates across F4's direction flip;
+(iii)~probe whether F5's sustained-ceiling behaviour is a property of agentic
+RL pre-training or of MoE routing; and (iv)~falsify the reward-landscape
+conjecture with gradient-level analysis~\citep{liu2025rlsubnetworks}.  RL
+post-training is no longer a niche technique---it is how the most capable
+language models learn to reason.  F1--F5 are the first controlled
+cross-library, cross-family map of that regime; the hardest and most
+important work is the mechanistic follow-up they make possible.

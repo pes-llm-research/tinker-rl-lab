@@ -1,42 +1,49 @@
 # Code anonymisation change log
 
 Tarball: blind_review/tinker-rl-lab-anon.tar.gz
-Tarball SHA-256: ef03e4ab3855e33d810a27c73296e90271efd1a4e39283b553d09b53744fb011
-Tarball size: 22514454 bytes
+Tarball SHA-256: f1272b57a5dbd98a72dff0d589188db0713131ebdaa245dd77baf0c63f3ae87b
+Tarball size: 101086047 bytes
 
 ## Totals by rule
 
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 39
-- ``PES University'' -> Anonymous Institution: 34
-- GH handle arvindcr4 -> anonymous: 32
-- GH org pes-llm-research -> anonymous-org: 27
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 24
-- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 21
+- GH handle arvindcr4 -> anonymous: 78
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 76
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 53
+- GH org pes-llm-research -> anonymous-org: 44
+- ``PES University'' -> Anonymous Institution: 43
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 27
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 24
+- first name Arvind -> Anonymous: 18
+- name Mohammad Rafi -> Anonymous: 13
 - notebook metadata.colab removed: 12
-- name Mohammad Rafi -> Anonymous: 10
-- first name Madhu -> Anonymous: 8
+- first name Madhu -> Anonymous: 9
+- name Sandhya Jeyaraj -> Anonymous: 9
+- name Madhu Kumara L -> Anonymous: 9
+- name Arvind C R -> Anonymous: 8
+- ``PES LLM Research Team'' -> Anonymous Authors: 6
+- name Dhruva N Murthy -> Anonymous: 6
 - first name Arumugam -> Anonymous: 6
-- name Sandhya Jeyaraj -> Anonymous: 6
-- name Madhu Kumara L -> Anonymous: 6
-- ``PES LLM Research Team'' -> Anonymous Authors: 5
+- name Arumugam K -> Anonymous: 5
 - first name Sandhya -> Anonymous: 5
+- GH handle madhukumara1993 -> anonymous: 4
+- lowercase arumugam (slug/id) -> anonymous: 4
 - ``PES LLM Research'' -> Anonymous: 4
-- name Arvind C R -> Anonymous: 4
+- name Narayana Darapaneni -> Anonymous: 4
 - name Arumugam Chetty K -> Anonymous: 4
-- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 3
-- first name Arvind -> Anonymous: 3
+- name Anwesh Reddy Paduri -> Anonymous: 3
 - first name Dhruva -> Anonymous: 3
-- GH handle madhukumara1993 -> anonymous: 3
-- lowercase arumugam (slug/id) -> anonymous: 3
-- name Dhruva N Murthy -> Anonymous: 3
-- name Arumugam K -> Anonymous: 2
+- ``Great Learning'' -> Anonymous Institution: 2
+- HF handle MohammadRafiML -> anonymous: 1
+- HF handle dhruvanmurthy -> anonymous: 1
 - LICENSE copyright line already anonymous: 1
+- first name Rafi -> Anonymous: 1
+- ``Northwestern University'' -> Anonymous Institution: 1
 - email redacted: 1
-- name Narayana Darapaneni -> Anonymous: 1
 - name Anwesh Reddy Padhuri -> Anonymous: 1
 
 ## Excluded files / directories
 
+- CITATION.cff
 - autoresearch-dashboard.md
 - blind_review/
 - experiments/collab-results/LLM_Tool_Call_Finetuning.pptx
@@ -44,11 +51,9 @@ Tarball size: 22514454 bytes
 - paper/acm_main.tex
 - paper/ethics_statement.tex
 - paper/limitations_update.tex
-- paper/main.aux
 - paper/main.bbl
 - paper/main.blg
 - paper/main.out
-- paper/main.pdf
 - paper/main.tex
 - paper/neurips_checklist_update.tex
 - reports/final/CONSOLIDATED_REVIEW_IMPROVEMENTS.md
@@ -68,20 +73,91 @@ Tarball size: 22514454 bytes
 
 ### ARTIFACT.md
 
-- GH handle arvindcr4 -> anonymous: 1
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- GH handle arvindcr4 -> anonymous: 2
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 2
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### CHANGELOG.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+- GH handle arvindcr4 -> anonymous: 2
+
+### Dockerfile
+
+- GH handle arvindcr4 -> anonymous: 2
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
 - github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### FINAL_HANDOFF.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- HF handle MohammadRafiML -> anonymous: 1
+- HF handle dhruvanmurthy -> anonymous: 1
+- GH handle madhukumara1993 -> anonymous: 1
+- GH handle arvindcr4 -> anonymous: 7
+- GH org pes-llm-research -> anonymous-org: 4
+- lowercase arumugam (slug/id) -> anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 5
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 2
+
+### INTEGRATION_LOG.md
+
+- GH handle arvindcr4 -> anonymous: 11
+- GH org pes-llm-research -> anonymous-org: 7
+- first name Arvind -> Anonymous: 15
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 4
 
 ### LICENSE
 
 - ``PES LLM Research Team'' -> Anonymous Authors: 1
 - LICENSE copyright line already anonymous: 1
 
+### LIMITATIONS_AND_IMPACT.md
+
+- GH handle arvindcr4 -> anonymous: 4
+- GH org pes-llm-research -> anonymous-org: 3
+- ``PES University'' -> Anonymous Institution: 2
+- first name Madhu -> Anonymous: 1
+- first name Rafi -> Anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 2
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 2
+
+### NEURIPS_CHECKLIST_FINAL.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 3
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 3
+- GH handle arvindcr4 -> anonymous: 5
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
 ### README.md
 
-- GH handle arvindcr4 -> anonymous: 5
+- GH handle arvindcr4 -> anonymous: 6
 - GH org pes-llm-research -> anonymous-org: 1
 - ``PES LLM Research Team'' -> Anonymous Authors: 1
 - ``PES LLM Research'' -> Anonymous: 2
+- ``PES University'' -> Anonymous Institution: 7
+- ``Great Learning'' -> Anonymous Institution: 2
+- ``Northwestern University'' -> Anonymous Institution: 1
+- name Narayana Darapaneni -> Anonymous: 1
+- name Anwesh Reddy Paduri -> Anonymous: 1
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 2
+
+### REPRODUCE.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+- GH handle arvindcr4 -> anonymous: 2
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 2
 
 ### advanced_rl_colab.ipynb
 
@@ -258,6 +334,16 @@ Tarball size: 22514454 bytes
 - ``PES LLM Research Team'' -> Anonymous Authors: 1
 - ``PES LLM Research'' -> Anonymous: 1
 
+### experiments/_archive/ppo_qwen3-8b_superseded_2026-04-19.json
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- GH handle arvindcr4 -> anonymous: 1
+
+### experiments/_archive/removed_duplicates_2026-04-19.json
+
+- GH handle arvindcr4 -> anonymous: 3
+
 ### experiments/aggregate_results.py
 
 - wandb entity arvindcr4-pes-university -> anonymous-entity: 3
@@ -301,8 +387,8 @@ Tarball size: 22514454 bytes
 
 ### experiments/master_results.csv
 
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 5
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 5
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 9
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 9
 - GH handle madhukumara1993 -> anonymous: 1
 - GH handle arvindcr4 -> anonymous: 1
 - name Mohammad Rafi -> Anonymous: 1
@@ -313,8 +399,8 @@ Tarball size: 22514454 bytes
 
 ### experiments/master_results.json
 
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 6
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 7
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 14
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 15
 - GH handle madhukumara1993 -> anonymous: 1
 - GH handle arvindcr4 -> anonymous: 4
 - name Mohammad Rafi -> Anonymous: 1
@@ -323,10 +409,23 @@ Tarball size: 22514454 bytes
 - first name Arumugam -> Anonymous: 1
 - lowercase arumugam (slug/id) -> anonymous: 1
 
+### experiments/modal/modal_grpo_openrlhf.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 3
+
 ### experiments/modal/modal_grpo_trl.py
 
 - wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
 - GH handle arvindcr4 -> anonymous: 3
+
+### experiments/modal/modal_grpo_verl.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 3
+
+### experiments/modal/modal_heldout_eval.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
 
 ### experiments/modal/modal_new_experiments.py
 
@@ -364,6 +463,15 @@ Tarball size: 22514454 bytes
 
 - GH handle arvindcr4 -> anonymous: 2
 
+### experiments/results/aggregate_framework_comparison.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+
+### experiments/results/heldout_gsm8k.json
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+
 ### experiments/tinker-runs/campaign_v2.py
 
 - wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
@@ -393,6 +501,42 @@ Tarball size: 22514454 bytes
 ### huggingface/upload_to_hub.py
 
 - GH org pes-llm-research -> anonymous-org: 2
+
+### integration_audit.json
+
+- name Narayana Darapaneni -> Anonymous: 1
+- name Anwesh Reddy Paduri -> Anonymous: 1
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 1
+
+### openrlhf/trainer.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+
+### paper/sections/abstract.tex
+
+- GH handle arvindcr4 -> anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### paper/sections/checklist.tex
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+- GH handle arvindcr4 -> anonymous: 5
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 3
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### paper/sections/intro.tex
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- GH handle arvindcr4 -> anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
 
 ### ppo_reinforce_baselines_colab.ipynb
 
@@ -431,6 +575,17 @@ Tarball size: 22514454 bytes
 - GH org pes-llm-research -> anonymous-org: 1
 - github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
 
+### scripts/integration_audit.py
+
+- name Narayana Darapaneni -> Anonymous: 1
+- name Anwesh Reddy Paduri -> Anonymous: 1
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 1
+
 ### skyrl-tinker-colab.ipynb
 
 - notebook metadata.colab removed: 1
@@ -465,4 +620,8 @@ Tarball size: 22514454 bytes
 
 - GH org pes-llm-research -> anonymous-org: 1
 - github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### verl/trainer.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
 

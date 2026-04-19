@@ -1,0 +1,98 @@
+% =============================================================================
+% Introduction — reframed around the five empirical discoveries (F1--F5)
+% Drop-in include: \input{sections/intro}
+% Target: <= 1.5 pages
+% =============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Reinforcement learning post-training now defines the state of the art in
+language-model reasoning and alignment~\citep{ouyang2022training,%
+guo2025deepseekr1nature}, and a small zoo of algorithms
+(PPO~\citep{schulman2017proximal}, GRPO~\citep{shao2024deepseekmath},
+DPO~\citep{rafailov2024direct}) interacts with a larger zoo of training
+frameworks (TRL, \tinker{}, OpenRLHF~\citep{hu2024openrlhf},
+veRL~\citep{sheng2024verl}).  Every week a new benchmark reports that one
+algorithm ``beats'' another, usually on a different model family, library, and
+reward protocol.  What the community lacks is not another leaderboard but a
+controlled empirical substrate that can say \emph{when} and \emph{why} RL
+post-training succeeds or fails---the same diagnosis Henderson et
+al.~\citep{henderson2018deep} demanded of classical deep RL nearly a decade
+ago.
+
+\ours{} is that substrate: 79 controlled runs spanning 7 RL libraries,
+5 model families, 32+ checkpoints, and scales from 0.6B to $\sim$1T
+parameters, all reported against \texttt{rliable}
+standards~\citep{agarwal2021deep} with stratified bootstrap 95\% CIs,
+IQM aggregation, and pre-registered hypotheses.  Every cross-library
+comparison holds model, task, reward, and seed fixed; every cross-family
+comparison holds library and hyperparameter budget fixed.  Running this
+substrate produced five empirical discoveries that reframe what practitioners
+should measure, report, and optimize.
+
+\paragraph{F1 --- ZVF dominance.}
+The Zero-Variance Fraction (ZVF)---the share of GRPO groups whose rollouts all
+receive identical rewards and therefore contribute zero gradient---is the
+single strongest predictor of final reward across our corpus
+($r_{\text{Pearson}}{=}{-}0.769$, $p{=}0.0008$; Spearman
+$\rho{=}{-}0.784$, $p{=}0.0005$).  Task type alone explains most of the
+variance: tool-use without SFT warm-up sits at ZVF $\approx$ 100\% from step 0,
+while GSM8K averages 8.5\%.  Elevated ZVF precedes reward collapse by 5--10
+steps---earlier than any reward-trajectory signal---making it an actionable
+early-warning diagnostic.  The simultaneous emergence of at least six
+independent 2025--2026 proposals targeting this failure
+mode~\citep{zhang2026aero,zhang2026greso} externally validates that ZVF
+names a real, cross-scale pathology.
+
+\paragraph{F2 --- Inverted-U in group size.}
+Holding model, task, seed, and LR fixed on Qwen3-8B/GSM8K, group size $G$
+traces an inverted-U in gradient utilization: $G{=}4$ collapses to $23.8\%$
+last-10 with immediate ZVF saturation; $G{=}16$ recovers; $G{=}32$ maximizes
+mean gradient utilization ($54.5\%$) and delays saturation onset to step 29;
+$G{=}64$ yields diminishing returns at $2\times$ compute.  ``More rollouts is
+always better'' is wrong---past $G{=}32$, additional samples buy variance
+reduction the advantage estimator cannot spend, a finding consistent with the
+scaling-law analysis of Zhou et al.~\citep{zhou2026demystify} and the
+2-GRPO efficiency argument of Wu et al.~\citep{wu2025grpo_dpo}.
+
+\paragraph{F3 --- Base vs.\ instruct dichotomy.}
+The delta between SFT-aligned and raw base checkpoints ($+0.922$ on GSM8K:
+$0.047 \to 0.969$) dwarfs every RL contribution we measure.  The dichotomy
+holds cross-family (Qwen, Llama) and cross-architecture (dense, MoE):
+Qwen3-30B-A3B-Instruct reaches 100\% last-10 while its base-model twin stalls
+at 32.5\% under identical GRPO protocols.  Below 8B-instruct, both Qwen and
+Llama collapse to ZVF-saturated non-learning.  The RL community's implicit
+``GRPO makes models reason'' framing inverts the causal arrow: SFT gates
+trainability, GRPO refines what SFT has already unlocked.
+
+\paragraph{F4 --- PPO vs.\ GRPO is model-dependent.}
+At matched compute on Modal H100 GPUs, GRPO beats PPO on Qwen3-8B (last-10:
+$34.4\%$ vs.\ $22.5\%$) while PPO decisively beats GRPO on Llama-3.1-8B
+($97.5\%$ vs.\ $84.4\%$; Mann-Whitney $r{=}0.94$, $p{<}10^{-10}$).  The
+direction of advantage \emph{reverses} across families---a finding the field's
+algorithm-vs-algorithm papers structurally cannot produce because they fix a
+single model family.  Universal algorithm recommendations are therefore
+incorrect by construction; model-conditioned selection is required.
+
+\paragraph{F5 --- Kimi-K2 sustained ceiling.}
+Scale alone does not buy stability.  Nemotron-120B reaches peak $87.5\%$ and
+then catastrophically collapses to $16.2\%$ last-10 on GSM8K, while
+Kimi-K2 ($\sim$1T MoE) sustains peak $100\%$ /
+last-10 $80\%$ in 20 steps, and Kimi-K2-Thinking reaches $91.7\%$ last-10.
+Qwen3-235B-A22B achieves perfect $100\%$ last-10 under the same protocol.
+The ceiling is neither monotone in parameter count nor predicted by the
+three-phase saturation model of~\citet{nimmaturi2025scalinglaws}; it is
+conditional on pre-training recipe (agentic RL, MoE routing, instruction
+quality), making frontier-scale evaluation a qualitatively distinct regime.
+
+\paragraph{Contributions.}
+\textbf{(i)}~F1--F5 as the first controlled cross-library, cross-family
+empirical map of RL post-training dynamics.
+\textbf{(ii)}~ZVF as an operational diagnostic with calibrated thresholds
+($\geq 50\%$ sustained over 5+ steps $\Rightarrow$ early termination).
+\textbf{(iii)}~A reproducibility substrate---79 runs, step-level traces,
+Docker environments, W\&B logs\footnote{\url{https://wandb.ai/anonymous/tinker-rl-bench}},
+LoRA adapters, and HuggingFace checkpoints---that lets others falsify or
+extend every finding.
+We release everything under MIT licence at
+\url{https://anonymous.4open.science/r/tinker-rl-lab}.
