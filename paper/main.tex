@@ -1417,22 +1417,32 @@ DeepSeek & DeepSeek-V3.1 & \multicolumn{3}{c}{\textit{Not evaluated (training in
 Inspired by the ``bitter lesson'' that scale and compute dominate clever algorithms~\cite{schulman2017proximal}, we launched a systematic campaign of 32 additional Tinker GRPO experiments plus 3 TRL-GRPO framework-comparison experiments on Modal H100s, bringing our total to 70+ training runs.
 
 \paragraph{New Frontier Models.}
-We evaluated six previously untested models on GSM8K with GRPO (Table~\ref{tab:main_results}, Bitter Lesson block).
-\textbf{Kimi-K2-Thinking} achieved the highest sustained performance (peak 100\%, last-10 95.8\%), confirming that reasoning-specialized models respond most strongly to RL post-training.
-\textbf{Qwen3.5-397B-A17B}---the largest MoE model in our study at 397B total / 17B active parameters---reached 100\% peak with 97.9\% last-10 average, establishing a new upper bound.
-\textbf{GPT-OSS-120B} showed remarkably stable training (93.8\% at step 1, 87.5\% last-10), consistent with our earlier finding that frontier models \emph{reinforce} rather than \emph{learn} GSM8K capability.
-Conversely, \textbf{DeepSeek-V3.1-Base} (671B/37B active) achieved only 57.3\% last-10 despite its massive scale, suggesting that dense parameter count alone is insufficient---base models need instruction-following capability for effective GRPO.
+\textbf{Kimi-K2-Thinking}, \textbf{Qwen3.5-397B-A17B}, \textbf{GPT-OSS-120B},
+and \textbf{DeepSeek-V3.1-Base} illustrate the same narrower descriptive
+point emphasized in the rebuttal appendices: short-horizon frontier behavior
+is highly heterogeneous. Some reasoning-oriented checkpoints begin from or
+briefly sustain very high training reward, while others regress sharply
+despite much larger scale. We therefore treat these runs as illustrative case
+studies of architecture- and initialization-dependent early-training
+behavior, not as evidence for a monotonic frontier scaling law.
 
-\paragraph{Framework Gap Deepens.}
-The TRL-GRPO experiments on Modal H100 reveal a striking framework effect that exceeds our earlier measurements.
-On the \emph{same model} (Qwen3-8B), Tinker GRPO achieves 84.4\% last-10 while TRL-GRPO achieves only 5.0\% (peak 37.5\%)---a 17$\times$ gap.
-This suggests the framework implementation (not just the algorithm) is a dominant factor in RL post-training outcomes, extending the findings of~\citet{henderson2018deep}.
-TRL-GRPO on Llama-3.2-3B-Instruct performs substantially better (71.3\% last-10), indicating that TRL's implementation is more effective on instruction-tuned models with existing chat formatting.
+\paragraph{Launcher Spread in Task~4.}
+Task~4 shows a large spread in this matched-task, mixed-checkpoint launcher
+comparison. Under the seed-42, $G=8$, lr$=10^{-5}$ setup, the Tinker-managed
+Qwen3-8B-Base run reaches 85.6\% last-10 reward, whereas TRL on Qwen3-8B
+reaches 5.0\%. We therefore treat this as evidence that outcomes are highly
+sensitive to the combined launcher/checkpoint/runtime stack in this
+short-horizon setting, not as a clean framework-only causal estimate. The
+contribution of hidden managed defaults, checkpoint choice, effective
+capacity, and runtime differences is not separately identified here.
 
 \paragraph{Base vs.~Instruct Models.}
-A clear pattern emerges: base models (Llama-3.1-70B at 36.4\%, Llama-3.1-8B at 11.5\%, DeepSeek-V3.1-Base at 57.3\%) struggle significantly compared to instruct counterparts.
-This aligns with the GRPO-as-DPO interpretation~\cite{wu2025grpo_dpo}: GRPO requires models that already produce \emph{some} correct completions to generate meaningful preference pairs.
-Base models lacking instruction-following capability produce uniformly low-quality completions, yielding zero-variance groups that prevent learning.
+Several base checkpoints underperform instruction-tuned or reasoning-tuned
+alternatives, especially the two Llama base models and DeepSeek-V3.1-Base, but
+this pattern is not universal: Qwen3-8B-Base is a clear counterexample. We
+therefore treat initialization quality as one plausible contributor to
+trainability in this benchmark rather than as a necessary or sufficient gating
+condition.
 
 \paragraph{Group Size Ablation.}
 We swept group size $G \in \{2, 4, 8, 16\}$ on Qwen3-8B (Table~\ref{tab:main_results}, Group Size block).
