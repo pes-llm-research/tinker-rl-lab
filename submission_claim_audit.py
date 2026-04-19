@@ -5,7 +5,6 @@ from pathlib import Path
 readme = Path("reports/final/README.md").read_text()
 checklist = Path("reports/final/SUBMISSION_CHECKLIST.md").read_text()
 submission = Path("reports/final/SUBMISSION_README.md").read_text()
-ideas = Path("autoresearch.ideas.md").read_text() if Path("autoresearch.ideas.md").exists() else ""
 
 issues = []
 
@@ -44,10 +43,6 @@ if "model checkpoint urls" in submission.lower():
     issues.append("submission_overstates_checkpoint_release")
 if re.search(r"\[x\].*9-page limit satisfied", submission):
     issues.append("submission_has_unverified_page_count_checkbox")
-
-# Ideas backlog should stay focused on unrun, concrete experiment paths.
-if "paper-improvement roadmap" in ideas.lower() or "plan audit" in ideas.lower():
-    issues.append("ideas_contains_already_done_meta_work")
 
 print(f"METRIC claim_issues={len(issues)}")
 print("All submission claim checks passed." if not issues else "\n".join(issues))

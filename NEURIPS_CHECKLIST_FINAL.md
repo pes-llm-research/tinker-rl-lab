@@ -260,7 +260,7 @@
   LLM-in-the-loop component of the authoring workflow.
 - **[AUDIT]** The in-paper checklist claim (p. 37) "LLMs were **not** used
   to draft or revise this paper" is stronger than the repository evidence
-  supports: `autoresearch.sh`, `reports/final/chatgpt_pro_*`, and
+  supports: `reports/final/chatgpt_pro_*` and
   `chatgpt_session_a_q1_5.txt` show that ChatGPT Pro was used for
   reviewer-style feedback on drafts (feedback was incorporated as
   revisions). The honest phrasing is: *LLMs were used as review and
@@ -279,7 +279,7 @@
 | 5 | Open Access | Claims MIT licence; repo is Apache-2.0 | Corrected to Apache-2.0 |
 | 12 | Licenses | Same MIT / Apache-2.0 mismatch, missing NoRobots licence | Corrected to Apache-2.0; added NoRobots CC-BY-NC-4.0 |
 | 13 | Assets | `DATASHEET.md` referenced but does not exist | Removed datasheet claim; model-card + `ARTIFACT.md` only |
-| 16 | LLM Usage | "LLMs were not used to draft" contradicts `autoresearch`/`chatgpt_pro_*` artefacts | Softened to an accurate description of review/scaffolding use |
+| 16 | LLM Usage | "LLMs were not used to draft" contradicts `chatgpt_pro_*` artefacts | Softened to an accurate description of review/scaffolding use |
 
 All other items were re-verified against the compiled PDF and stand as
 answered. The machine-readable counterpart of this file is

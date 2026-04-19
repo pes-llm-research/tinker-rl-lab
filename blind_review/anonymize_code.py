@@ -80,7 +80,6 @@ EXCLUDE_FILES = {
     "reports/final/PAPER_IMPROVEMENT_PLAN.md",
     "scripts/anonymize.sh",
     "verify_links_entities.txt",
-    "autoresearch-dashboard.md",
     # Citation metadata file lists real author names -- excluded from blind
     # bundle. A reviewer-facing citation block lives in the paper itself.
     "CITATION.cff",

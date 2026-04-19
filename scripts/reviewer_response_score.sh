@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reviewer-response scorer for autoresearch loop.
+# Reviewer-response scorer.
 # STDOUT: single integer = addressed_count
 # STDERR: human-readable breakdown + severity-weighted score
 set -euo pipefail

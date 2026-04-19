@@ -1,8 +1,0 @@
-results.jsonl
-queue.jsonl
-spend_usd.txt
-wave_briefs/wave_*/v*.result.json
-variant_configs/wave_*/*.yaml
-!variant_configs/smoke_test.yaml
-__pycache__/
-*.pyc

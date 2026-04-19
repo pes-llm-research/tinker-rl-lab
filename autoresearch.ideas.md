@@ -1,7 +1,0 @@
-- Recover or regenerate the trained math adapters, then run full held-out GSM8K evaluation with fixed decoding and bootstrap confidence intervals; this is the single highest-value experiment for turning the math story from training dynamics into a generalization claim.
-- Add standardized tool-calling evaluation via FC-RewardBench / ToolRM-style single-turn judging and proxy-state/final-state multi-turn evaluation with judge reliability checks.
-- Add full HumanEval/MBPP canonical harness runs with pass@1/pass@k and bootstrap confidence intervals, keeping the current 50-problem subset only as a pilot appendix result.
-- Add 3B rescue experiments that combine larger GRPO group sizes (32-128), higher sampling temperature, and easy-to-hard curriculum to test whether the current failure is exploration/reward-sparsity rather than pure capacity.
-- Add lightweight KL-to-SFT and entropy-regularized GRPO ablations with telemetry dashboards for KL, entropy, zero-advantage rate, and group composition (all-bad/mixed/all-good).
-- Add MoE-specific routing diagnostics (router entropy, expert load variance, router shift ratio, clip fraction) to turn the current volatility observation into a quantitative stability finding.
-- Add matched baseline comparisons against SFT-only, DPO/Step-DPO, RLOO/REINFORCE++, and step-wise GRPO variants to support stronger efficiency and algorithm-selection claims.

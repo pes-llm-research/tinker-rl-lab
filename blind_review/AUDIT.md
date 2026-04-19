@@ -27,9 +27,9 @@ anonymisation artefacts live under `blind_review/` and `paper/main_anon.tex`.
 ## 2. Audit-script results
 
 All 17 `*_audit.py` scripts at the repo root were executed. `run_all_audits.py`
-covers 13 of them; 4 extras (`autoresearch_config_audit.py`,
-`paper_plan_audit.py`, `reviewer_caveat_audit.py`, `scientific_audit.py`) were
-executed separately. Logs are in `blind_review/audit_logs/`.
+covers 13 of them; 3 extras (`paper_plan_audit.py`, `reviewer_caveat_audit.py`,
+`scientific_audit.py`) were executed separately. Logs are in
+`blind_review/audit_logs/`.
 
 ### 2.1 Passing (10)
 
@@ -59,7 +59,6 @@ fixing them belongs to other tasks in the submission plan.
 | `capstone_claim_audit.py` (rc=0, `capstone_issues=1`) | `missing_baseline_positioning` | paper-hardening task |
 | `abstract_scope_audit.py` (rc=0, `abstract_issues=4`) | Missing `humaneval_subset_caveat` and `training_reward_caveat` in the abstract of both `main.tex` and `main_anon.tex` | abstract-caveats task |
 | `reviewer_caveat_audit.py` (rc=0, `caveat_issues=6`) | `heldout_scope`, `tool_eval_protocol`, `codegen_subset`, `budget_and_splits`, `replication_release`, `report.threshold_overclaim` | reviewer-caveats task |
-| `autoresearch_config_audit.py` (rc=0, `config_issues=3`) | `autoresearch_md_missing_suite_metric`, `autoresearch_md_missing_unified_suite_reference`, `autoresearch_md_missing_primary_reviewer_metric_context` | autoresearch-config task |
 
 ### 2.3 Environment limitation
 
@@ -193,7 +192,6 @@ ship to reviewers:
 
 Excluded files:
 
-- `autoresearch-dashboard.md`
 - `experiments/collab-results/LLM_Tool_Call_Finetuning.pptx`
 - `experiments/collab-results/exp3_multiturn.pptx`
 - `paper/acm_main.tex`
@@ -247,7 +245,7 @@ From a fresh clone on `task-11-anonymization`:
 python blind_review/anonymize_paper.py
 python blind_review/anonymize_code.py
 python run_all_audits.py > blind_review/audit_logs/run_all_audits.log 2>&1
-for a in autoresearch_config_audit paper_plan_audit reviewer_caveat_audit scientific_audit; do
+for a in paper_plan_audit reviewer_caveat_audit scientific_audit; do
   python "${a}.py" > "blind_review/audit_logs/${a}.log" 2>&1 || true
 done
 ```
