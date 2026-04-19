@@ -1,0 +1,37 @@
+% =============================================================================
+% Abstract — reframed around the five empirical discoveries (F1--F5)
+% Drop-in include: \input{sections/abstract}
+% Target: <= 250 words
+% =============================================================================
+\begin{abstract}
+RL post-training of language models is now shaped by a handful of algorithms
+(PPO, GRPO, DPO) and a growing fleet of frameworks (TRL, \tinker{}, OpenRLHF,
+veRL), yet which choices actually drive performance remains empirically
+unsettled.  We present \ours{}, a controlled study of 79 runs spanning 7 RL
+libraries, 5 model families, and 0.6B--$\sim$1T parameters, designed to isolate
+cause from confound on GSM8K, MATH-500, HumanEval, and tool-use.
+
+Five discoveries reframe what should be measured and reported.
+\textbf{(F1) ZVF dominance.}  Zero-Variance Fraction---the share of GRPO
+groups with no within-group reward variance---is the single strongest predictor
+of final reward (Pearson $r{=}{-}0.769$, $p{=}0.0008$), outranking scale,
+algorithm, and library, and elevates 5--10 steps before reward collapses.
+\textbf{(F2) Inverted-U in group size.}  $G{=}32$ maximizes gradient
+utilization (54.5\%) and latest saturation onset (step 29); smaller and larger
+$G$ are both worse, contradicting ``more rollouts is better.''
+\textbf{(F3) Base vs.\ instruct dichotomy.}  Instruction tuning delivers a
+$+0.922$ GSM8K delta (0.047$\to$0.969); Qwen3-30B-A3B-Instruct hits 100\%
+last-10 where its base twin stalls at 32.5\%.  SFT, not RL, is the
+trainability gate.
+\textbf{(F4) PPO vs.\ GRPO is model-dependent.}  GRPO beats PPO on Qwen3-8B
+(34.4\% vs.\ 22.5\%); PPO beats GRPO on Llama-3.1-8B (97.5\% vs.\ 84.4\%,
+Mann-Whitney $r{=}0.94$, $p{<}10^{-10}$)---the ranking reverses across
+families.
+\textbf{(F5) Kimi-K2 sustained ceiling.}  Where Nemotron-120B peaks 87.5\%
+then collapses to 16.2\%, Kimi-K2 holds peak 100\% / last-10 80\% in 20 steps
+(Kimi-K2-Thinking: 91.7\% last-10)---ceiling stability is architecture-
+and pre-training-conditional, not a monotone function of scale.
+
+Code, 79 run logs, and checkpoints:
+\url{https://github.com/arvindcr4/tinker-rl-lab}.
+\end{abstract}
