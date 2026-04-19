@@ -20,6 +20,9 @@ TEMPLATE_SAVES_EXPERIMENT_DATA=0
 CONFIG_TIMEOUT_ADEQUATE=0
 TEMPLATE_RUNS_CLEANLY=0
 TEMPLATE_PRINTS_METRICS=0
+TEMPLATE_HAS_ERROR_HANDLING=0
+TEMPLATE_SETS_SEEDS=0
+PYPROJECT_HAS_TINKER=0
 
 # --- 1. Dependency readiness (20 points) ---
 MISSING=""
@@ -186,6 +189,39 @@ if [ "$TEMPLATE_PARSES" -eq 1 ]; then
     rm -rf "$TMPDIR"
 fi
 
+# --- 11. pyproject.toml includes tinker in core dependencies (10 points) ---
+PYPROJECT="/Users/arvind/paper/tinker-rl-lab/pyproject.toml"
+if [ -f "$PYPROJECT" ]; then
+    if grep -q '"tinker>=' "$PYPROJECT"; then
+        PYPROJECT_HAS_TINKER=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "PYPROJECT_MISSING_TINKER=1"
+    fi
+else
+    echo "PYPROJECT_NOT_FOUND=1"
+fi
+
+# --- 12. Template has error handling around Tinker API calls (10 points) ---
+if [ "$TEMPLATE_PARSES" -eq 1 ]; then
+    if grep -q "try:" "$TEMPLATE" && grep -q "except" "$TEMPLATE"; then
+        TEMPLATE_HAS_ERROR_HANDLING=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "TEMPLATE_MISSING_ERROR_HANDLING=1"
+    fi
+fi
+
+# --- 13. Template sets random seeds explicitly (10 points) ---
+if [ "$TEMPLATE_PARSES" -eq 1 ]; then
+    if grep -q "random.seed" "$TEMPLATE" && grep -q "np.random.seed" "$TEMPLATE"; then
+        TEMPLATE_SETS_SEEDS=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "TEMPLATE_MISSING_SEED_SETTERS=1"
+    fi
+fi
+
 # --- Output metrics ---
 echo "METRIC runnability_score=$SCORE"
 echo "METRIC deps_ready=$DEPS_READY"
@@ -198,3 +234,6 @@ echo "METRIC template_saves_experiment_data=$TEMPLATE_SAVES_EXPERIMENT_DATA"
 echo "METRIC config_timeout_adequate=$CONFIG_TIMEOUT_ADEQUATE"
 echo "METRIC template_prints_metrics=$TEMPLATE_PRINTS_METRICS"
 echo "METRIC template_runs_cleanly=$TEMPLATE_RUNS_CLEANLY"
+echo "METRIC template_has_error_handling=$TEMPLATE_HAS_ERROR_HANDLING"
+echo "METRIC template_sets_seeds=$TEMPLATE_SETS_SEEDS"
+echo "METRIC pyproject_has_tinker=$PYPROJECT_HAS_TINKER"

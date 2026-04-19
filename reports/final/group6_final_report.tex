@@ -212,13 +212,23 @@ substantially less compute than standard PPO --- making it attractive
 for resource-constrained post-training of small models.
 
 This project investigates GRPO across one agentic and two non-agentic
-transfer domains: - \textbf{Tool calling (agentic):} structured JSON
-function calling with 5--60,000 tool schemas - \textbf{Code generation
-(transfer control):} HumanEval benchmark subset - \textbf{Mathematical
-reasoning (transfer control):} GSM8K (grade-school). Although MATH
-(competition-level) was part of our original scope, the MATH track did
-not reach the same experimental maturity as GSM8K; we therefore exclude
-it from our main claims and treat it as exploratory pilot work
+transfer domains:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Tool calling (agentic):} structured JSON function calling with
+  5--60,000 tool schemas
+\item
+  \textbf{Code generation (transfer control):} HumanEval benchmark
+  subset
+\item
+  \textbf{Mathematical reasoning (transfer control):} GSM8K
+  (grade-school). Although MATH (competition-level) was part of our
+  original scope, the MATH track did not reach the same experimental
+  maturity as GSM8K; we therefore exclude it from our main claims and
+  treat it as exploratory pilot work
+\end{itemize}
 
 We execute experiments across model sizes from 0.5B to 235B parameters
 using QLoRA on Google Colab T4 GPUs, full LoRA on Tinker cloud GPUs, and
@@ -2103,12 +2113,23 @@ learns format, it's not just overlapping with grammar enforcement.
 \subsection{4.4.7 Reward Hacking and Catastrophic
 Collapse}\label{reward-hacking-and-catastrophic-collapse}
 
-Llama-3.1-8B base on tool-use showed a dramatic trajectory: 1.
-\textbf{Steps 1-20:} Stuck at reward 0.10-0.18, 75-100\% ZVF (saturated
-at bottom) 2. \textbf{Steps 21-40:} Sudden breakout --- reward climbed
-0.28 -\textgreater{} \textbf{0.873} 3. \textbf{Step 41:} Catastrophic
-collapse --- reward crashed 0.87 -\textgreater{} 0.002 -\textgreater{}
-\textbf{0.000} 4. \textbf{Steps 42-50:} Dead --- zero reward, 100\% ZVF
+Llama-3.1-8B base on tool-use showed a dramatic trajectory:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Steps 1-20:} Stuck at reward 0.10-0.18, 75-100\% ZVF
+  (saturated at bottom)
+\item
+  \textbf{Steps 21-40:} Sudden breakout --- reward climbed 0.28
+  -\textgreater{} \textbf{0.873}
+\item
+  \textbf{Step 41:} Catastrophic collapse --- reward crashed 0.87
+  -\textgreater{} 0.002 -\textgreater{} \textbf{0.000}
+\item
+  \textbf{Steps 42-50:} Dead --- zero reward, 100\% ZVF
+\end{enumerate}
 
 Loss magnitudes during breakout reached -238, indicating extreme policy
 divergence. This is a textbook reward hacking -\textgreater{} collapse
@@ -3111,16 +3132,26 @@ templates, and run logs at the anonymised repository to support this
 follow-up.
 
 \textbf{Important caveats:} This should be read as a \emph{suggestive
-model-family/scale discontinuity}, not an established threshold: - The
-4B model (Qwen3.5-4B) and 3B model (Llama-3.2-3B) differ in architecture
-family and model generation, not just parameter count. Architecture
-confound cannot be ruled out. - The 1.5B model succeeds on tool calling
-(92\% JSON validity) while the 3B fails on math, suggesting the
-threshold is task-dependent, not a universal parameter-count boundary. -
-4B multi-seed replication (4 seeds, mean 84.7\%, SD=12.0\%) confirms the
-result is reproducible but variance is high. - The 10x size ladder
-confirms the null extends to Qwen sub-8B models (0.6B, 1.7B), ruling out
-the Llama-specific architecture confound for the smallest models.
+model-family/scale discontinuity}, not an established threshold:
+
+\begin{itemize}
+\tightlist
+\item
+  The 4B model (Qwen3.5-4B) and 3B model (Llama-3.2-3B) differ in
+  architecture family and model generation, not just parameter count.
+  Architecture confound cannot be ruled out.
+\item
+  The 1.5B model succeeds on tool calling (92\% JSON validity) while the
+  3B fails on math, suggesting the threshold is task-dependent, not a
+  universal parameter-count boundary.
+\item
+  4B multi-seed replication (4 seeds, mean 84.7\%, SD=12.0\%) confirms
+  the result is reproducible but variance is high.
+\item
+  The 10x size ladder confirms the null extends to Qwen sub-8B models
+  (0.6B, 1.7B), ruling out the Llama-specific architecture confound for
+  the smallest models.
+\end{itemize}
 
 \textbf{Base-model control:} Base Qwen3-8B without LoRA scores 82.0\% on
 the same 200 test examples. The GRPO delta (+1.3pp, \(p{=}0.26\)) is not
@@ -3162,10 +3193,17 @@ rather than mechanism-level.
 Progression}\label{two-phase-learning-progression}
 
 GRPO training exhibits a characteristic two-phase pattern on
-tool-calling tasks: - \textbf{Phase 1 (Steps 1--20):} Model learns
-answer FORMAT compliance (0\%-\textgreater14\% accuracy) - \textbf{Phase
-2 (Steps 21--25):} Once format stabilizes, reasoning capability rapidly
-improves (14\%-\textgreater58\%)
+tool-calling tasks:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Phase 1 (Steps 1--20):} Model learns answer FORMAT compliance
+  (0\%-\textgreater14\% accuracy)
+\item
+  \textbf{Phase 2 (Steps 21--25):} Once format stabilizes, reasoning
+  capability rapidly improves (14\%-\textgreater58\%)
+\end{itemize}
 
 This is most pronounced where format compliance is a distinct sub-task;
 on GSM8K the phases are less separable. We describe this as a
@@ -3208,14 +3246,24 @@ capability.
 \section{5.6 LoRA Rank and Parameter
 Efficiency}\label{lora-rank-and-parameter-efficiency}
 
-Our ablation across ranks 8, 16, 32 (default), and 64 reveals: - Higher
-rank correlates with faster initial learning (rank 64 achieves 47.5\% in
-first 5 steps vs.~27.5\% for rank 8) - Peak accuracy scales with rank
-(62.5\% -\textgreater{} 75.0\% -\textgreater{} 87.5\%) - All ranks
-converge to similar long-run averages (\textasciitilde20-25\%),
-indicating the ceiling is determined by model capacity and reward
-signal, not adapter capacity - Diminishing returns: rank
-16-\textgreater64 adds +12.5\% peak for 4x more parameters
+Our ablation across ranks 8, 16, 32 (default), and 64 reveals:
+
+\begin{itemize}
+\tightlist
+\item
+  Higher rank correlates with faster initial learning (rank 64 achieves
+  47.5\% in first 5 steps vs.~27.5\% for rank 8)
+\item
+  Peak accuracy scales with rank (62.5\% -\textgreater{} 75.0\%
+  -\textgreater{} 87.5\%)
+\item
+  All ranks converge to similar long-run averages
+  (\textasciitilde20-25\%), indicating the ceiling is determined by
+  model capacity and reward signal, not adapter capacity
+\item
+  Diminishing returns: rank 16-\textgreater64 adds +12.5\% peak for 4x
+  more parameters
+\end{itemize}
 
 \section{5.7 Statistical Robustness}\label{statistical-robustness}
 
@@ -3695,13 +3743,23 @@ reference policy, GRPO avoids compounding drift that KL-penalized
 objectives can accumulate.
 
 \textbf{Nemotron-120B Collapse Case Study:} The most dramatic policy
-drift in our benchmark: - SI = 1.180 (highest across all experiments) -
-PTD = 0.762 (catastrophic) - Rolling variance peaks at steps 3--5
-(σ\^{}2 = 0.041) then partially subsides, consistent with an
-early-training policy excursion from which the model never recovers -
-Contrast: Qwen3-235B-A22B has SI \textasciitilde{} 0, PTD
-\textasciitilde{} 0, indicating the policy remained in the immediate
-neighborhood of the reference initialization throughout training
+drift in our benchmark:
+
+\begin{itemize}
+\tightlist
+\item
+  SI = 1.180 (highest across all experiments)
+\item
+  PTD = 0.762 (catastrophic)
+\item
+  Rolling variance peaks at steps 3--5 (σ\^{}2 = 0.041) then partially
+  subsides, consistent with an early-training policy excursion from
+  which the model never recovers
+\item
+  Contrast: Qwen3-235B-A22B has SI \textasciitilde{} 0, PTD
+  \textasciitilde{} 0, indicating the policy remained in the immediate
+  neighborhood of the reference initialization throughout training
+\end{itemize}
 
 \textbf{Honest Limitation:} These proxy metrics capture \emph{symptoms}
 of policy drift (reward instability) rather than \emph{direct
@@ -5520,11 +5578,19 @@ TinkerRL-Bench's initial comparison captured.
 \textbf{Implication 3: The framework landscape has evolved significantly
 since our experiments.} Our World-Class Suite experiments were conducted
 on Tinker SDK v0.16.1 and TRL at an earlier version. The major framework
-updates between mid-2025 and April 2026 include: - TRL v1.0--1.2:
-asynchronous GRPO, Liger memory reduction, VESPO/DPPO/SDPO, tool-calling
-support for Qwen3 and LLaMA 3.1/3.2 - veRL v0.7.1: GSPO support,
-Megatron MoE backend, SGLang rollout, per-sample temperature, FlowGRPO
-trainer - OpenRLHF v0.10.1: VLM support, async RL, Ray-based scaling
+updates between mid-2025 and April 2026 include:
+
+\begin{itemize}
+\tightlist
+\item
+  TRL v1.0--1.2: asynchronous GRPO, Liger memory reduction,
+  VESPO/DPPO/SDPO, tool-calling support for Qwen3 and LLaMA 3.1/3.2
+\item
+  veRL v0.7.1: GSPO support, Megatron MoE backend, SGLang rollout,
+  per-sample temperature, FlowGRPO trainer
+\item
+  OpenRLHF v0.10.1: VLM support, async RL, Ray-based scaling
+\end{itemize}
 
 Any replication of TinkerRL-Bench's experiments with current frameworks
 may show meaningfully different results, particularly for the

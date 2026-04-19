@@ -33,6 +33,7 @@ Large language models (LLMs) increasingly serve as autonomous agents that call t
 Group Relative Policy Optimization (GRPO) is a critic-free variant of Proximal Policy Optimization (PPO) that computes advantages by normalizing rewards within groups of sampled completions. It requires no value function, no reference model for KL regularization, and substantially less compute than standard PPO — making it attractive for resource-constrained post-training of small models.
 
 This project investigates GRPO across one agentic and two non-agentic transfer domains:
+
 - **Tool calling (agentic):** structured JSON function calling with 5–60,000 tool schemas
 - **Code generation (transfer control):** HumanEval benchmark subset
 - **Mathematical reasoning (transfer control):** GSM8K (grade-school). Although MATH (competition-level) was part of our original scope, the MATH track did not reach the same experimental maturity as GSM8K; we therefore exclude it from our main claims and treat it as exploratory pilot work
@@ -725,6 +726,7 @@ Both converge to ~1.0 with similar saturation profiles. This refutes the "decode
 #### 4.4.7 Reward Hacking and Catastrophic Collapse
 
 Llama-3.1-8B base on tool-use showed a dramatic trajectory:
+
 1. **Steps 1-20:** Stuck at reward 0.10-0.18, 75-100% ZVF (saturated at bottom)
 2. **Steps 21-40:** Sudden breakout — reward climbed 0.28 → **0.873**
 3. **Step 41:** Catastrophic collapse — reward crashed 0.87 → 0.002 → **0.000**
@@ -1043,6 +1045,7 @@ We observe a sharp break between 3B and 4B parameters for GRPO on GSM8K. Dense 3
 **Baseline positioning note (critic-free families).** The low-budget setup here evaluates GRPO in isolation; an RLOO / REINFORCE++ / S-GRPO comparison on the same tool-calling, GSM8K, and HumanEval-subset slices would be the direct apples-to-apples baseline family for our gradient-utilization and group-saturation diagnostics, and we position that cross-method comparison — together with ToolRM / FC-RewardBench proxy-state evaluation for the tool-use track — as the immediately next required experiment rather than a claim this paper already makes. We explicitly release code, evaluation scripts, prompt templates, and run logs at the anonymised repository to support this follow-up.
 
 **Important caveats:** This should be read as a *suggestive model-family/scale discontinuity*, not an established threshold:
+
 - The 4B model (Qwen3.5-4B) and 3B model (Llama-3.2-3B) differ in architecture family and model generation, not just parameter count. Architecture confound cannot be ruled out.
 - The 1.5B model succeeds on tool calling (92% JSON validity) while the 3B fails on math, suggesting the threshold is task-dependent, not a universal parameter-count boundary.
 - 4B multi-seed replication (4 seeds, mean 84.7%, SD=12.0%) confirms the result is reproducible but variance is high.
@@ -1063,6 +1066,7 @@ A Qwen3-30B-MoE model with ~3B active parameters reached a 99% peak GSM8K traini
 ### 5.3 Two-Phase Learning Progression
 
 GRPO training exhibits a characteristic two-phase pattern on tool-calling tasks:
+
 - **Phase 1 (Steps 1–20):** Model learns answer FORMAT compliance (0%→14% accuracy)
 - **Phase 2 (Steps 21–25):** Once format stabilizes, reasoning capability rapidly improves (14%→58%)
 
@@ -1081,6 +1085,7 @@ On tool calling, synthetic 5-tool tasks saturate to reward >0.9 within 5 GRPO st
 ### 5.6 LoRA Rank and Parameter Efficiency
 
 Our ablation across ranks 8, 16, 32 (default), and 64 reveals:
+
 - Higher rank correlates with faster initial learning (rank 64 achieves 47.5% in first 5 steps vs. 27.5% for rank 8)
 - Peak accuracy scales with rank (62.5% → 75.0% → 87.5%)
 - All ranks converge to similar long-run averages (~20-25%), indicating the ceiling is determined by model capacity and reward signal, not adapter capacity
@@ -1284,6 +1289,7 @@ Both SI and PTD correlate significantly with training outcomes, confirming that 
 GRPO exhibits significantly lower instability than classic-RL PPO. This stability advantage is consistent with GRPO's reference-free objective: by computing advantages relative to group baselines rather than a reference policy, GRPO avoids compounding drift that KL-penalized objectives can accumulate.
 
 **Nemotron-120B Collapse Case Study:** The most dramatic policy drift in our benchmark:
+
 - SI = 1.180 (highest across all experiments)
 - PTD = 0.762 (catastrophic)
 - Rolling variance peaks at steps 3–5 (σ² = 0.041) then partially subsides, consistent with an early-training policy excursion from which the model never recovers
@@ -1868,6 +1874,7 @@ Our finding that implementation framework explains more variance than algorithm 
 
 **Implication 3: The framework landscape has evolved significantly since our experiments.**
 Our World-Class Suite experiments were conducted on Tinker SDK v0.16.1 and TRL at an earlier version. The major framework updates between mid-2025 and April 2026 include:
+
 - TRL v1.0–1.2: asynchronous GRPO, Liger memory reduction, VESPO/DPPO/SDPO, tool-calling support for Qwen3 and LLaMA 3.1/3.2
 - veRL v0.7.1: GSPO support, Megatron MoE backend, SGLang rollout, per-sample temperature, FlowGRPO trainer
 - OpenRLHF v0.10.1: VLM support, async RL, Ray-based scaling
