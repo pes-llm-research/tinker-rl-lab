@@ -305,7 +305,7 @@ def check_compute_budget() -> dict:
     c_lo, c_hi = total_row
 
     # Sub-rows sum EXCLUDES the per-person entries (Colab) and counts one H100 PPO row.
-    # Accept if claimed bracket overlaps computed ±20%.
+    # Accept if claimed bracket overlaps computed ±30%.
     overlap = not (c_hi < sum_lo * 0.7 or c_lo > sum_hi * 1.3)
     passed = overlap
     return {

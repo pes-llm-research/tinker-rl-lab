@@ -23,7 +23,7 @@ dataset slug and split used. No new dataset is introduced by this paper.
 |---|---|---|
 | Tinker RL Lab benchmark harness | Apache-2.0 | Code in this repo |
 | LoRA adapter checkpoints (Modal runs) | Apache-2.0 | Posted to HuggingFace (anonymous mirror for review) |
-| Experiment manifest (`master_results.json`) | Apache-2.0 | 79 runs × 7 frameworks × 5 model families |
+| Experiment manifest (`master_results.json`) | Apache-2.0 | 83 experiment rows (post-consolidation; see `metadata.total_experiments`) spanning 7 RL frameworks (TRL, SB3, CleanRL, Tianshou, OpenRLHF, veRL, Tinker) and 5 model families (Qwen, Llama, DeepSeek, Kimi, Nemotron) |
 | Figures & tables | CC BY 4.0 | Regenerated deterministically from `master_results.json` |
 
 ## 3. Personally identifiable information

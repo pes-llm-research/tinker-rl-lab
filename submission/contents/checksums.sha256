@@ -1,21 +1,6 @@
-# Submission bundle MANIFEST — Tinker RL Lab (NeurIPS 2026 D&B)
-
-Every file in `neurips2026_tinker_rl_lab.zip` with SHA-256. The machine-readable
-checksum list lives in the companion file `checksums.sha256`, which is the
-authoritative input to `sha256sum -c`.
-
-```
 0204147bcfc9cad6d0110e923fbe365308734482a0a3ba82f8cd3a61dc3bb67b  ethics_statement.pdf
 15b71c30762400ee9b1ca042f231437494cfe64b34321de345c8ba363a8cffa7  paper.pdf
 c5ab440c9d3795b9c994135d75dcdb1b663b2a831856d9dfbaea864e3b254f06  paper_anon.pdf
 5082ce24906b60f3c878b986e1fc36639524d30606bad4a998cc606768b1c976  code.tar.gz
 3553adadcc314a40de5c5a2496fddf15485e46ea844162b77358ebdca7317ffe  REVIEWER_README.md
 8493dd928d8ff349b905729b1c47f3894252ad959c9f9069f5ebfbac747f9c90  data_statement.md
-```
-
-Verify with:
-
-```bash
-unzip neurips2026_tinker_rl_lab.zip
-sha256sum -c checksums.sha256
-```

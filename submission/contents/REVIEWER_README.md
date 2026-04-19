@@ -20,8 +20,8 @@ the submission.
 ```bash
 tar xzf code.tar.gz
 cd tinker-rl-lab-anon
-# Offline test subset (~25 s CPU):
-python3 -m pytest reproducibility/test_offline_subset.py -v
+# Offline smoke test (~25 s CPU):
+bash scripts/smoke_test.sh
 # Headline-claim check (±2 pp tolerance):
 python3 reproducibility/check_qwen3_8b_claim.py
 ```

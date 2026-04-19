@@ -78,7 +78,7 @@ python3 reproducibility/check_qwen3_8b_claim.py  # PPO + GRPO both pass
 
 ## 3. What was done in task 13
 
-Six commits on `task-13-integrator`:
+Eight commits on `task-13-integrator`:
 
 | # | SHA | Step | Description |
 |---|---|---|---|
