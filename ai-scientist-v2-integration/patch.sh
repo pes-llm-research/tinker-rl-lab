@@ -12,5 +12,8 @@ if [ -f "$SRC/ai_scientist/treesearch/parallel_agent.py" ]; then
     echo "PATCHED parallel_agent.py"
 fi
 
-# Future patches go here...
+# Copy modified experiment template
+cp "$SRC/ai_scientist/ideas/tinker_grpo_rl.py" "$DST/ai_scientist/ideas/tinker_grpo_rl.py"
+echo "PATCHED tinker_grpo_rl.py"
+
 echo "Patches applied."
