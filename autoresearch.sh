@@ -18,6 +18,7 @@ TEMPLATE_NO_MAIN_GUARD=0
 TEMPLATE_GRACEFUL_API_KEY=0
 TEMPLATE_SAVES_EXPERIMENT_DATA=0
 CONFIG_TIMEOUT_ADEQUATE=0
+TEMPLATE_RUNS_CLEANLY=0
 
 # --- 1. Dependency readiness (20 points) ---
 MISSING=""
@@ -158,6 +159,22 @@ else
     echo "CONFIG_MISSING=1"
 fi
 
+# --- 9. Template runs cleanly without TINKER_API_KEY (20 points) ---
+if [ "$TEMPLATE_PARSES" -eq 1 ]; then
+    TMPDIR=$(mktemp -d)
+    cd "$TMPDIR"
+    python3 "$TEMPLATE" > output.log 2>&1 || true
+    if [ -f "$TMPDIR/working/final_info.json" ] && [ -f "$TMPDIR/working/experiment_data.npy" ]; then
+        TEMPLATE_RUNS_CLEANLY=1
+        SCORE=$((SCORE + 20))
+    else
+        echo "TEMPLATE_RUN_CLEANLY_FAILED=1"
+        ls -la "$TMPDIR/working/" 2>/dev/null || echo "NO_WORKING_DIR"
+    fi
+    cd - > /dev/null
+    rm -rf "$TMPDIR"
+fi
+
 # --- Output metrics ---
 echo "METRIC runnability_score=$SCORE"
 echo "METRIC deps_ready=$DEPS_READY"
@@ -168,3 +185,4 @@ echo "METRIC template_no_main_guard=$TEMPLATE_NO_MAIN_GUARD"
 echo "METRIC template_graceful_api_key=$TEMPLATE_GRACEFUL_API_KEY"
 echo "METRIC template_saves_experiment_data=$TEMPLATE_SAVES_EXPERIMENT_DATA"
 echo "METRIC config_timeout_adequate=$CONFIG_TIMEOUT_ADEQUATE"
+echo "METRIC template_runs_cleanly=$TEMPLATE_RUNS_CLEANLY"
