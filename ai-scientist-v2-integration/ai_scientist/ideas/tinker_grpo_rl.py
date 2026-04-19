@@ -265,9 +265,21 @@ if "TINKER_API_KEY" not in os.environ:
             },
         }
     }
+    # Save experiment_data.npy for AI Scientist plotting code
+    experiment_data = {
+        "gsm8k": {
+            "metrics": {"train": [0.0], "val": [0.0]},
+            "losses": {"train": [float("nan")], "val": [float("nan")]},
+            "predictions": [],
+            "ground_truth": [],
+        }
+    }
+    np.save(os.path.join(working_dir, "experiment_data.npy"), experiment_data)
+    print(f"Wrote placeholder experiment_data.npy")
+
     out = Path(working_dir) / "final_info.json"
     out.write_text(json.dumps(final_info, indent=2))
-    print(f"\nWrote placeholder {out}")
+    print(f"Wrote placeholder {out}")
 else:
     print("Loading GSM8K…")
     ds = load_dataset("openai/gsm8k", "main")
@@ -322,9 +334,27 @@ else:
             },
         }
     }
+    # Save experiment_data.npy for AI Scientist plotting code
+    experiment_data = {
+        "gsm8k": {
+            "metrics": {
+                "train": [s["last_10_accuracy"] for s in per_seed],
+                "val": [s["peak_accuracy"] for s in per_seed],
+            },
+            "losses": {
+                "train": [s["training_loss"] for s in per_seed],
+                "val": [s["training_loss"] for s in per_seed],
+            },
+            "predictions": [],
+            "ground_truth": [],
+        }
+    }
+    np.save(os.path.join(working_dir, "experiment_data.npy"), experiment_data)
+    print(f"Wrote experiment_data.npy")
+
     out = Path(working_dir) / "final_info.json"
     out.write_text(json.dumps(final_info, indent=2))
-    print(f"\nWrote {out}")
+    print(f"Wrote {out}")
     print(
         f"last_10={stats['last_10_accuracy']['mean']:.3f} ± "
         f"{stats['last_10_accuracy']['stderr']:.3f}  "

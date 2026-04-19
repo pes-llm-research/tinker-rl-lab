@@ -16,4 +16,8 @@ fi
 cp "$SRC/ai_scientist/ideas/tinker_grpo_rl.py" "$DST/ai_scientist/ideas/tinker_grpo_rl.py"
 echo "PATCHED tinker_grpo_rl.py"
 
+# Copy modified BFTS config
+cp "$SRC/bfts_config.yaml" "$DST/bfts_config.yaml"
+echo "PATCHED bfts_config.yaml"
+
 echo "Patches applied."
