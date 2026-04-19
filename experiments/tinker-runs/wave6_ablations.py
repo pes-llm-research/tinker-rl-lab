@@ -15,9 +15,22 @@ Shared baseline is run once and re-used across all three sweeps.
 Output: experiments/tinker-runs/results/wave6_ablations.json
 """
 
-import os, re, json, random, sys, time, warnings, traceback
-from datetime import datetime, timezone
+import json
+import os
+import random
+import re
+import sys
+import time
+import traceback
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
+
+import torch
+import tinker
+import tinker.types as T
+from datasets import load_dataset
+from transformers import AutoTokenizer
 
 warnings.filterwarnings("ignore")
 
@@ -25,11 +38,6 @@ API_KEY = os.environ.get("TINKER_API_KEY", "")
 WANDB_KEY = os.environ.get("WANDB_API_KEY", "")
 os.environ["TINKER_API_KEY"] = API_KEY
 
-import torch
-import tinker
-import tinker.types as T
-from transformers import AutoTokenizer
-from datasets import load_dataset
 
 # ── Constants ───────────────────────────────────────────────────────
 MODEL = "Qwen/Qwen3-8B"
@@ -44,9 +52,20 @@ BASE_RANK = 32
 BASE_TEMP = 0.8
 BASE_BATCH = 2
 
-RESULTS_PATH = (
-    "/home/user/workspace/tinker-rl-lab/"
-    "experiments/tinker-runs/results/wave6_ablations.json"
+# Default output path. Derived from this file's location so the script
+# is portable across checkouts; overridable via --out when running the
+# figure generator, or by setting WAVE6_RESULTS_PATH in the environment.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(os.path.dirname(_HERE))
+RESULTS_PATH = os.environ.get(
+    "WAVE6_RESULTS_PATH",
+    os.path.join(
+        _REPO_ROOT,
+        "experiments",
+        "tinker-runs",
+        "results",
+        "wave6_ablations.json",
+    ),
 )
 
 SYSTEM_PROMPT = (
@@ -57,17 +76,26 @@ QUESTION_SUFFIX = (
     " Provide a numerical answer without units, written inside \\boxed{}."
 )
 
-# ── Load GSM8K ──────────────────────────────────────────────────────
-print("Loading GSM8K dataset...", flush=True)
-_ds = load_dataset("openai/gsm8k", "main", split="train")
-GSM8K_EXAMPLES = []
-for row in _ds:
-    m = re.search(r"####\s*([\-\d,\.]+)", row["answer"])
-    if m:
-        GSM8K_EXAMPLES.append(
-            (row["question"], m.group(1).replace(",", "").strip())
-        )
-print(f"Loaded {len(GSM8K_EXAMPLES)} GSM8K examples", flush=True)
+
+# ── Lazy GSM8K loader ───────────────────────────────────────────────
+# Dataset loading is deferred until a worker actually needs it so that
+# `import wave6_ablations` stays cheap (no network/disk at import time).
+_GSM8K_CACHE = []
+
+
+def _load_gsm8k():
+    if _GSM8K_CACHE:
+        return _GSM8K_CACHE
+    print("Loading GSM8K dataset...", flush=True)
+    ds = load_dataset("openai/gsm8k", "main", split="train")
+    for row in ds:
+        m = re.search(r"####\s*([\-\d,\.]+)", row["answer"])
+        if m:
+            _GSM8K_CACHE.append(
+                (row["question"], m.group(1).replace(",", "").strip())
+            )
+    print(f"Loaded {len(_GSM8K_CACHE)} GSM8K examples", flush=True)
+    return _GSM8K_CACHE
 
 
 def reward_fn(response: str, answer: str) -> float:
@@ -115,11 +143,14 @@ def run_one(exp):
         random.seed(seed)
         torch.manual_seed(seed)
 
+        gsm8k = _load_gsm8k()
+
         tok = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
         # W&B
         try:
             import wandb
+
             if WANDB_KEY:
                 wandb.login(key=WANDB_KEY, relogin=True)
             wb_run = wandb.init(
@@ -162,7 +193,7 @@ def run_one(exp):
             return loss, {"loss": loss.item()}
 
         step_rewards, step_log = [], []
-        examples = list(GSM8K_EXAMPLES)
+        examples = list(gsm8k)
         random.shuffle(examples)
 
         for step in range(steps):
@@ -482,9 +513,6 @@ def launch(max_parallel=6):
 def _save(results, exps, final=False):
     # Organize for the results file
     by_tag = {r["tag"]: r for r in results}
-    baseline = by_tag.get(
-        f"w6_base_r{BASE_RANK}_t{BASE_TEMP}_b{BASE_BATCH}"
-    )
 
     def _collect(sweep_name, key, values):
         rows = []
@@ -509,13 +537,35 @@ def _save(results, exps, final=False):
                 )
             r = by_tag.get(tag)
             if r:
-                rows.append({key: v, **{k: r.get(k) for k in [
-                    "status", "peak_reward", "last10_avg", "first5_avg",
-                    "zero_reward_pct", "zero_loss_pct", "reward_trace",
-                    "step_log", "run_id", "checkpoint", "seed", "rank",
-                    "temperature", "batch", "group_size", "lr", "steps",
-                    "wall_clock_sec", "tag",
-                ]}})
+                rows.append(
+                    {
+                        key: v,
+                        **{
+                            k: r.get(k)
+                            for k in [
+                                "status",
+                                "peak_reward",
+                                "last10_avg",
+                                "first5_avg",
+                                "zero_reward_pct",
+                                "zero_loss_pct",
+                                "reward_trace",
+                                "step_log",
+                                "run_id",
+                                "checkpoint",
+                                "seed",
+                                "rank",
+                                "temperature",
+                                "batch",
+                                "group_size",
+                                "lr",
+                                "steps",
+                                "wall_clock_sec",
+                                "tag",
+                            ]
+                        },
+                    }
+                )
             else:
                 rows.append({key: v, "status": "pending", "tag": tag})
         return rows
@@ -557,7 +607,9 @@ def _save(results, exps, final=False):
         "runs": results,
     }
 
-    os.makedirs(os.path.dirname(RESULTS_PATH), exist_ok=True)
+    out_dir = os.path.dirname(RESULTS_PATH)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     with open(RESULTS_PATH, "w") as f:
         json.dump(out, f, indent=2)
 
