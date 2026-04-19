@@ -1,0 +1,21 @@
+[
+  {
+    "Name": "tool_use_dense_reward_design",
+    "Title": "Dense Reward Shaping for Tool-Use RL: From Binary Success to Sub-Goal Credit",
+    "Short Hypothesis": "Replacing the current binary success/failure reward for tool-use tasks with a dense reward that gives partial credit for correct tool selection, valid argument formatting, and partial execution will reduce ZVF saturation and enable meaningful GRPO learning on tool-use benchmarks.",
+    "Related Work": "Reward shaping in RL (Ng et al., 1999) and process reward models (Lightman et al., 2023) show that intermediate credit accelerates learning. Current tool-use implementations (Qin et al., 2023; Patil et al., 2023) typically use outcome-only rewards, which leads to sparse gradients and high ZVF in GRPO training.",
+    "Abstract": "Tool-use RL fine-tuning currently yields zero-reward outcomes because the reward is binary: 1.0 only if the entire tool-execution chain succeeds, 0.0 otherwise. This extreme sparsity causes GRPO group variance to collapse (ZVF=1.0) and prevents any learning signal from propagating. We propose a 4-tier dense reward for tool-use tasks: (1) +0.2 for selecting any valid tool name, (2) +0.3 for formatting tool arguments with correct schema, (3) +0.3 for executing the tool without runtime errors, (4) +0.2 for producing the correct final answer. We evaluate this on a simplified tool-use dataset (weather lookup, calculator, web search) using local TRL GRPO with Qwen2.5-0.5B-Instruct. Metrics: nonzero reward fraction, ZVF, last-10 accuracy, and held-out success rate.",
+    "Experiments": [
+      "Baseline: Binary reward (1.0 for full success, 0.0 otherwise) on 100 tool-use problems with 3 tools. Run GRPO for 50 steps, GROUP_SIZE=8, NUM_SEEDS=3. Record ZVF, nonzero reward fraction, and success rate.",
+      "Dense reward: Implement the 4-tier reward described above on the same dataset. Compare ZVF, nonzero reward fraction, and learning curves against baseline.",
+      "Ablation: Remove each tier individually to isolate which component carries most of the gradient signal.",
+      "Held-out evaluation: Test both reward functions on 50 unseen tool-use problems to verify generalization."
+    ],
+    "Risk Factors and Limitations": [
+      "The 4-tier reward requires a tool parser/validator, which may not generalize to arbitrary tool schemas.",
+      "Partial credit for argument formatting may reward syntactic correctness over semantic correctness.",
+      "Small model (0.5B) may lack the capacity to learn complex tool-use patterns even with dense rewards.",
+      "Simplified tool-use dataset may not reflect real-world API complexity."
+    ]
+  }
+]
