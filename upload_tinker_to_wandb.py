@@ -38,9 +38,7 @@ STEP_RE = re.compile(
 )
 RUN_ID_RE = re.compile(r"Run ID:\s*(\S+)")
 RUN_RE = re.compile(r"Run:\s*(\S+)")
-CONFIG_RE = re.compile(
-    r"model=(\S+)\s+seed=(\d+)\s+rank=(\d+)\s+lr=([\d.e\-]+)"
-)
+CONFIG_RE = re.compile(r"model=(\S+)\s+seed=(\d+)\s+rank=(\d+)\s+lr=([\d.e\-]+)")
 REWARD_TRACE_RE = re.compile(r"Reward trace:\s*\[(.+)\]")
 
 
@@ -54,13 +52,15 @@ def parse_log(path: str):
         for line in f:
             m = STEP_RE.search(line)
             if m:
-                steps.append({
-                    "step": int(m.group(1)),
-                    "total_steps": int(m.group(2)),
-                    "loss": float(m.group(3)),
-                    "reward": float(m.group(4)),
-                    "accuracy": float(m.group(5)),
-                })
+                steps.append(
+                    {
+                        "step": int(m.group(1)),
+                        "total_steps": int(m.group(2)),
+                        "loss": float(m.group(3)),
+                        "reward": float(m.group(4)),
+                        "accuracy": float(m.group(5)),
+                    }
+                )
                 continue
 
             m = RUN_ID_RE.search(line)
@@ -114,12 +114,15 @@ def upload_run(name: str, log_file: str, group: str):
     )
 
     for s in steps:
-        run.log({
-            "train/step": s["step"],
-            "train/loss": s["loss"],
-            "train/reward_mean": s["reward"],
-            "train/accuracy": s["accuracy"],
-        }, step=s["step"])
+        run.log(
+            {
+                "train/step": s["step"],
+                "train/loss": s["loss"],
+                "train/reward_mean": s["reward"],
+                "train/accuracy": s["accuracy"],
+            },
+            step=s["step"],
+        )
 
     # Summary
     if steps:

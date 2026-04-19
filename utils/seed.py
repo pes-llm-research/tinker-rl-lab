@@ -21,7 +21,6 @@ Reference:
 import os
 import random
 import argparse
-from typing import Optional
 
 
 def set_global_seed(seed: int = 42, deterministic_cudnn: bool = True) -> dict:
@@ -43,6 +42,7 @@ def set_global_seed(seed: int = 42, deterministic_cudnn: bool = True) -> dict:
     # NumPy
     try:
         import numpy as np
+
         np.random.seed(seed)
     except ImportError:
         pass
@@ -51,6 +51,7 @@ def set_global_seed(seed: int = 42, deterministic_cudnn: bool = True) -> dict:
     torch_info = {}
     try:
         import torch
+
         torch.manual_seed(seed)
         torch_info["torch_version"] = torch.__version__
 
@@ -60,7 +61,9 @@ def set_global_seed(seed: int = 42, deterministic_cudnn: bool = True) -> dict:
             torch_info["cuda_available"] = True
             torch_info["cuda_version"] = torch.version.cuda
             torch_info["gpu_count"] = torch.cuda.device_count()
-            torch_info["gpu_name"] = torch.cuda.get_device_name(0) if torch.cuda.device_count() > 0 else "N/A"
+            torch_info["gpu_name"] = (
+                torch.cuda.get_device_name(0) if torch.cuda.device_count() > 0 else "N/A"
+            )
 
             if deterministic_cudnn:
                 torch.backends.cudnn.deterministic = True
@@ -78,6 +81,7 @@ def set_global_seed(seed: int = 42, deterministic_cudnn: bool = True) -> dict:
     # TensorFlow (if used)
     try:
         import tensorflow as tf
+
         tf.random.set_seed(seed)
     except ImportError:
         pass
@@ -117,6 +121,7 @@ def get_environment_info() -> dict:
     # PyTorch
     try:
         import torch
+
         info["torch_version"] = torch.__version__
         info["cuda_available"] = torch.cuda.is_available()
         if torch.cuda.is_available():
@@ -133,6 +138,7 @@ def get_environment_info() -> dict:
     # Transformers
     try:
         import transformers
+
         info["transformers_version"] = transformers.__version__
     except ImportError:
         pass
@@ -140,6 +146,7 @@ def get_environment_info() -> dict:
     # TRL
     try:
         import trl
+
         info["trl_version"] = trl.__version__
     except ImportError:
         pass
@@ -147,6 +154,7 @@ def get_environment_info() -> dict:
     # NumPy
     try:
         import numpy as np
+
         info["numpy_version"] = np.__version__
     except ImportError:
         pass
@@ -154,6 +162,7 @@ def get_environment_info() -> dict:
     # Datasets
     try:
         import datasets
+
         info["datasets_version"] = datasets.__version__
     except ImportError:
         pass
@@ -192,10 +201,7 @@ def log_experiment_metadata(
         "environment": get_environment_info(),
     }
 
-    filepath = os.path.join(
-        output_dir,
-        f"{experiment_name}_seed{seed}_metadata.json"
-    )
+    filepath = os.path.join(output_dir, f"{experiment_name}_seed{seed}_metadata.json")
 
     with open(filepath, "w") as f:
         json.dump(metadata, f, indent=2, default=str)

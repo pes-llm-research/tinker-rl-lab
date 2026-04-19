@@ -20,7 +20,6 @@ import json
 import glob
 import argparse
 from typing import Dict, List, Optional, Tuple
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -74,10 +73,9 @@ def compute_bootstrap_ci(
         rng = np.random.default_rng(42)
 
     n = len(scores)
-    bootstrap_means = np.array([
-        np.mean(rng.choice(scores, size=n, replace=True))
-        for _ in range(n_bootstrap)
-    ])
+    bootstrap_means = np.array(
+        [np.mean(rng.choice(scores, size=n, replace=True)) for _ in range(n_bootstrap)]
+    )
 
     alpha = (1 - confidence) / 2
     lower = np.percentile(bootstrap_means, 100 * alpha)
@@ -125,9 +123,7 @@ def mann_whitney_u(scores_a: np.ndarray, scores_b: np.ndarray) -> dict:
     """
     from scipy import stats
 
-    u_stat, p_value = stats.mannwhitneyu(
-        scores_a, scores_b, alternative="two-sided"
-    )
+    u_stat, p_value = stats.mannwhitneyu(scores_a, scores_b, alternative="two-sided")
 
     return {
         "u_statistic": float(u_stat),
@@ -210,12 +206,14 @@ def generate_results_table(
     for algo_name, scores in results.items():
         mean, ci_lower, ci_upper = compute_bootstrap_ci(scores)
         se = np.std(scores, ddof=1) / np.sqrt(len(scores))
-        rows.append({
-            "Algorithm": algo_name,
-            f"{metric_name} (mean ± SE)": f"{mean:.3f} ± {se:.3f}",
-            "95% CI": f"[{ci_lower:.3f}, {ci_upper:.3f}]",
-            "Seeds": len(scores),
-        })
+        rows.append(
+            {
+                "Algorithm": algo_name,
+                f"{metric_name} (mean ± SE)": f"{mean:.3f} ± {se:.3f}",
+                "95% CI": f"[{ci_lower:.3f}, {ci_upper:.3f}]",
+                "Seeds": len(scores),
+            }
+        )
 
     df = pd.DataFrame(rows)
 
@@ -242,7 +240,11 @@ def try_rliable_analysis(results: Dict[str, np.ndarray], output_dir: str):
     try:
         from rliable import library as rly
         from rliable import metrics as rly_metrics
-        from rliable import plot_utils
+
+        # ``plot_utils`` is imported to verify the full rliable install is
+        # present (the caller later builds rliable plots via helper scripts);
+        # we assign ``_`` to signal the availability check to ruff/linters.
+        from rliable import plot_utils as _  # noqa: F401
 
         print("Running rliable analysis...")
 
@@ -253,12 +255,14 @@ def try_rliable_analysis(results: Dict[str, np.ndarray], output_dir: str):
             score_dict[algo] = scores.reshape(-1, 1) if scores.ndim == 1 else scores
 
         # Compute aggregate metrics with CIs
-        aggregate_func = lambda x: np.array([
-            rly_metrics.aggregate_median(x),
-            rly_metrics.aggregate_iqm(x),
-            rly_metrics.aggregate_mean(x),
-            rly_metrics.aggregate_optimality_gap(x),
-        ])
+        aggregate_func = lambda x: np.array(
+            [
+                rly_metrics.aggregate_median(x),
+                rly_metrics.aggregate_iqm(x),
+                rly_metrics.aggregate_mean(x),
+                rly_metrics.aggregate_optimality_gap(x),
+            ]
+        )
 
         aggregate_scores, aggregate_cis = rly.get_interval_estimates(
             score_dict, aggregate_func, reps=50000
@@ -266,12 +270,8 @@ def try_rliable_analysis(results: Dict[str, np.ndarray], output_dir: str):
 
         # Save rliable results
         rliable_results = {
-            "aggregate_scores": {
-                k: v.tolist() for k, v in aggregate_scores.items()
-            },
-            "aggregate_cis": {
-                k: v.tolist() for k, v in aggregate_cis.items()
-            },
+            "aggregate_scores": {k: v.tolist() for k, v in aggregate_scores.items()},
+            "aggregate_cis": {k: v.tolist() for k, v in aggregate_cis.items()},
         }
 
         os.makedirs(output_dir, exist_ok=True)
@@ -286,17 +286,14 @@ def try_rliable_analysis(results: Dict[str, np.ndarray], output_dir: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Statistical analysis for RL experiments"
-    )
+    parser = argparse.ArgumentParser(description="Statistical analysis for RL experiments")
     parser.add_argument("--results-dir", type=str, default="results/")
-    parser.add_argument("--experiment", type=str, default=None,
-                        help="Specific experiment to analyze")
+    parser.add_argument(
+        "--experiment", type=str, default=None, help="Specific experiment to analyze"
+    )
     parser.add_argument("--output-dir", type=str, default="paper/figures/")
-    parser.add_argument("--format", type=str, choices=["latex", "csv", "both"],
-                        default="both")
-    parser.add_argument("--rliable", action="store_true",
-                        help="Run rliable aggregate analysis")
+    parser.add_argument("--format", type=str, choices=["latex", "csv", "both"], default="both")
+    parser.add_argument("--rliable", action="store_true", help="Run rliable aggregate analysis")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -306,16 +303,17 @@ def main():
         experiments = [args.experiment]
     else:
         experiments = [
-            d for d in os.listdir(args.results_dir)
+            d
+            for d in os.listdir(args.results_dir)
             if os.path.isdir(os.path.join(args.results_dir, d))
         ]
 
     print(f"Found experiments: {experiments}")
 
     for exp in experiments:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Analyzing: {exp}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         seed_results = load_multi_seed_results(args.results_dir, exp)
         if not seed_results:
@@ -329,18 +327,47 @@ def main():
         for seed, metrics_list in seed_results.items():
             if metrics_list:
                 last_metric = metrics_list[-1]
-                score = last_metric.get("reward/mean",
-                        last_metric.get("accuracy",
-                        last_metric.get("eval/percent_correct", 0)))
+                score = last_metric.get(
+                    "reward/mean",
+                    last_metric.get("accuracy", last_metric.get("eval/percent_correct", 0)),
+                )
                 final_scores.append(score)
 
         if final_scores:
             scores_arr = np.array(final_scores)
             mean, ci_lower, ci_upper = compute_bootstrap_ci(scores_arr)
             se = np.std(scores_arr, ddof=1) / np.sqrt(len(scores_arr))
-            print(f"  Final score: {mean:.4f} ± {se:.4f} (95% CI: [{ci_lower:.4f}, {ci_upper:.4f}])")
+            print(
+                f"  Final score: {mean:.4f} ± {se:.4f} (95% CI: [{ci_lower:.4f}, {ci_upper:.4f}])"
+            )
 
     print("\nStatistical analysis complete.")
+
+
+# ----------------------------------------------------------------------------
+# Compatibility aliases
+# ----------------------------------------------------------------------------
+# Some downstream tooling / CI imports the bootstrap CI under a shorter name.
+bootstrap_ci = compute_bootstrap_ci
+
+
+def compute_iqm(scores: np.ndarray, tau: float = 0.25) -> float:
+    """Compute the Interquartile Mean (IQM) of a score array.
+
+    Follows Agarwal et al. (2021), "Deep RL at the Edge of the Statistical
+    Precipice". Drops the top and bottom `tau` fraction of values and returns
+    the mean of the middle (1 - 2*tau) fraction. Default tau=0.25 gives the
+    canonical IQM over the central 50% of scores.
+    """
+    arr = np.asarray(scores, dtype=float).ravel()
+    if arr.size == 0:
+        return float("nan")
+    lo = np.quantile(arr, tau)
+    hi = np.quantile(arr, 1 - tau)
+    mid = arr[(arr >= lo) & (arr <= hi)]
+    if mid.size == 0:
+        return float(np.mean(arr))
+    return float(np.mean(mid))
 
 
 if __name__ == "__main__":

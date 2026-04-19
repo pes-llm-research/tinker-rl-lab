@@ -19,6 +19,7 @@ Changes, in order:
 The script is idempotent: running it twice produces the same output.
 Run from the repository root: ``python blind_review/anonymize_paper.py``.
 """
+
 from __future__ import annotations
 
 import re
@@ -146,10 +147,14 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
     # 3. Author-block submission guidance (header comments lines 7--10 and the
     # inline ``For submission, use anonymous authors:'' block).
     for old, tag in [
-        (r"% SUBMISSION NOTE:.*?https://anonymous\.4open\.science/r/tinker-rl-lab\}\n\n",
-         "header author-guidance comment removed"),
-        (r"% For submission, use anonymous authors:\n% \\author\{Anonymous Authors\}\n\n",
-         "inline ``for submission'' comment removed"),
+        (
+            r"% SUBMISSION NOTE:.*?https://anonymous\.4open\.science/r/tinker-rl-lab\}\n\n",
+            "header author-guidance comment removed",
+        ),
+        (
+            r"% For submission, use anonymous authors:\n% \\author\{Anonymous Authors\}\n\n",
+            "inline ``for submission'' comment removed",
+        ),
     ]:
         new_text, n = re.subn(old, "", text, flags=re.DOTALL)
         _record(changes, tag, n)
@@ -167,21 +172,31 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 5. GitHub URLs.
     for old, new, tag in [
-        (r"https://github\.com/arvindcr4/tinker-rl-lab",
-         r"https://anonymous.4open.science/r/tinker-rl-lab",
-         "github.com/arvindcr4/tinker-rl-lab -> anonymous.4open.science"),
-        (r"https://github\.com/pes-llm-research/tinker-rl-lab",
-         r"https://anonymous.4open.science/r/tinker-rl-lab",
-         "github.com/pes-llm-research/tinker-rl-lab -> anonymous.4open.science"),
-        (r"https://github\.com/arvindcr4/([\w-]+)",
-         r"https://anonymous.4open.science/r/\1",
-         "github.com/arvindcr4/<repo> -> anonymous.4open.science"),
-        (r"https://github\.com/pes-llm-research/([\w-]+)",
-         r"https://anonymous.4open.science/r/\1",
-         "github.com/pes-llm-research/<repo> -> anonymous.4open.science"),
-        (r"https://github\.com/madhukumara1993/qwen3-grpo",
-         r"https://anonymous.4open.science/r/code-grpo",
-         "github.com/madhukumara1993/qwen3-grpo redacted"),
+        (
+            r"https://github\.com/arvindcr4/tinker-rl-lab",
+            r"https://anonymous.4open.science/r/tinker-rl-lab",
+            "github.com/arvindcr4/tinker-rl-lab -> anonymous.4open.science",
+        ),
+        (
+            r"https://github\.com/pes-llm-research/tinker-rl-lab",
+            r"https://anonymous.4open.science/r/tinker-rl-lab",
+            "github.com/pes-llm-research/tinker-rl-lab -> anonymous.4open.science",
+        ),
+        (
+            r"https://github\.com/arvindcr4/([\w-]+)",
+            r"https://anonymous.4open.science/r/\1",
+            "github.com/arvindcr4/<repo> -> anonymous.4open.science",
+        ),
+        (
+            r"https://github\.com/pes-llm-research/([\w-]+)",
+            r"https://anonymous.4open.science/r/\1",
+            "github.com/pes-llm-research/<repo> -> anonymous.4open.science",
+        ),
+        (
+            r"https://github\.com/madhukumara1993/qwen3-grpo",
+            r"https://anonymous.4open.science/r/code-grpo",
+            "github.com/madhukumara1993/qwen3-grpo redacted",
+        ),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -189,27 +204,41 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 6. HuggingFace URLs and repo paths.
     for old, new, tag in [
-        (r"https://huggingface\.co/arvindcr4/tinker-rl-bench-\*",
-         r"https://huggingface.co/anonymous/tinker-rl-bench-*",
-         "HuggingFace arvindcr4/tinker-rl-bench-* -> anonymous/"),
-        (r"huggingface\.co/arvindcr4/",
-         r"huggingface.co/anonymous/",
-         "HuggingFace arvindcr4/ -> anonymous/"),
-        (r"huggingface\.co/pes-llm-research/",
-         r"huggingface.co/anonymous/",
-         "HuggingFace pes-llm-research/ -> anonymous/"),
-        (r"huggingface\.co/Madhu2133",
-         r"huggingface.co/anonymous",
-         "HuggingFace Madhu2133 -> anonymous"),
-        (r"huggingface\.co/MohammadRafiML",
-         r"huggingface.co/anonymous",
-         "HuggingFace MohammadRafiML -> anonymous"),
-        (r"huggingface\.co/Balasandhya",
-         r"huggingface.co/anonymous",
-         "HuggingFace Balasandhya -> anonymous"),
-        (r"huggingface\.co/dhruvanmurthy",
-         r"huggingface.co/anonymous",
-         "HuggingFace dhruvanmurthy -> anonymous"),
+        (
+            r"https://huggingface\.co/arvindcr4/tinker-rl-bench-\*",
+            r"https://huggingface.co/anonymous/tinker-rl-bench-*",
+            "HuggingFace arvindcr4/tinker-rl-bench-* -> anonymous/",
+        ),
+        (
+            r"huggingface\.co/arvindcr4/",
+            r"huggingface.co/anonymous/",
+            "HuggingFace arvindcr4/ -> anonymous/",
+        ),
+        (
+            r"huggingface\.co/pes-llm-research/",
+            r"huggingface.co/anonymous/",
+            "HuggingFace pes-llm-research/ -> anonymous/",
+        ),
+        (
+            r"huggingface\.co/Madhu2133",
+            r"huggingface.co/anonymous",
+            "HuggingFace Madhu2133 -> anonymous",
+        ),
+        (
+            r"huggingface\.co/MohammadRafiML",
+            r"huggingface.co/anonymous",
+            "HuggingFace MohammadRafiML -> anonymous",
+        ),
+        (
+            r"huggingface\.co/Balasandhya",
+            r"huggingface.co/anonymous",
+            "HuggingFace Balasandhya -> anonymous",
+        ),
+        (
+            r"huggingface\.co/dhruvanmurthy",
+            r"huggingface.co/anonymous",
+            "HuggingFace dhruvanmurthy -> anonymous",
+        ),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -217,18 +246,26 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 7. Weights & Biases URLs and entity names.
     for old, new, tag in [
-        (r"https://wandb\.ai/arvindcr4-pes-university/",
-         r"https://wandb.ai/anonymous/",
-         "wandb entity arvindcr4-pes-university -> anonymous"),
-        (r"https://wandb\.ai/tinker-rl-lab/tinker-rl-lab-world-class",
-         r"https://wandb.ai/anonymous/tinker-rl-bench",
-         "wandb project URL -> anonymous mirror"),
-        (r"project:\s*\\texttt\{tinker-rl-lab-world-class\}",
-         r"project: \\texttt{tinker-rl-bench}",
-         "wandb project name ``tinker-rl-lab-world-class'' -> ``tinker-rl-bench''"),
-        (r"tinker-rl-lab-world-class",
-         r"tinker-rl-bench",
-         "wandb project name (bare) -> tinker-rl-bench"),
+        (
+            r"https://wandb\.ai/arvindcr4-pes-university/",
+            r"https://wandb.ai/anonymous/",
+            "wandb entity arvindcr4-pes-university -> anonymous",
+        ),
+        (
+            r"https://wandb\.ai/tinker-rl-lab/tinker-rl-lab-world-class",
+            r"https://wandb.ai/anonymous/tinker-rl-bench",
+            "wandb project URL -> anonymous mirror",
+        ),
+        (
+            r"project:\s*\\texttt\{tinker-rl-lab-world-class\}",
+            r"project: \\texttt{tinker-rl-bench}",
+            "wandb project name ``tinker-rl-lab-world-class'' -> ``tinker-rl-bench''",
+        ),
+        (
+            r"tinker-rl-lab-world-class",
+            r"tinker-rl-bench",
+            "wandb project name (bare) -> tinker-rl-bench",
+        ),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -264,56 +301,91 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 10. Remaining institutional references anywhere in the body.
     for old, new, tag in [
-        (r"PES University's LLM Research Group",
-         r"our host institution's research group",
-         "``PES University's LLM Research Group'' redacted"),
-        (r"PES University/Great Learning",
-         r"Anonymous Institution",
-         "``PES University/Great Learning'' redacted"),
-        (r"Great Learning / PES University",
-         r"Anonymous Institution",
-         "``Great Learning / PES University'' redacted"),
-        (r"PES University",
-         r"Anonymous Institution",
-         "``PES University'' redacted"),
-        (r"Great Learning",
-         r"Anonymous Institution",
-         "``Great Learning'' redacted"),
-        (r"Northwestern University / Anonymous Institution",
-         r"Anonymous Institution",
-         "``Northwestern University / ...'' redacted"),
-        (r"Northwestern University",
-         r"Anonymous Institution",
-         "``Northwestern University'' redacted"),
+        (
+            r"PES University's LLM Research Group",
+            r"our host institution's research group",
+            "``PES University's LLM Research Group'' redacted",
+        ),
+        (
+            r"PES University/Great Learning",
+            r"Anonymous Institution",
+            "``PES University/Great Learning'' redacted",
+        ),
+        (
+            r"Great Learning / PES University",
+            r"Anonymous Institution",
+            "``Great Learning / PES University'' redacted",
+        ),
+        (r"PES University", r"Anonymous Institution", "``PES University'' redacted"),
+        (r"Great Learning", r"Anonymous Institution", "``Great Learning'' redacted"),
+        (
+            r"Northwestern University / Anonymous Institution",
+            r"Anonymous Institution",
+            "``Northwestern University / ...'' redacted",
+        ),
+        (
+            r"Northwestern University",
+            r"Anonymous Institution",
+            "``Northwestern University'' redacted",
+        ),
         # The ethics statement refers to the shared A100 node as ``PES A100''.
         # After redacting ``PES University'' we still need to strip the node name.
-        (r"PES A100", r"Institutional A100",
-         "``PES A100'' node name redacted"),
+        (r"PES A100", r"Institutional A100", "``PES A100'' node name redacted"),
         # ``by collaborator <Name>'' / ``by <Surname>'' in ethics data-statement
         # paragraphs must not reveal any team-member name.
-        (r"by collaborator Mohammad Rafi", r"by an anonymous collaborator",
-         "collaborator Mohammad Rafi redacted"),
-        (r"by collaborator Madhu\b", r"by an anonymous collaborator",
-         "collaborator Madhu redacted"),
-        (r"by collaborator Sandhya\b", r"by an anonymous collaborator",
-         "collaborator Sandhya redacted"),
-        (r"by collaborator Arumugam\b", r"by an anonymous collaborator",
-         "collaborator Arumugam redacted"),
-        (r"by collaborator Dhruva\b", r"by an anonymous collaborator",
-         "collaborator Dhruva redacted"),
+        (
+            r"by collaborator Mohammad Rafi",
+            r"by an anonymous collaborator",
+            "collaborator Mohammad Rafi redacted",
+        ),
+        (
+            r"by collaborator Madhu\b",
+            r"by an anonymous collaborator",
+            "collaborator Madhu redacted",
+        ),
+        (
+            r"by collaborator Sandhya\b",
+            r"by an anonymous collaborator",
+            "collaborator Sandhya redacted",
+        ),
+        (
+            r"by collaborator Arumugam\b",
+            r"by an anonymous collaborator",
+            "collaborator Arumugam redacted",
+        ),
+        (
+            r"by collaborator Dhruva\b",
+            r"by an anonymous collaborator",
+            "collaborator Dhruva redacted",
+        ),
         # Residual mentions such as ``reported by Rafi'' / ``by Madhu''.
-        (r"reported by Rafi\b", r"reported by that collaborator",
-         "``reported by Rafi'' redacted"),
-        (r"\bby (Rafi|Madhu|Sandhya|Arumugam|Dhruva)\b", r"by that collaborator",
-         "bare ``by <surname>'' redacted"),
+        (
+            r"reported by Rafi\b",
+            r"reported by that collaborator",
+            "``reported by Rafi'' redacted",
+        ),
+        (
+            r"\bby (Rafi|Madhu|Sandhya|Arumugam|Dhruva)\b",
+            r"by that collaborator",
+            "bare ``by <surname>'' redacted",
+        ),
         # The ``arvindcr4/tinker-rl-bench-*'' pattern still appears as a
         # plain-text example in ethics_statement.tex.
-        (r"arvindcr4/tinker-rl-bench-\*", r"anonymous/tinker-rl-bench-*",
-         "``arvindcr4/tinker-rl-bench-*'' placeholder redacted"),
-        (r"pes-llm-research/tinker-rl-lab", r"anonymous-org/tinker-rl-lab",
-         "``pes-llm-research/tinker-rl-lab'' placeholder redacted"),
-        (r"arvindcr4/tinker-rl-lab", r"anonymous-mirror/tinker-rl-lab",
-         "``arvindcr4/tinker-rl-lab'' mirror placeholder redacted"),
+        (
+            r"arvindcr4/tinker-rl-bench-\*",
+            r"anonymous/tinker-rl-bench-*",
+            "``arvindcr4/tinker-rl-bench-*'' placeholder redacted",
+        ),
+        (
+            r"pes-llm-research/tinker-rl-lab",
+            r"anonymous-org/tinker-rl-lab",
+            "``pes-llm-research/tinker-rl-lab'' placeholder redacted",
+        ),
+        (
+            r"arvindcr4/tinker-rl-lab",
+            r"anonymous-mirror/tinker-rl-lab",
+            "``arvindcr4/tinker-rl-lab'' mirror placeholder redacted",
+        ),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -321,22 +393,22 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 11. Team-member surnames / handles that may appear in prose.
     for old, new, tag in [
-        (r"Balasandhya/[\w.-]+", "anonymous/multiturn-toolcall",
-         "Balasandhya/* HF slug redacted"),
-        (r"Madhu2133/[\w.-]+", "anonymous/code-grpo",
-         "Madhu2133/* HF slug redacted"),
-        (r"MohammadRafiML", "anonymous",
-         "MohammadRafiML handle redacted"),
-        (r"dhruvanmurthy/[\w\\\\_.-]+", "anonymous/efficiency-grpo",
-         "dhruvanmurthy/* HF slug redacted"),
-        (r"madhukumara1993", "anonymous",
-         "madhukumara1993 GitHub handle redacted"),
-        (r"arvindcr4-pes-university", "anonymous",
-         "arvindcr4-pes-university wandb entity (bare) redacted"),
-        (r"arvindcr4", "anonymous",
-         "arvindcr4 handle redacted"),
-        (r"pes-llm-research", "anonymous-org",
-         "pes-llm-research org redacted"),
+        (r"Balasandhya/[\w.-]+", "anonymous/multiturn-toolcall", "Balasandhya/* HF slug redacted"),
+        (r"Madhu2133/[\w.-]+", "anonymous/code-grpo", "Madhu2133/* HF slug redacted"),
+        (r"MohammadRafiML", "anonymous", "MohammadRafiML handle redacted"),
+        (
+            r"dhruvanmurthy/[\w\\\\_.-]+",
+            "anonymous/efficiency-grpo",
+            "dhruvanmurthy/* HF slug redacted",
+        ),
+        (r"madhukumara1993", "anonymous", "madhukumara1993 GitHub handle redacted"),
+        (
+            r"arvindcr4-pes-university",
+            "anonymous",
+            "arvindcr4-pes-university wandb entity (bare) redacted",
+        ),
+        (r"arvindcr4", "anonymous", "arvindcr4 handle redacted"),
+        (r"pes-llm-research", "anonymous-org", "pes-llm-research org redacted"),
     ]:
         new_text, n = re.subn(old, new, text)
         _record(changes, tag, n)
@@ -344,7 +416,7 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
 
     # 12. Email addresses (defence in depth).
     for old, tag in [
-        (r"\\texttt\{arvindcr4@gmail\.com\}",   "email arvindcr4@gmail.com"),
+        (r"\\texttt\{arvindcr4@gmail\.com\}", "email arvindcr4@gmail.com"),
         (r"\\texttt\{sandhya\.jeyaraj2014@gmail\.com\}", "email sandhya.jeyaraj2014"),
         (r"\\texttt\{madhukumara1993@gmail\.com\}", "email madhukumara1993"),
         (r"\\texttt\{gmd\.rafi\.2024@gmail\.com\}", "email gmd.rafi.2024"),

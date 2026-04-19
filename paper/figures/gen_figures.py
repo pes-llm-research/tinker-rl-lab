@@ -6,7 +6,8 @@ Generate publication-quality figures:
 
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib.colors import Normalize
@@ -17,53 +18,161 @@ OUT_DIR = "/home/user/workspace/tinker-rl-lab/paper/figures"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # ─── Global style ──────────────────────────────────────────────────────────────
-plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.size": 11,
-    "axes.labelsize": 13,
-    "axes.titlesize": 13,
-    "xtick.labelsize": 11,
-    "ytick.labelsize": 11,
-    "legend.fontsize": 10,
-    "figure.dpi": 300,
-    "axes.spines.top": False,
-    "axes.spines.right": False,
-    "axes.grid": True,
-    "grid.alpha": 0.3,
-    "grid.linestyle": "--",
-    "axes.axisbelow": True,
-})
+plt.rcParams.update(
+    {
+        "font.family": "sans-serif",
+        "font.size": 11,
+        "axes.labelsize": 13,
+        "axes.titlesize": 13,
+        "xtick.labelsize": 11,
+        "ytick.labelsize": 11,
+        "legend.fontsize": 10,
+        "figure.dpi": 300,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": True,
+        "grid.alpha": 0.3,
+        "grid.linestyle": "--",
+        "axes.axisbelow": True,
+    }
+)
 
 # Design palette (from skill)
 COLORS = {
-    "GRPO-DeepSeek-V3.1": "#20808D",   # Teal
-    "GRPO-Qwen3-8B":      "#A84B2F",   # Terra/rust
-    "PPO-Qwen3-8B":       "#944454",   # Mauve
-    "PPO-Llama-8B":       "#1B474D",   # Dark teal
+    "GRPO-DeepSeek-V3.1": "#20808D",  # Teal
+    "GRPO-Qwen3-8B": "#A84B2F",  # Terra/rust
+    "PPO-Qwen3-8B": "#944454",  # Mauve
+    "PPO-Llama-8B": "#1B474D",  # Dark teal
 }
 
 # ─── Reward traces ─────────────────────────────────────────────────────────────
 traces = {
-    "GRPO-DeepSeek-V3.1": np.array([
-        0.875, 0.875, 1.0, 0.75, 0.75, 0.75, 0.625, 0.875, 0.875, 1.0,
-        0.75, 1.0, 0.875, 0.875, 0.75, 1.0, 0.875, 0.75, 0.875, 0.875
-    ]),
-    "GRPO-Qwen3-8B": np.array([
-        0.375, 0.0625, 0.5625, 0.1875, 0.375, 0.3125, 0.125, 0.125, 0.1875,
-        0.125, 0.25, 0.4375, 0.625, 0.1875, 0.3125, 0.5, 0.375, 0.375,
-        0.4375, 0.5, 0.3125, 0.125, 0.25, 0.4375, 0.5, 0.3125, 0.4375,
-        0.375, 0.1875, 0.25
-    ]),
-    "PPO-Qwen3-8B": np.array([
-        0.5, 0.5, 0.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.25, 0.5, 0.5, 0.0,
-        0.5, 0.25, 0.0, 0.0, 0.0, 0.25, 0.25, 0.0, 0.5, 0.5, 0.5, 0.0,
-        0.75, 0.25, 0.0, 0.25, 0.75, 0.0
-    ]),
-    "PPO-Llama-8B": np.array([
-        1.0, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5,
-        1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.75, 1.0, 1.0, 1.0, 1.0, 0.75,
-        1.0, 1.0, 1.0, 1.0, 0.75, 1.0
-    ]),
+    "GRPO-DeepSeek-V3.1": np.array(
+        [
+            0.875,
+            0.875,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            0.625,
+            0.875,
+            0.875,
+            1.0,
+            0.75,
+            1.0,
+            0.875,
+            0.875,
+            0.75,
+            1.0,
+            0.875,
+            0.75,
+            0.875,
+            0.875,
+        ]
+    ),
+    "GRPO-Qwen3-8B": np.array(
+        [
+            0.375,
+            0.0625,
+            0.5625,
+            0.1875,
+            0.375,
+            0.3125,
+            0.125,
+            0.125,
+            0.1875,
+            0.125,
+            0.25,
+            0.4375,
+            0.625,
+            0.1875,
+            0.3125,
+            0.5,
+            0.375,
+            0.375,
+            0.4375,
+            0.5,
+            0.3125,
+            0.125,
+            0.25,
+            0.4375,
+            0.5,
+            0.3125,
+            0.4375,
+            0.375,
+            0.1875,
+            0.25,
+        ]
+    ),
+    "PPO-Qwen3-8B": np.array(
+        [
+            0.5,
+            0.5,
+            0.0,
+            0.0,
+            1.0,
+            0.5,
+            0.0,
+            0.0,
+            0.25,
+            0.5,
+            0.5,
+            0.0,
+            0.5,
+            0.25,
+            0.0,
+            0.0,
+            0.0,
+            0.25,
+            0.25,
+            0.0,
+            0.5,
+            0.5,
+            0.5,
+            0.0,
+            0.75,
+            0.25,
+            0.0,
+            0.25,
+            0.75,
+            0.0,
+        ]
+    ),
+    "PPO-Llama-8B": np.array(
+        [
+            1.0,
+            1.0,
+            1.0,
+            0.75,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.5,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.75,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.75,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.75,
+            1.0,
+        ]
+    ),
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -89,7 +198,7 @@ max_len = max(len(t) for t in traces.values())
 score_matrix = np.full((max_len, n_methods), np.nan)
 for j, name in enumerate(method_names):
     t = traces[name]
-    score_matrix[:len(t), j] = t
+    score_matrix[: len(t), j] = t
 
 # For each step, compute best (max) reward across methods (ignoring NaN)
 best_per_step = np.nanmax(score_matrix, axis=1)  # shape (max_len,)
@@ -120,27 +229,31 @@ fig, ax = plt.subplots(figsize=(6.5, 4.5))
 
 line_styles = {
     "GRPO-DeepSeek-V3.1": "-",
-    "GRPO-Qwen3-8B":       "--",
-    "PPO-Qwen3-8B":        "-.",
-    "PPO-Llama-8B":        ":",
+    "GRPO-Qwen3-8B": "--",
+    "PPO-Qwen3-8B": "-.",
+    "PPO-Llama-8B": ":",
 }
 line_widths = {
     "GRPO-DeepSeek-V3.1": 2.2,
-    "GRPO-Qwen3-8B":       2.0,
-    "PPO-Qwen3-8B":        2.0,
-    "PPO-Llama-8B":        2.2,
+    "GRPO-Qwen3-8B": 2.0,
+    "PPO-Qwen3-8B": 2.0,
+    "PPO-Llama-8B": 2.2,
 }
 
 for name in method_names:
     r = ratios[name]
     n_problems = len(r)
     rho = np.array([np.mean(r <= tau) for tau in tau_vals])
-    ax.step(tau_vals, rho, where='post',
-            color=COLORS[name],
-            linestyle=line_styles[name],
-            linewidth=line_widths[name],
-            label=name,
-            alpha=0.92)
+    ax.step(
+        tau_vals,
+        rho,
+        where="post",
+        color=COLORS[name],
+        linestyle=line_styles[name],
+        linewidth=line_widths[name],
+        label=name,
+        alpha=0.92,
+    )
 
 ax.set_xlabel(r"Performance ratio $\tau$", fontsize=13)
 ax.set_ylabel(r"Fraction of steps solved within $\tau$", fontsize=13)
@@ -174,12 +287,15 @@ print("Saved performance_profiles.png + .pdf")
 # Models (columns): Qwen2.5-0.5B (TRL GRPO), GRPO-Qwen3-8B, GRPO-DeepSeek-V3.1, PPO-Qwen3-8B, PPO-Llama-8B
 # Metrics (rows): Peak Reward, Last-10 Avg, Steps to >50%, Volatility
 
+
 # ── Helper functions ──────────────────────────────────────────────────────────
 def peak_reward(trace):
     return float(np.max(trace))
 
+
 def last10_avg(trace):
     return float(np.mean(trace[-10:]))
+
 
 def steps_to_50(trace):
     """Steps (1-indexed) until first reward > 0.5. None if never."""
@@ -188,15 +304,17 @@ def steps_to_50(trace):
             return i + 1
     return len(trace)  # never crossed; return total steps
 
+
 def volatility(trace):
     return float(np.std(trace))
+
 
 # ── Per-model stats ───────────────────────────────────────────────────────────
 # Qwen2.5-0.5B (TRL GRPO, 5 seeds): only mean stats available
 # We'll synthesise a plausible trace using the 5 seed accuracies as "steps"
 trl_accuracies = np.array([0.735, 0.81, 0.62, 0.74, 0.765])
 trl_mean = 0.734
-trl_std  = 0.065
+trl_std = 0.065
 # peak = max of seeds
 trl_peak = float(np.max(trl_accuracies))
 # last10_avg: approximate as mean (we only have 5 points)
@@ -275,6 +393,7 @@ for i in range(n_metrics):
             norm_row = 1.0 - norm_row  # invert so "good" = high (green)
         norm_matrix[i] = norm_row
 
+
 # ── Format annotation strings ────────────────────────────────────────────────
 def fmt_val(metric_name, val):
     if "Steps" in metric_name:
@@ -283,6 +402,7 @@ def fmt_val(metric_name, val):
         return f"{val:.3f}"
     else:
         return f"{val:.3f}"
+
 
 # ── Plot ─────────────────────────────────────────────────────────────────────
 fig, ax = plt.subplots(figsize=(8.5, 4.2))
@@ -300,10 +420,16 @@ for i in range(n_metrics):
         rgba = cmap(norm_val)
         lum = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
         text_color = "#28251D" if lum > 0.5 else "white"
-        ax.text(j, i, text,
-                ha="center", va="center",
-                fontsize=10.5, fontweight="medium",
-                color=text_color)
+        ax.text(
+            j,
+            i,
+            text,
+            ha="center",
+            va="center",
+            fontsize=10.5,
+            fontweight="medium",
+            color=text_color,
+        )
 
 # Axes
 ax.set_xticks(range(n_models))

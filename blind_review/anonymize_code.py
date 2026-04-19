@@ -40,6 +40,7 @@ Files dropped on purpose (not part of the anonymised artefact):
 The script is idempotent and logs every file it edited, in order, into
 ``blind_review/code_changes.log``.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -97,18 +98,57 @@ EXCLUDE_DIRS = {
 
 # Binary / non-rewriteable extensions: copy as-is, no text rewrite.
 BINARY_EXTS = {
-    ".zip", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".pptx",
-    ".docx", ".xlsx", ".webp", ".bin", ".pt", ".pth", ".safetensors",
-    ".tar", ".gz", ".tgz", ".ico",
+    ".zip",
+    ".pdf",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".pptx",
+    ".docx",
+    ".xlsx",
+    ".webp",
+    ".bin",
+    ".pt",
+    ".pth",
+    ".safetensors",
+    ".tar",
+    ".gz",
+    ".tgz",
+    ".ico",
 }
 
 # Rewriteable text extensions (everything else we skip for safety).
 TEXT_EXTS = {
-    ".py", ".md", ".tex", ".yaml", ".yml", ".json", ".sh", ".txt",
-    ".toml", ".cfg", ".ipynb", ".sty", ".bib", ".bst", ".cls",
-    ".rst", ".csv", ".tsv", ".log", ".jsonl", ".env", "",
-    ".in", ".ini", ".conf", ".gitignore", ".gitattributes",
-    ".dockerfile", ".Dockerfile",
+    ".py",
+    ".md",
+    ".tex",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".sh",
+    ".txt",
+    ".toml",
+    ".cfg",
+    ".ipynb",
+    ".sty",
+    ".bib",
+    ".bst",
+    ".cls",
+    ".rst",
+    ".csv",
+    ".tsv",
+    ".log",
+    ".jsonl",
+    ".env",
+    "",
+    ".in",
+    ".ini",
+    ".conf",
+    ".gitignore",
+    ".gitattributes",
+    ".dockerfile",
+    ".Dockerfile",
 }
 
 # We use explicit lookaround (``(?<![A-Za-z0-9_])...(?![A-Za-z0-9_])``)
@@ -123,86 +163,103 @@ _LA = r"(?![A-Za-z0-9_])"
 
 REPLACEMENTS: list[tuple[str, str, str]] = [
     # Weights & Biases entity (must come before ``arvindcr4`` alone).
-    (r"arvindcr4-pes-university", "anonymous-entity",
-     "wandb entity arvindcr4-pes-university -> anonymous-entity"),
-    (r"tinker-rl-lab-world-class", "tinker-rl-bench",
-     "wandb project tinker-rl-lab-world-class -> tinker-rl-bench"),
+    (
+        r"arvindcr4-pes-university",
+        "anonymous-entity",
+        "wandb entity arvindcr4-pes-university -> anonymous-entity",
+    ),
+    (
+        r"tinker-rl-lab-world-class",
+        "tinker-rl-bench",
+        "wandb project tinker-rl-lab-world-class -> tinker-rl-bench",
+    ),
     # Team HF handles.
-    (_LB + r"Madhu2133" + _LA,        "anonymous",  "HF handle Madhu2133 -> anonymous"),
-    (_LB + r"MohammadRafiML" + _LA,   "anonymous",  "HF handle MohammadRafiML -> anonymous"),
-    (_LB + r"Balasandhya" + _LA,      "anonymous",  "HF handle Balasandhya -> anonymous"),
-    (_LB + r"dhruvanmurthy" + _LA,    "anonymous",  "HF handle dhruvanmurthy -> anonymous"),
+    (_LB + r"Madhu2133" + _LA, "anonymous", "HF handle Madhu2133 -> anonymous"),
+    (_LB + r"MohammadRafiML" + _LA, "anonymous", "HF handle MohammadRafiML -> anonymous"),
+    (_LB + r"Balasandhya" + _LA, "anonymous", "HF handle Balasandhya -> anonymous"),
+    (_LB + r"dhruvanmurthy" + _LA, "anonymous", "HF handle dhruvanmurthy -> anonymous"),
     # GitHub handles / slugs.
-    (_LB + r"madhukumara1993" + _LA,  "anonymous",  "GH handle madhukumara1993 -> anonymous"),
-    (_LB + r"arvindcr4" + _LA,        "anonymous",  "GH handle arvindcr4 -> anonymous"),
+    (_LB + r"madhukumara1993" + _LA, "anonymous", "GH handle madhukumara1993 -> anonymous"),
+    (_LB + r"arvindcr4" + _LA, "anonymous", "GH handle arvindcr4 -> anonymous"),
     # No lookbehind for the hyphenated slug — the leading ``pes-`` is
     # distinctive enough and lookbehind breaks when preceded by ``n`` in
     # source literals like ``\\npes-llm-research``.
-    (r"pes-llm-research", "anonymous-org",
-     "GH org pes-llm-research -> anonymous-org"),
+    (r"pes-llm-research", "anonymous-org", "GH org pes-llm-research -> anonymous-org"),
     # Institutions.
-    (r"PES LLM Research Team", "Anonymous Authors",
-     "``PES LLM Research Team'' -> Anonymous Authors"),
-    (r"PES LLM Research",      "Anonymous",
-     "``PES LLM Research'' -> Anonymous"),
-    (r"PES University",        "Anonymous Institution",
-     "``PES University'' -> Anonymous Institution"),
-    (r"Great Learning",        "Anonymous Institution",
-     "``Great Learning'' -> Anonymous Institution"),
-    (r"Northwestern University", "Anonymous Institution",
-     "``Northwestern University'' -> Anonymous Institution"),
+    (
+        r"PES LLM Research Team",
+        "Anonymous Authors",
+        "``PES LLM Research Team'' -> Anonymous Authors",
+    ),
+    (r"PES LLM Research", "Anonymous", "``PES LLM Research'' -> Anonymous"),
+    (r"PES University", "Anonymous Institution", "``PES University'' -> Anonymous Institution"),
+    (r"Great Learning", "Anonymous Institution", "``Great Learning'' -> Anonymous Institution"),
+    (
+        r"Northwestern University",
+        "Anonymous Institution",
+        "``Northwestern University'' -> Anonymous Institution",
+    ),
     # Team-member real names (in comments, docstrings, READMEs, bibtex, etc.).
-    (r"Narayana Darapaneni",  "Anonymous", "name Narayana Darapaneni -> Anonymous"),
+    (r"Narayana Darapaneni", "Anonymous", "name Narayana Darapaneni -> Anonymous"),
     (r"Anwesh Reddy Padhuri", "Anonymous", "name Anwesh Reddy Padhuri -> Anonymous"),
-    (r"Anwesh Reddy Paduri",  "Anonymous", "name Anwesh Reddy Paduri -> Anonymous"),
-    (r"Sandhya Jeyaraj",      "Anonymous", "name Sandhya Jeyaraj -> Anonymous"),
-    (r"Madhu Kumara L",       "Anonymous", "name Madhu Kumara L -> Anonymous"),
-    (r"Mohammad Rafi",        "Anonymous", "name Mohammad Rafi -> Anonymous"),
-    (r"Dhruva N Murthy",      "Anonymous", "name Dhruva N Murthy -> Anonymous"),
-    (r"Arumugam Chetty K",    "Anonymous", "name Arumugam Chetty K -> Anonymous"),
-    (r"Arumugam K",           "Anonymous", "name Arumugam K -> Anonymous"),
-    (r"Arvind C R",           "Anonymous", "name Arvind C R -> Anonymous"),
+    (r"Anwesh Reddy Paduri", "Anonymous", "name Anwesh Reddy Paduri -> Anonymous"),
+    (r"Sandhya Jeyaraj", "Anonymous", "name Sandhya Jeyaraj -> Anonymous"),
+    (r"Madhu Kumara L", "Anonymous", "name Madhu Kumara L -> Anonymous"),
+    (r"Mohammad Rafi", "Anonymous", "name Mohammad Rafi -> Anonymous"),
+    (r"Dhruva N Murthy", "Anonymous", "name Dhruva N Murthy -> Anonymous"),
+    (r"Arumugam Chetty K", "Anonymous", "name Arumugam Chetty K -> Anonymous"),
+    (r"Arumugam K", "Anonymous", "name Arumugam K -> Anonymous"),
+    (r"Arvind C R", "Anonymous", "name Arvind C R -> Anonymous"),
     # First-name-only references in informal prose (after surname-forms above).
-    (_LB + r"Sandhya" + _LA,  "Anonymous", "first name Sandhya -> Anonymous"),
-    (_LB + r"Madhu" + _LA,    "Anonymous", "first name Madhu -> Anonymous"),
-    (_LB + r"Arvind" + _LA,   "Anonymous", "first name Arvind -> Anonymous"),
-    (_LB + r"Dhruva" + _LA,   "Anonymous", "first name Dhruva -> Anonymous"),
-    (_LB + r"Anwesh" + _LA,   "Anonymous", "first name Anwesh -> Anonymous"),
-    (_LB + r"Rafi" + _LA,     "Anonymous", "first name Rafi -> Anonymous"),
+    (_LB + r"Sandhya" + _LA, "Anonymous", "first name Sandhya -> Anonymous"),
+    (_LB + r"Madhu" + _LA, "Anonymous", "first name Madhu -> Anonymous"),
+    (_LB + r"Arvind" + _LA, "Anonymous", "first name Arvind -> Anonymous"),
+    (_LB + r"Dhruva" + _LA, "Anonymous", "first name Dhruva -> Anonymous"),
+    (_LB + r"Anwesh" + _LA, "Anonymous", "first name Anwesh -> Anonymous"),
+    (_LB + r"Rafi" + _LA, "Anonymous", "first name Rafi -> Anonymous"),
     (_LB + r"Arumugam" + _LA, "Anonymous", "first name Arumugam -> Anonymous"),
     # Lowercase handle variants seen in IDs/CSV keys (``arumugam_dpo_...``).
     # Here we intentionally allow ``_`` to follow because these are ID slugs
     # (``arumugam_dpo_keyword_0.5b``) where the underscore is part of the key.
-    (r"(?<![A-Za-z0-9])arumugam(?![A-Za-z0-9])", "anonymous",
-     "lowercase arumugam (slug/id) -> anonymous"),
+    (
+        r"(?<![A-Za-z0-9])arumugam(?![A-Za-z0-9])",
+        "anonymous",
+        "lowercase arumugam (slug/id) -> anonymous",
+    ),
     # PES student roll numbers (PES2PGE24DS140 etc).
-    (r"PES2PGE\d{2}DS\d{3}",  "ANONYMIZED-ID", "PES student ID redacted"),
+    (r"PES2PGE\d{2}DS\d{3}", "ANONYMIZED-ID", "PES student ID redacted"),
     # Emails (all team/supervisor addresses seen in the tree).
-    (r"arvindcr4@gmail\.com",              "anonymous@neurips.cc", "email redacted"),
-    (r"sandhya\.jeyaraj2014@gmail\.com",   "anonymous@neurips.cc", "email redacted"),
-    (r"madhukumara1993@gmail\.com",        "anonymous@neurips.cc", "email redacted"),
-    (r"gmd\.rafi\.2024@gmail\.com",        "anonymous@neurips.cc", "email redacted"),
-    (r"dhruva\.n\.murthy@gmail\.com",      "anonymous@neurips.cc", "email redacted"),
-    (r"chettyarumugam@mail\.com",          "anonymous@neurips.cc", "email redacted"),
-    (r"anwesh@greatlearning\.in",          "anonymous@neurips.cc", "email redacted"),
+    (r"arvindcr4@gmail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"sandhya\.jeyaraj2014@gmail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"madhukumara1993@gmail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"gmd\.rafi\.2024@gmail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"dhruva\.n\.murthy@gmail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"chettyarumugam@mail\.com", "anonymous@neurips.cc", "email redacted"),
+    (r"anwesh@greatlearning\.in", "anonymous@neurips.cc", "email redacted"),
     (r"narayana\.darapaneni@northwestern\.edu", "anonymous@neurips.cc", "email redacted"),
-    (r"arvindcr@pes\.edu",                 "anonymous@neurips.cc", "email redacted"),
+    (r"arvindcr@pes\.edu", "anonymous@neurips.cc", "email redacted"),
     # GitHub URL rewriting to anonymous mirrors (after handle replacement so
     # anonymous/tinker-rl-lab lands at anonymous.4open.science).
-    (r"https://github\.com/anonymous/tinker-rl-lab",
-     r"https://anonymous.4open.science/r/tinker-rl-lab",
-     "github.com/anonymous/tinker-rl-lab -> anonymous.4open.science"),
-    (r"https://github\.com/anonymous-org/tinker-rl-lab",
-     r"https://anonymous.4open.science/r/tinker-rl-lab",
-     "github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science"),
+    (
+        r"https://github\.com/anonymous/tinker-rl-lab",
+        r"https://anonymous.4open.science/r/tinker-rl-lab",
+        "github.com/anonymous/tinker-rl-lab -> anonymous.4open.science",
+    ),
+    (
+        r"https://github\.com/anonymous-org/tinker-rl-lab",
+        r"https://anonymous.4open.science/r/tinker-rl-lab",
+        "github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science",
+    ),
     # LICENSE copyright line.
-    (r"Copyright 2026 Anonymous Authors", "Copyright 2026 Anonymous Authors",
-     "LICENSE copyright line already anonymous"),
+    (
+        r"Copyright 2026 Anonymous Authors",
+        "Copyright 2026 Anonymous Authors",
+        "LICENSE copyright line already anonymous",
+    ),
 ]
 
 REPLACEMENTS_COMPILED = [
-    (re.compile(pattern), replacement, label)
-    for pattern, replacement, label in REPLACEMENTS
+    (re.compile(pattern), replacement, label) for pattern, replacement, label in REPLACEMENTS
 ]
 
 
@@ -230,7 +287,10 @@ def _git_archive_into(dst: Path) -> None:
     dst.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
-        cwd=ROOT, stdout=subprocess.PIPE, text=True, check=True,
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
     )
     for rel in result.stdout.splitlines():
         rel = rel.strip()

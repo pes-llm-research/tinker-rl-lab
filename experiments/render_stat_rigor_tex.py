@@ -337,13 +337,18 @@ def render(payload: Dict) -> str:
         [c for c in comps if isinstance(c.get("p_raw"), (int, float)) and math.isfinite(c["p_raw"])],
         key=lambda c: c["p_raw"],
     )
+    # Pre-escape underscores outside the f-string so this file parses on Python 3.9–3.11
+    # (backslash escapes inside f-string expressions are only legal on 3.12+).
+    underscore_escape = "\\_"
     for i, c in enumerate(sorted_comps, start=1):
         d = c.get("d")
         d_str = fmt_num(d, 2, signed=True)
         test = c.get("test", "--")
+        desc_tex = c["description"].replace("_", underscore_escape)
+        test_tex = test.replace("_", underscore_escape)
         lines.append(
-            f"{i} & {c['table']} & {c['description'].replace('_','\\_')} & "
-            f"{test.replace('_','\\_')} & {d_str} & "
+            f"{i} & {c['table']} & {desc_tex} & "
+            f"{test_tex} & {d_str} & "
             f"{fmt_p(c['p_raw'])} & {fmt_p(c['p_bonf_global'])}{sig_marker(c['p_bonf_global'])} \\\\"
         )
     lines.append("\\bottomrule")

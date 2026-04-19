@@ -33,6 +33,7 @@ Exit codes:
     1  at least one experiment outside tolerance
     2  usage / IO error
 """
+
 from __future__ import annotations
 
 import argparse
@@ -45,18 +46,18 @@ from typing import Dict, List, Optional, Tuple
 # Default expected results — overridden by --expected-results file if present.
 # Values from paper/main.tex Table 2 ("Atropos GSM8K, Tinker, GRPO" block).
 DEFAULT_EXPECTED: Dict[str, Dict[str, float]] = {
-    "gsm8k_qwen3_8b":        {"last10": 0.344, "peak": 0.625},   # headline
-    "gsm8k_qwen3_8b_base":   {"last10": 0.844, "peak": 1.000},
-    "gsm8k_qwen3_5_4b":      {"last10": 0.850, "peak": 1.000},
-    "gsm8k_qwen3_5_27b":     {"last10": 0.437, "peak": 0.750},
-    "gsm8k_qwen3_8b_g2":     {"last10": 0.375, "peak": 0.500},
-    "gsm8k_qwen3_8b_g4":     {"last10": 0.521, "peak": 0.750},
-    "gsm8k_qwen3_8b_g8":     {"last10": 0.844, "peak": 1.000},
-    "gsm8k_qwen3_8b_g16":    {"last10": 0.380, "peak": 0.719},
+    "gsm8k_qwen3_8b": {"last10": 0.344, "peak": 0.625},  # headline
+    "gsm8k_qwen3_8b_base": {"last10": 0.844, "peak": 1.000},
+    "gsm8k_qwen3_5_4b": {"last10": 0.850, "peak": 1.000},
+    "gsm8k_qwen3_5_27b": {"last10": 0.437, "peak": 0.750},
+    "gsm8k_qwen3_8b_g2": {"last10": 0.375, "peak": 0.500},
+    "gsm8k_qwen3_8b_g4": {"last10": 0.521, "peak": 0.750},
+    "gsm8k_qwen3_8b_g8": {"last10": 0.844, "peak": 1.000},
+    "gsm8k_qwen3_8b_g16": {"last10": 0.380, "peak": 0.719},
 }
 
 _LOG_LAST10_RE = re.compile(r"Last-10 avg accuracy:\s*([0-9.]+)%")
-_LOG_PEAK_RE   = re.compile(r"Peak accuracy:\s*([0-9.]+)%")
+_LOG_PEAK_RE = re.compile(r"Peak accuracy:\s*([0-9.]+)%")
 
 
 def _parse_result_file(path: Path) -> Optional[Dict]:
@@ -70,14 +71,14 @@ def _parse_result_file(path: Path) -> Optional[Dict]:
     # Plain log: extract the final-report block
     text = path.read_text(errors="replace")
     last10 = _LOG_LAST10_RE.search(text)
-    peak   = _LOG_PEAK_RE.search(text)
+    peak = _LOG_PEAK_RE.search(text)
     if not last10 or not peak:
         return None
     exp = path.stem
     return {
         "experiment": exp,
         "last10_avg": float(last10.group(1)) / 100.0,
-        "peak":       float(peak.group(1))   / 100.0,
+        "peak": float(peak.group(1)) / 100.0,
     }
 
 
@@ -123,8 +124,8 @@ def verify(
         got_l10 = float(parsed.get("last10_avg", parsed.get("last10", float("nan"))))
         got_peak = float(parsed.get("peak", parsed.get("peak_reward", float("nan"))))
         within = (
-            abs(got_l10  - exp_vals["last10"]) <= last10_tol
-            and abs(got_peak - exp_vals["peak"])   <= peak_tol
+            abs(got_l10 - exp_vals["last10"]) <= last10_tol
+            and abs(got_peak - exp_vals["peak"]) <= peak_tol
         )
         rows.append((exp, key, exp_vals["last10"], got_l10, exp_vals["peak"], got_peak, within))
         if not within:
@@ -133,12 +134,16 @@ def verify(
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("--results-dir", required=True, type=Path)
     p.add_argument("--expected-results", type=Path, default=None)
     p.add_argument("--last10-tolerance", type=float, default=0.05)
-    p.add_argument("--peak-tolerance",   type=float, default=0.10)
-    p.add_argument("--strict", action="store_true", help="Fail if any expected result is missing a match.")
+    p.add_argument("--peak-tolerance", type=float, default=0.10)
+    p.add_argument(
+        "--strict", action="store_true", help="Fail if any expected result is missing a match."
+    )
     args = p.parse_args()
 
     if not args.results_dir.exists():
@@ -163,11 +168,15 @@ def main() -> int:
     print(hdr)
     print("-" * len(hdr))
     for exp, key, l10_e, l10_g, pk_e, pk_g, ok in rows:
-        print(f"{exp[:34]:35s} {key[:21]:22s} {l10_e:10.3f} {l10_g:10.3f} {pk_e:9.3f} {pk_g:9.3f}  {'Y' if ok else 'N'}")
+        print(
+            f"{exp[:34]:35s} {key[:21]:22s} {l10_e:10.3f} {l10_g:10.3f} {pk_e:9.3f} {pk_g:9.3f}  {'Y' if ok else 'N'}"
+        )
 
     print()
-    print(f"summary: {len(rows) - failed}/{len(rows)} experiments within tolerance "
-          f"(last10±{args.last10_tolerance:.2f}, peak±{args.peak_tolerance:.2f})")
+    print(
+        f"summary: {len(rows) - failed}/{len(rows)} experiments within tolerance "
+        f"(last10±{args.last10_tolerance:.2f}, peak±{args.peak_tolerance:.2f})"
+    )
 
     if args.strict:
         missing = [k for k in expected if not any(r[1] == k for r in rows)]

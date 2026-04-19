@@ -70,7 +70,18 @@ slack.har
 
 # Task outcomes (may contain sensitive data)
 tasks/outcome/
+
+# LaTeX build artifacts
 paper/tikz/*.aux
+paper/main.aux
+paper/main.log
+paper/main.out
+paper/main.toc
+paper/main.bbl
+paper/main.blg
+paper/main.fls
+paper/main.fdb_latexmk
+paper/main.synctex.gz
 wandb/
 .modal/
 node_modules/
