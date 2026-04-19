@@ -16,6 +16,8 @@ TEMPLATE_RUNNABLE=0
 PROMPT_HAS_TINKER=0
 TEMPLATE_NO_MAIN_GUARD=0
 TEMPLATE_GRACEFUL_API_KEY=0
+TEMPLATE_SAVES_EXPERIMENT_DATA=0
+CONFIG_TIMEOUT_ADEQUATE=0
 
 # --- 1. Dependency readiness (20 points) ---
 MISSING=""
@@ -124,6 +126,38 @@ if [ "$TEMPLATE_PARSES" -eq 1 ]; then
     fi
 fi
 
+# --- 7. Template saves experiment_data.npy (10 points) ---
+# The AI Scientist plotting code expects experiment_data.npy to exist.
+if [ "$TEMPLATE_PARSES" -eq 1 ]; then
+    if grep -q "experiment_data.npy" "$TEMPLATE"; then
+        TEMPLATE_SAVES_EXPERIMENT_DATA=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "TEMPLATE_MISSING_EXPERIMENT_DATA=1"
+    fi
+fi
+
+# --- 8. BFTS config timeout is adequate for Tinker training (10 points) ---
+CONFIG_FILE="$HOME/ai-scientist-v2/bfts_config.yaml"
+if [ -f "$CONFIG_FILE" ]; then
+    # Tinker training with STEPS=30, NUM_SEEDS=3 can take >1hr due to network latency.
+    # The default timeout is 3600s (1hr). We consider >=7200s (2hr) adequate.
+    TIMEOUT=$(python3 -c "
+import yaml
+with open('$CONFIG_FILE') as f:
+    cfg = yaml.safe_load(f)
+print(cfg.get('exec', {}).get('timeout', 0))
+" 2>/dev/null || echo "0")
+    if [ "$TIMEOUT" -ge 7200 ] 2>/dev/null; then
+        CONFIG_TIMEOUT_ADEQUATE=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "CONFIG_TIMEOUT_LOW=$TIMEOUT"
+    fi
+else
+    echo "CONFIG_MISSING=1"
+fi
+
 # --- Output metrics ---
 echo "METRIC runnability_score=$SCORE"
 echo "METRIC deps_ready=$DEPS_READY"
@@ -132,3 +166,5 @@ echo "METRIC template_runnable=$TEMPLATE_RUNNABLE"
 echo "METRIC prompt_has_tinker=$PROMPT_HAS_TINKER"
 echo "METRIC template_no_main_guard=$TEMPLATE_NO_MAIN_GUARD"
 echo "METRIC template_graceful_api_key=$TEMPLATE_GRACEFUL_API_KEY"
+echo "METRIC template_saves_experiment_data=$TEMPLATE_SAVES_EXPERIMENT_DATA"
+echo "METRIC config_timeout_adequate=$CONFIG_TIMEOUT_ADEQUATE"
