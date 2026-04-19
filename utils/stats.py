@@ -240,6 +240,7 @@ def try_rliable_analysis(results: Dict[str, np.ndarray], output_dir: str):
     try:
         from rliable import library as rly
         from rliable import metrics as rly_metrics
+
         # ``plot_utils`` is imported to verify the full rliable install is
         # present (the caller later builds rliable plots via helper scripts);
         # we assign ``_`` to signal the availability check to ruff/linters.
