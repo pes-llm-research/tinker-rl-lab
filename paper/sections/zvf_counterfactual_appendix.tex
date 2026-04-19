@@ -1,0 +1,98 @@
+% !TEX root = ../main.tex
+%REVIEW-ADDR: W-reward-shape-counterfactual
+% =============================================================================
+% Appendix: Reward-Shape Counterfactual on Tool-Use ZVF
+% -----------------------------------------------------------------------------
+% A key concern raised against the main ZVF-collapse result is that the tool-use
+% environment uses a near-binary reward (0.0 / 0.5 / 1.0), which is itself a
+% confound: collapse could be driven by the reward shape rather than by model
+% capacity or group size. This appendix documents a direct counterfactual
+% sweep that manipulates only the reward shape and measures downstream ZVF.
+% =============================================================================
+
+\section{Reward-Shape Counterfactual Sweep}
+\label{app:zvf_counterfactual}
+
+\subsection{Hypothesis}
+If reward-shape coarseness is the primary driver of ZVF saturation in the
+tool-use environment, replacing the three-level reward (\(0.0\), \(0.5\), \(1.0\))
+with a six-level shaped reward
+\(\{0.0, 0.2, 0.4, 0.6, 0.8, 1.0\}\)
+that grants partial credit for (i)~producing any JSON object, (ii)~naming a
+tool, (iii)~naming the \emph{correct} tool, (iv)~producing a dict argument
+block, and (v)~per-argument match should reduce ZVF by a measurable margin at
+fixed group size and model scale. If ZVF is instead dominated by capacity or
+group-size ceiling effects, the shaped reward should not substantially reduce
+ZVF.
+
+\subsection{Design}
+We hold all other hyperparameters fixed and sweep
+\(\{\text{Qwen3-4B-Instruct-2507}, \text{Qwen3-8B}\}
+ \times \{\text{v1 binary-ish}, \text{v2 6-level}\}
+ \times \{42, 43, 44\}\)
+for a total of twelve GRPO runs
+(LoRA rank \(32\), group size \(16\), batch size
+\(64\) / \(128\) for 4B / 8B, \(50\) training steps).
+The reward-version switch is gated by a single environment variable
+(\texttt{TOOL\_USE\_REWARD\_VERSION}) so that the training harness, dataset,
+and sampler are byte-identical between v1 and v2. ZVF is computed with the
+same canonical script used elsewhere in this paper
+(\texttt{scripts/zvf\_compute\_cross\_framework.py}); configs live under
+\texttt{experiments/tool\_use\_zvf\_sweep/}.
+
+\subsection{Results}
+Table~\ref{tab:zvf_counterfactual} summarises per-run ZVF and pass rate.
+Rows with em-dashes indicate runs that are in progress at the time of
+submission; the sweep state is tracked at
+\texttt{experiments/tool\_use\_zvf\_sweep/manifest.tsv}.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Model & Reward & Seed & Steps & ZVF (mean last 10 steps) & Pass\@1 \\
+\midrule
+Qwen3-4B & v1 & 42 & 50 & --- & --- \\
+Qwen3-4B & v1 & 43 & 50 & --- & --- \\
+Qwen3-4B & v1 & 44 & 50 & --- & --- \\
+Qwen3-4B & v2 & 42 & 50 & --- & --- \\
+Qwen3-4B & v2 & 43 & 50 & --- & --- \\
+Qwen3-4B & v2 & 44 & 50 & --- & --- \\
+\midrule
+Qwen3-8B & v1 & 42 & 50 & --- & --- \\
+Qwen3-8B & v1 & 43 & 50 & --- & --- \\
+Qwen3-8B & v1 & 44 & 50 & --- & --- \\
+Qwen3-8B & v2 & 42 & 50 & --- & --- \\
+Qwen3-8B & v2 & 43 & 50 & --- & --- \\
+Qwen3-8B & v2 & 44 & 50 & --- & --- \\
+\bottomrule
+\end{tabular}
+\caption{Reward-shape counterfactual. ZVF is the fraction of GRPO groups
+with within-group score variance below \(10^{-4}\), averaged over the final
+ten training steps. \(3\) seeds per cell; the planned summary statistic is
+paired-\(t\) on per-seed ZVF between v1 and v2 within each model. Em-dash
+rows indicate runs still in progress; values will be spliced in from
+\texttt{experiments/tool\_use\_zvf\_sweep/results.csv} on the next build.}
+\label{tab:zvf_counterfactual}
+\end{table}
+
+\subsection{Pre-committed interpretation}
+We pre-commit to the following reading of the results to avoid post-hoc
+rationalisation:
+\begin{itemize}
+  \item \textbf{ZVF drops by \(\geq 0.15\) with v2 in both models.}
+        Reward coarseness is a substantial contributor to collapse;
+        the binary-ish reward is a partial confound and the
+        ``capacity ceiling'' argument is weakened.
+  \item \textbf{ZVF drops by \(<0.05\) under v2 in both models.}
+        Collapse is not primarily reward-shape-driven; the
+        capacity/group-size explanation is strengthened.
+  \item \textbf{ZVF drops sharply in 4B but not in 8B (or vice versa).}
+        The effect interacts with scale; we report the interaction as
+        the headline result and retract the uniform ``reward-shape does
+        not matter'' claim.
+\end{itemize}
+
+Reproduction instructions and raw wandb run URLs are listed in the
+repository under \texttt{experiments/tool\_use\_zvf\_sweep/README.md}.

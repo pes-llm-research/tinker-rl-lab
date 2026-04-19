@@ -1,0 +1,37 @@
+# smoke test: Qwen3-4B (0.5B unavailable on Tinker), 2 steps, tiny batch
+# validates 3-process stack + Tinker round-trip
+env:
+  group_size: 8
+  batch_size: 16
+  max_batches_offpolicy: 2
+  tokenizer_name: "Qwen/Qwen3-4B-Instruct-2507"
+  use_wandb: true
+  rollout_server_url: "http://localhost:18000"
+  wandb_name: "smoke-qwen3_4b-v1-env"
+  ensure_scores_are_not_same: false
+  max_token_length: 256
+  max_num_workers: 8
+  total_steps: 2
+  steps_per_eval: 1
+  data_seed: 42
+
+openai:
+  - model_name: "Qwen/Qwen3-4B-Instruct-2507"
+    base_url: "http://localhost:8001/v1"
+    api_key: "x"
+    weight: 1.0
+    num_requests_for_eval: 20
+
+tinker:
+  lora_rank: 16
+  learning_rate: 5e-5
+  max_token_trainer_length: 512
+  checkpoint_dir: "./checkpoints/tool_use_zvf_sweep/smoke_qwen3_4b_v1/"
+  save_checkpoint_interval: 0
+  tinker_model_name: "Qwen/Qwen3-4B-Instruct-2507"
+  wandb_project: "tinker-rl-zvf-counterfactual"
+  wandb_group: "smoke"
+  wandb_run_name: "smoke-qwen3_4b-v1"
+
+slurm: false
+testing: false

@@ -1,0 +1,235 @@
+\chapter*{Comprehensive Experiment and Results Coverage}
+\addcontentsline{toc}{chapter}{Comprehensive Experiment and Results Coverage}
+
+The embedded base report, \texttt{group6.pdf}, is the Group 6 capstone submission
+circulated for plagiarism checking on April 5, 2026. Since that submission, the
+repository accumulated a substantially broader experiment record spanning later
+ablations, held-out evaluation, frontier-model runs, and negative results. This
+addendum consolidates that later evidence so the merged final report reflects the
+complete project state as of April 20, 2026.
+
+Across the repository we now record 77+ Tinker runs, including a 32-run
+``10x Structural Ceiling'' sweep, 13 completed or partially completed GRPO runs
+in the World-Class Suite, 2 completed PPO baselines on Modal H100, 1 failed
+KL-tracking run, a 5-seed TRL baseline, 5-seed held-out GSM8K evaluation, and
+multiple LoRA-rank, group-size, learning-rate, and synthetic-versus-real-data
+ablations. The authoritative detailed ledger remains
+\path{reports/final/capstone_final_report.md}, especially Sections 4, 5, and 8;
+the purpose of this chapter is to surface that evidence inside the final merged
+PDF rather than leaving it implicit in repository files.
+
+\section*{Tool Calling, Structured Output, and Code Generation}
+
+The tool-use track now covers four distinct lines of evidence: Sandhya's
+real-dataset SFT$\rightarrow$GRPO scaling study, Arumugam's independent
+replication, Dhruva's schema-compliance pipeline, and Arvind's Tinker-based
+tool-use GRPO runs on both synthetic and real tool corpora. Together these
+experiments establish three points clearly. First, tiny synthetic datasets are
+insufficient: Sandhya's 0.5B SFT-only run on 14 examples remained largely
+non-functional. Second, once the model is warm-started with SFT on a real tool
+distribution, GRPO sharply improves structured calling behavior. Third, the
+apparent ease of synthetic tool benchmarks does not transfer to real tool
+schema diversity.
+
+\small
+\begin{center}
+\begin{tabularx}{\textwidth}{L{2.3cm}L{3.3cm}L{3.0cm}Y}
+\toprule
+Study & Setup & Main quantitative result & What it establishes \\
+\midrule
+Sandhya Exp.\ 1 & Qwen2.5-0.5B-Instruct, 14 synthetic examples, SFT only & JSON valid 30\%, correct tool 20\%, full match 0\% & A tiny handcrafted set is not enough to induce usable tool calling. \\
+Sandhya Exp.\ 2 & Qwen2.5-1.5B-Instruct, Glaive-function-calling-v2 plus ToolBench, SFT then GRPO & JSON valid 0\%\,$\rightarrow$\,92\%, correct tool 0\%\,$\rightarrow$\,50\%, arguments 0\%\,$\rightarrow$\,42\%, clean output 0\%\,$\rightarrow$\,92\%, average score 0.0\,$\rightarrow$\,0.59 & Real-data warm-start plus GRPO creates structured tool calls where SFT alone produced plain text. \\
+Sandhya Exp.\ 3 & Qwen2.5-3B-Instruct, multi-turn tool chaining, 40 GRPO steps & Mean score 0.72\,$\rightarrow$\,0.91 & Multi-turn chaining improves strongly under GRPO once repeat-call penalties are added. \\
+Arumugam & Independent replication of Sandhya Exp.\ 2 & JSON 0\%\,$\rightarrow$\,92\%, correct tool 0\%\,$\rightarrow$\,50\%, average 0\,$\rightarrow$\,0.59 & The core real-data single-turn tool result reproduces independently. \\
+Dhruva & Synthetic five-tool benchmark plus SFT+GRPO schema pipeline & Schema compliance 52\%\,$\rightarrow$\,70--71\% in early phases and 97\%\,$\rightarrow$\,100\% at the final stage & GRPO is effective for near-ceiling format refinement, even when held-out task quality does not move. \\
+Arvind tool-use Tinker & Qwen3-8B, 30-step and 100-step runs on synthetic 5-tool data, xlam-60k, and math & 30-step synthetic last-10 rewards 0.875, 0.999, 0.977; 30-step xlam-60k 0.363; 100-step synthetic 0.825; 100-step xlam-60k 0.113; 100-step math 0.264 & Real-world tool corpora are 3--8$\times$ harder than clean synthetic tool tasks. \\
+Madhu code generation & Qwen3-8B, 3,000 SFT examples plus 35 GRPO prompts with 10 rollouts each & HumanEval pass@1 reaches 86\% (141/164); earlier 50-problem subset and prior SWE run are superseded & The strongest code-generation result is on full HumanEval, not on the earlier smaller subset. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\normalsize
+
+These results also clarify two negative findings that matter for the final
+story. The first is that GRPO without SFT warm-up does not bootstrap tool use:
+later World-Class cross-tool runs on Qwen3-32B and Llama-3.1-8B-Instruct both
+stayed at exactly 0.0 reward for all 30 steps. The second is that synthetic
+tool data materially overstates real performance: the repository's xlam-60k
+results remain far below the synthetic five-tool sandbox despite using the same
+training machinery.
+
+\section*{Mathematical Reasoning, Held-Out Evaluation, and Ablations}
+
+The GSM8K track is now broad enough to separate three different claims that the
+earlier report could not cleanly separate: behavior during stochastic training,
+generalization under greedy held-out decoding, and how much of the held-out
+score comes from the base model rather than from GRPO. The project also now
+contains multi-seed replication, Qwen3.5-4B replication, LoRA-rank ablations,
+group-size ablations, a lower-learning-rate control, and a TRL baseline.
+
+\small
+\begin{center}
+\begin{tabularx}{\textwidth}{L{2.7cm}L{3.3cm}L{2.6cm}Y}
+\toprule
+Experiment family & Scope & Main quantitative result & Interpretation \\
+\midrule
+Qwen3-8B multi-seed GRPO & 5 seeds, 50 steps, rank 32 & Mean last-10 reward 30.5\% $\pm$ 3.3\%, 95\% CI [26.5\%, 34.5\%], mean peak 72.5\% & Training trajectories are noisy, but the final last-10 reward is reproducible across seeds. \\
+Qwen3.5-4B replication & 4 seeds, 50 steps, rank 32 & Mean last-10 reward 84.7\%, SD 12.0\%, all seeds peak at 100\% & The 4B instruct model is dramatically stronger than the Qwen3-8B setup used in the original campaign. \\
+LoRA rank ablation & Ranks 8, 16, 32, 64 on Qwen3-8B & Rank 64 starts fastest (47.5\% first-5) and peaks highest (87.5\%); rank 32 remains the default multi-seed setting & More adapter capacity accelerates early learning, but does not by itself remove the task ceiling. \\
+Group-size ablation & $G=4,8,16,32$ on Qwen3-8B & Last-10 reward rises from 23.8\% at $G=4$ to 54.7\% at $G=32$; $G=32$ reaches 100\% peak and 0\% zero-reward groups & Exploration matters strongly; larger groups reduce wasted all-equal-reward batches. \\
+Low-LR extended run & Qwen3-8B, 100 steps, LR $5\times10^{-6}$ & Peak 75.0\%, last-10 27.5\% & Lower LR stabilizes but does not break the underlying reward-sparsity ceiling. \\
+Held-out GSM8K evaluation & 5 seeds, 200 test items per seed, greedy decoding & Mean held-out accuracy 83.3\%, SD 2.2\%, CI [80.6\%, 86.0\%] & Final checkpoints evaluate well on held-out greedy decoding. \\
+Base-model control & Same 200 held-out items, Qwen3-8B without LoRA & 82.0\% held-out accuracy, delta +1.3pp relative to GRPO mean, $t=1.32$, $p=0.26$ & The held-out score is overwhelmingly inherited from the base model; the GRPO gain is not statistically significant. \\
+TRL baseline & Qwen2.5-0.5B, 5 seeds, 125 steps on NVIDIA L4 & Mean 73.4\% $\pm$ 7.03\%, bootstrap CI [67.9\%, 78.9\%], versus Tinker comparison $t=8.44$, $p=0.0014$ & Framework and scale matter strongly; the low-cost reference implementation underperforms the Tinker-based frontier setups. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\normalsize
+
+This is the most important correction to the earlier narrative: the repository
+now demonstrates that training reward and held-out accuracy answer different
+questions. The 30.5\% mean last-10 training reward for the five-seed Qwen3-8B
+campaign does \emph{not} imply poor final decoding quality; conversely, the
+83.3\% held-out score does \emph{not} imply that GRPO created that capability.
+The base-model control shows that most of the held-out GSM8K accuracy was
+already present before RL, and the repository now records that as a negative
+result rather than overstating the GRPO contribution.
+
+\section*{10x Structural Ceiling Sweep}
+
+The dedicated 10x Structural Ceiling sweep is one of the strongest additions
+after the original final report. This 32-run Tinker campaign, costing roughly
+\$65, systematically ablated benchmark type, architecture family, model scale,
+group size, learning rate, and constrained decoding under a consistent 50-step
+training budget.
+
+\small
+\begin{center}
+\begin{tabularx}{\textwidth}{L{2.5cm}L{3.0cm}L{2.6cm}Y}
+\toprule
+Axis & Conditions covered & Main result & Conclusion \\
+\midrule
+Benchmark hierarchy & Tool-use, GSM8K, MATH-500, HumanEval on Qwen3-8B & Tool-use 1.000, GSM8K 0.972--1.000, MATH-500 0.574, HumanEval 0.000 & GRPO solves structural-format tasks, partly handles math, and completely fails on the code benchmark used here. \\
+Cross-family dependence & Qwen3-8B, Llama-3.1-8B-Instruct, Llama-3.1-8B base & Tool-use: 1.000 vs 0.103 vs 0.000; GSM8K: 1.000 vs 0.969 vs 0.047 & Tool-use trainability is strongly family-dependent; instruction tuning is a prerequisite. \\
+Model-size ladder & Qwen 0.6B, 1.7B, 8B and Llama 1B, 3B controls & Sub-8B instruct-free models remain at or near zero with onset at step 0 and ZVF above 88\% & Below the 8B-instruct regime, groups often never produce reward variance at all. \\
+Group saturation metric & $G=4,16,32,64$ & $G=32$ gives mean GU 54.5\% with saturation onset at step 29 & Zero-Variance Fraction and Gradient Utilization are useful training-health diagnostics. \\
+Learning-rate tradeoff & $10^{-5}$, $4\times10^{-5}$, $10^{-4}$, $3\times10^{-4}$ & LR $10^{-5}$ never saturates; LR $3\times10^{-4}$ recovers by 50 steps; LR $10^{-4}$ saturates fastest & Speed, saturation, and stability trade off against each other; early partial traces can be misleading. \\
+Constrained decoding & Constrained vs unconstrained tool-use training & 0.981 vs 0.998 final reward, same onset step & Grammar-constrained decoding is not the reason the tool-use result succeeds. \\
+Reward-hacking collapse & Llama-3.1-8B base on tool-use & Breakout to 0.873 followed by collapse to 0.000 at step 41 & Catastrophic collapse is directly observed in at least one base-model tool-use run. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\normalsize
+
+This sweep turns several earlier intuitions into explicit experimental claims:
+benchmark difficulty is sharply ordered, instruction tuning matters more than
+raw parameter count for trainability, and the absence of within-group reward
+variance is a concrete failure mode rather than a vague stability problem.
+
+\section*{World-Class Suite, PPO Baselines, and Frontier Runs}
+
+The World-Class Suite extends the project beyond the original 0.5B--8B regime
+to large dense and MoE checkpoints, and it also adds the first PPO baselines on
+Modal H100. The current ledger includes 13 completed or partially completed GRPO
+runs on Tinker, 2 completed PPO baselines, 1 failed KL-instrumentation run, and
+1 GPT-OSS-20B run that did not complete because of inference-side Tinker API
+timeouts.
+
+\small
+\begin{center}
+\begin{tabularx}{\textwidth}{L{2.8cm}L{1.5cm}L{1.1cm}L{1.3cm}Y}
+\toprule
+Model & Arch / scale & Steps & Peak / last-10 & Coverage note \\
+\midrule
+DeepSeek-V3.1 & MoE, about 671B total, 37B active & 20 & 100\% / 85.0\% & High reward from step 1; capability largely pre-exists RL. \\
+Qwen3.5-4B & Dense 4B & 30 & 100\% / 85.0\% & Strong completed GRPO run in the smaller-model regime. \\
+Llama-3.1-8B-Instruct & Dense 8B & 30 & 100\% / 84.4\% & Strong GRPO baseline later compared against PPO. \\
+Qwen3-8B & Dense 8B & 30 & 62.5\% / 34.4\% & Much weaker than the best 50-step Qwen runs; shows trajectory sensitivity. \\
+Qwen3-235B-A22B & MoE, 235B total, 22B active & 15 & 100\% / 100\% & Fastest perfect convergence in the whole study. \\
+Qwen3-30B-A3B-Instruct & MoE, 30B total, about 3B active & partial & 100\% / 100\% & Partial run, but already at perfect reward. \\
+Nemotron-120B & Dense 120B & 20 & 87.5\% / 16.2\% & Peak-then-collapse behavior at frontier scale. \\
+Qwen3.5-27B & Dense 27B & 10 & 75.0\% / 43.7\% & Partial ascending run, suggests more room with longer training. \\
+Qwen3-32B & Dense 32B & 10 & 31.2\% / 25.0\% & Slow early ascent under the available partial budget. \\
+Qwen3-30B-A3B (base) & MoE base & partial & 50.0\% / 32.5\% & Same architecture as instruct variant, showing the effect of instruction tuning. \\
+Kimi-K2 & MoE, about 1T total & 20 & 100\% / 80.0\% & Strong frontier MoE result with moderate late instability. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\normalsize
+
+\small
+\begin{center}
+\begin{tabularx}{\textwidth}{L{3.2cm}L{2.6cm}L{2.0cm}Y}
+\toprule
+Additional run & Scope & Main result & What it means \\
+\midrule
+Cross-tool Qwen3-32B & Tool-use GRPO without SFT warm-up & 0\% peak, 0\% last-10 & Tool-use never bootstraps without a warm-started instruct policy. \\
+Cross-tool Llama-3.1-8B-Instruct & Tool-use GRPO without SFT warm-up & 0\% peak, 0\% last-10 & The no-SFT failure is not unique to Qwen. \\
+PPO Llama-3.1-8B-Instruct & Modal H100 PPO baseline & 100\% peak, 97.5\% last-10 & Strongest late-stage stability in the entire record. \\
+PPO Qwen3-8B & Modal H100 PPO baseline & 100\% peak, 22.5\% last-10 & Same method behaves very differently on Qwen than on Llama. \\
+KL tracking run & Modal H100 instrumentation & final\_kl 60.75, trajectory unusable & Gradient-graph bug prevented reliable KL and entropy logging. \\
+GPT-OSS-20B & Planned frontier GRPO run & did not complete & Tinker inference timeouts blocked the run before usable results were obtained. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\normalsize
+
+The main conclusion from this suite is not a simplistic ``bigger is better''
+story. The frontier results are non-monotonic: some very large models converge
+immediately, some show strong but unstable performance, and one 120B dense
+model collapses badly. The clearer pattern is that instruction tuning and model
+family dominate trainability. That is why Qwen3-30B-A3B-Instruct reaches perfect
+reward while the otherwise matched base MoE checkpoint remains far lower, and it
+is why PPO helps Llama dramatically but destabilizes Qwen.
+
+\section*{Negative Results, Null Findings, and Scope Corrections}
+
+The final report should preserve the failures as explicitly as the successes.
+The repository now supports the following negative or limiting conclusions.
+
+\begin{itemize}
+\item The held-out GSM8K improvement over the base Qwen3-8B model is only
++1.3 percentage points and is not statistically significant ($p=0.26$).
+\item Tool-use GRPO without SFT warm-up failed completely on both
+Qwen3-32B and Llama-3.1-8B-Instruct, staying at exactly 0.0 reward.
+\item The 10x Structural Ceiling sweep produced a total null on the HumanEval
+code benchmark under the tested GRPO setup.
+\item Nemotron-120B is a frontier-scale counterexample to any simple
+``frontier models are always stable'' narrative: it peaks high and then
+collapses to a poor last-10 average.
+\item KL and entropy tracking are not yet a finished result. The PPO reward
+curves are valid, but the KL instrumentation run failed because the loss term
+was not properly attached to the autograd graph.
+\item GPT-OSS-20B is an incomplete run, not a weak result. The blocker was
+Tinker-side inference timeout, not a measured training failure.
+\item Earlier smaller code-evaluation claims were superseded by the final full
+HumanEval evaluation and should no longer be treated as the definitive result.
+\end{itemize}
+
+\section*{Reproducibility Ledger}
+
+The merged PDF now contains the experiment-level conclusions, but the detailed
+artifacts still live in the repository and should be treated as the canonical
+evidence trail:
+
+\begin{itemize}
+\item \path{reports/final/capstone_final_report.md}: authoritative narrative,
+run registry, statistical summary, platform and budget breakdown, and links to
+checkpoints and W\&B.
+\item \path{reports/final/supplementary_appendix.tex}: paper appendix material,
+including reviewer-facing statistical clarifications and surviving claims.
+\item \path{paper/main.tex} and the appended \path{paper/main.pdf}: final paper
+text integrating the later analysis, reviewer responses, and formalized
+results.
+\item \path{experiments/results/} and the JSON files under
+\path{reports/final/}: held-out GSM8K outputs, baseline controls, and generated
+diagnostic tables.
+\item HuggingFace checkpoints under \url{https://huggingface.co/arvindcr4} and
+Weights \& Biases projects \texttt{tinker-structural-ceiling} and
+\texttt{tinker-rl-lab-world-class}: external storage for run traces and model
+artifacts referenced throughout the capstone report.
+\end{itemize}
+
+This chapter is therefore the bridge between the original submitted report and
+the much larger body of evidence accumulated afterward: the embedded base report
+preserves the submitted document, while this addendum records the full later
+experiment corpus and the appended paper preserves the final research framing.
