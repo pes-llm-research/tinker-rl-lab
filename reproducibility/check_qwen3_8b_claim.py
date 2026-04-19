@@ -36,16 +36,31 @@ ROW_NAMES = {
 TOLERANCE_PP = 2.0  # percentage points
 
 
+def _row_key(r):
+    for k in ("name", "experiment_id", "tag", "experiment"):
+        if k in r and r[k]:
+            return r[k]
+    return None
+
+
 def load_rows():
     d = json.loads(MASTER.read_text())
-    index = {r["name"]: r for r in d["experiments"]}
+    index = {}
+    for r in d["experiments"]:
+        key = _row_key(r)
+        if key is None:
+            continue
+        # Prefer rows that carry a reward_trace when duplicates collide
+        if key in index and not r.get("reward_trace"):
+            continue
+        index[key] = r
     return index
 
 
 def recompute_last10(row) -> float:
     trace = row.get("reward_trace") or []
     if len(trace) < 10:
-        raise RuntimeError(f"row {row['name']} has only {len(trace)} steps — cannot compute last-10")
+        raise RuntimeError(f"row {_row_key(row)} has only {len(trace)} steps — cannot compute last-10")
     return mean(trace[-10:])
 
 

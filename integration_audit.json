@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-19T16:08:31.791784+00:00",
+  "generated_at": "2026-04-19T16:25:08.130337+00:00",
   "repo_root": "/tmp/tinker-rl-lab",
   "all_passed": true,
   "total_checks": 7,
@@ -16,17 +16,15 @@
     {
       "name": "models_in_master",
       "passed": true,
-      "total_candidates": 37,
-      "matched": 29,
+      "total_candidates": 38,
+      "matched": 32,
       "discussed_only": [
         "Qwen2-0.5B",
         "Qwen2-0.5B-Inst",
         "Qwen2.5-3B",
         "Qwen3-0.6B",
         "Qwen3-0.6B-Instruct",
-        "Qwen3-14B",
-        "Qwen3-30B-A3B",
-        "Qwen3-30B-A3B-Instruct"
+        "Qwen3-14B"
       ],
       "unmatched": [],
       "detail": "Every model family mentioned must either (a) map to a master_results.json entry or (b) be on the documented discussed-only allowlist."
@@ -42,8 +40,8 @@
     {
       "name": "ref_resolution",
       "passed": true,
-      "labels_defined": 91,
-      "refs_used": 48,
+      "labels_defined": 93,
+      "refs_used": 49,
       "undefined_refs": [],
       "total_undefined": 0
     },
