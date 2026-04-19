@@ -64,7 +64,11 @@ acceptance.
 """
 
 
-ANON_ACK_ENV_BLOCK = r"""\begin{ack}
+ANON_ACK_ENV_BLOCK = r"""% NeurIPS anonymous-submission mode drops \begin{ack} bodies entirely
+% (\ack is \let to a \hide environment). Place the label outside so that
+% \ref{sec:acknowledgments} in ethics_statement_anon.tex still resolves.
+\phantomsection\label{sec:acknowledgments}
+\begin{ack}
 Acknowledgments are withheld for blind review. We thank the Tinker team for
 API access, the Modal team for GPU compute credits (H100 cluster), Weights
 \& Biases for experiment tracking infrastructure, and Hugging Face for model

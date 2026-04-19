@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-19T16:25:08.130337+00:00",
+  "generated_at": "2026-04-19T16:54:15.849397+00:00",
   "repo_root": "/tmp/tinker-rl-lab",
   "all_passed": true,
   "total_checks": 7,
@@ -40,8 +40,8 @@
     {
       "name": "ref_resolution",
       "passed": true,
-      "labels_defined": 93,
-      "refs_used": 49,
+      "labels_defined": 95,
+      "refs_used": 50,
       "undefined_refs": [],
       "total_undefined": 0
     },
