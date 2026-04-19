@@ -46,13 +46,14 @@ causal failure mode beyond simpler observables such as reward mean, entropy,
 advantage variance, or divergence proxies.
 
 Our third contribution is a set of targeted ablations on trainability. In the
-current benchmark, instruction-tuned checkpoints are consistently easier to
+current benchmark, trainability varies substantially with initialization and
+rollout regime: instruction-tuned checkpoints were generally easier to
 optimize than comparable base models, and intermediate rollout group sizes
-outperform extremes in limited sweeps. These observations support a cautious
-claim: whether RL fine-tuning works at all often depends more on
-initialization and reward-bearing rollout structure than on the nominal choice
-of RL algorithm. They do \emph{not} yet justify a universal optimal group size
-or a general ``SFT dominates RL'' law.
+often behaved better than the smallest or largest settings we tested. These
+observations support a narrower claim: whether RL fine-tuning works at all can
+depend materially on initialization and reward-bearing rollout structure, in
+addition to the nominal RL algorithm. They do \emph{not} yet justify a
+universal optimal group size or a general ``SFT dominates RL'' law.
 
 Finally, we explicitly separate training reward from held-out generalization.
 For Qwen3-8B on GSM8K, a five-seed held-out evaluation yields 83.3\% accuracy,

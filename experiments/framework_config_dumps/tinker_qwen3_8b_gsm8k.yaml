@@ -1,0 +1,80 @@
+# Framework: Tinker (managed runtime, Thinking Machines)
+# Task: gsm8k on Qwen/Qwen3-8B
+# Purpose: reviewer-requested exact config dump (W6/Q3)
+# Emit path: experiments/framework_config_dumps/tinker_qwen3_8b_gsm8k.yaml
+#
+# Fields the Tinker API does not expose are marked
+# `null  # managed_by_tinker`. Per Section "What Was Not Identical"
+# of the appendix, 5 of the 47 tracked fields are Tinker-managed.
+
+metadata:
+  framework: tinker
+  framework_version: 0.2.x
+  model: Qwen/Qwen3-8B
+  model_sha256: placeholder-sha256-of-qwen3-8b-hf-snapshot
+  task: gsm8k
+  seed: 42
+  source_git_sha: f0edf7265b319401824d8a187df9b57befc3489f
+
+lora:
+  rank: 16
+  alpha: 32
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+  dropout: 0.0
+
+grpo:
+  group_size: 8
+  rollouts_per_group: 1
+  max_new_tokens: 384
+
+sampling:
+  temperature: 0.7
+  top_p: 0.95
+  top_k: null
+  do_sample: true
+
+kl:
+  beta: null  # managed_by_tinker
+  surrogate: null  # managed_by_tinker
+
+importance_sampling:
+  granularity: null  # managed_by_tinker
+
+reference_model:
+  placement: managed
+  offload: null  # managed_by_tinker
+  recompute: null  # managed_by_tinker
+
+optimizer:
+  name: adamw
+  lr: 1.0e-6
+  weight_decay: 0.0
+  betas:
+    - 0.9
+    - 0.999
+  eps: 1.0e-8
+
+tokens_per_optimizer_step: null  # managed_by_tinker
+
+ppo:
+  clip_range: null
+  value_clip_range: null
+  critic_lr: null
+  critic_warmup_steps: null
+
+reward:
+  type: binary_outcome
+  broadcast_precision: null  # managed_by_tinker
+
+runtime:
+  bf16: true
+  gradient_checkpointing: null  # managed_by_tinker
+  micro_batch_size: null  # managed_by_tinker
+  gradient_accumulation_steps: null  # managed_by_tinker
+  tensor_parallel_size: null  # managed_by_tinker
+
+# W6/Q3 addresses: reviewer request for exact config dumps

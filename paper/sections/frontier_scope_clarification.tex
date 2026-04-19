@@ -1,0 +1,132 @@
+% =============================================================================
+% Frontier-scope clarification: reframes F5 (ceiling stability at frontier
+% scale) from a mechanistic claim to a descriptive, horizon-limited observation
+% Drop-in include: \input{sections/frontier_scope_clarification}
+% Target: ~1 page
+% =============================================================================
+%REVIEW-ADDR: W10-f5-brief-runs -- F5 scope explicitly limited to evaluated horizon; monotonic phrasing retracted; strong-vs.-descriptive evidence table added
+\section{Scope Clarification for Frontier-Scale Stability (F5)}
+\label{sec:frontier_scope}
+
+Reviewer feedback correctly flagged that our earlier framing of Finding F5 ---
+``sustained ceiling / stability at frontier scale'' --- over-generalised what
+the underlying Tinker-backed runs can support. The frontier evidence consists
+of short-horizon (20--30 step), mostly single-seed, occasionally interrupted
+runs on API-managed models at $N\geq 70\mathrm{B}$ parameters. This section
+explicitly restates F5 as a descriptive observation, retracts any implicit
+monotonic-in-parameter-count claim, and specifies the experimental budget that
+would be required to upgrade F5 into a robust scaling statement.
+
+\subsection{Restated F5 (descriptive, horizon-limited)}
+
+\paragraph{Original (retracted) phrasing.}
+Earlier drafts could be read as asserting that reward ceilings are
+\emph{monotonically more stable at larger scale}, with $N\geq 70\mathrm{B}$
+runs implicitly extrapolated beyond their actual training horizon. We retract
+any such reading. The single-seed 15--30 step traces (e.g.\ Nemotron-120B's
+$87.5\%$ peak $\to$ $16.2\%$ last-10 regression, Qwen3-32B's interrupted
+$31.2\%$ peak, Kimi-K2.5's $100\% \to 62.5\%$ drop) directly contradict a
+monotonic-in-$N$ reading; our own scaling fits already flag these as
+non-monotonic excursions outside the exponential saturation regime.
+
+\paragraph{F5$'$ (defensible, weaker claim).}
+\emph{At the frontier scales we tested ($N\geq 70\mathrm{B}$) over 20--30 steps
+of Tinker-managed GRPO training on GSM8K, we observe that reward trajectories
+for a subset of reasoning-tuned checkpoints remain bounded within
+$[\mathrm{baseline}, \mathrm{baseline}+\varepsilon]$ without the
+oscillation/collapse patterns visible at $0.6\mathrm{B}$--$8\mathrm{B}$ for
+some base checkpoints; we do \textbf{not} claim this generalises beyond the
+evaluated 20--30-step horizon, to additional seeds, to other initialisations,
+or to tasks beyond GSM8K training reward.}
+
+This restatement is consistent with the heterogeneity already reported in
+Section~\ref{sec:frontier} and with the ``early-training behaviour is
+heterogeneous'' wording in the Bitter Lesson narrative: some frontier
+checkpoints begin from or briefly sustain very high training reward; others
+regress sharply at equal or larger scale.
+
+\subsection{Evidence-strength tiering}
+
+We adopt the evidence-strength tiering shown in
+Table~\ref{tab:f5_evidence_tiers}: strong-evidence claims require multi-seed
+runs of at least $100$ steps at small/mid scale; short-horizon single-seed
+frontier runs are demoted to \emph{descriptive observations} that illustrate
+early-training behaviour and are not used as standalone scaling-law evidence.
+
+\begin{table}[htbp]
+\centering
+\caption{Evidence-strength tiering for F5 and related frontier-scale claims.
+Strong-evidence claims must satisfy all columns; descriptive observations are
+reported transparently but not used to support scaling laws. ``Seeds'' and
+``Steps'' denote the minimum per-configuration requirement.}
+\label{tab:f5_evidence_tiers}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l l l l l@{}}
+\toprule
+\textbf{Tier} & \textbf{Seeds} & \textbf{Steps} & \textbf{Scope in this paper} & \textbf{Usage} \\
+\midrule
+Strong evidence        & $\geq 5$ & $\geq 100$ & $0.6\mathrm{B}$--$8\mathrm{B}$ GSM8K GRPO & Quantitative claim \\
+Supportive evidence    & $\geq 3$ & $\geq 50$  & $14\mathrm{B}$--$32\mathrm{B}$ GSM8K GRPO (partial) & Trend statement \\
+Descriptive obs.\ (F5) & $1$ (typ.)   & $15$--$30$ & $70\mathrm{B}$--$671\mathrm{B}$ Tinker API runs  & Illustrative, not law \\
+Interrupted / partial  & $1$       & $<20$      & Subset of frontier runs ($\dagger$ in tables) & Footnote only \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All frontier runs used to illustrate F5$'$ fall in the third row of
+Table~\ref{tab:f5_evidence_tiers}. We do not aggregate them with the
+small-scale multi-seed runs when stating any scaling-law claim, and we flag
+them as \emph{observational} wherever they appear in the main text.
+
+\subsection{Why long-horizon frontier runs are not yet included}
+
+Upgrading F5 to a strong-evidence claim requires multi-seed, long-horizon
+training at frontier scale. Under the Tinker managed-API pricing regime that
+governed this campaign, a single 100-step GRPO run at $N\geq 70\mathrm{B}$
+with our default group size ($G=8$) consumes roughly $C_{100} \approx
+\$X_{100}$ in managed compute (order-of-magnitude $10^{3}$--$10^{4}$ USD per
+configuration, depending on architecture, rollout length, and whether the
+backbone is dense or MoE). A defensible F5 replication therefore calls for
+\[
+5\ \text{seeds} \times 200\ \text{steps} \times 3\ \text{frontier sizes}
+\;\;\approx\;\; 30\ \text{runs}
+\]
+at an aggregate cost roughly $30 \cdot (200/100) \cdot C_{100}$, i.e.\ 60$\times$
+the budget of the single-seed short runs currently reported. This is outside
+the budget envelope of the present release; we therefore restrict F5 to the
+descriptive tier above and make the cost frontier explicit so that future
+replications can plan accordingly.
+
+\subsection{Consequences for downstream claims}
+
+\begin{itemize}
+    \item \textbf{Abstract, introduction, and conclusion.} The ``frontier-model
+    stability is heterogeneous'' wording already present in
+    Sections~\ref{sec:intro} and~\ref{sec:conclusion} is consistent with
+    F5$'$ and is retained. Any residual phrasing suggesting that ceilings
+    are monotonically more stable with $N$ should be read as retracted in
+    favour of F5$'$.
+    \item \textbf{Scaling-law section.} The positive scale correlations in
+    Section~\ref{sec:scaling_laws} (e.g.\ $r=0.533$ between $N$ and
+    $R_{\max}$) are reported on the \emph{pooled} fit across all tiers and
+    should not be read as implying that individual frontier runs remain
+    monotonically stable; Nemotron-120B and Qwen3-32B are explicit
+    counterexamples within our own data.
+    \item \textbf{Tables.} Frontier rows in Table~\ref{tab:main_results} and
+    Table~\ref{tab:frontier} continue to be flagged with $\dagger$ for
+    interrupted runs; F5$'$ does not re-weight them.
+    \item \textbf{Recommended replication.} To upgrade F5 beyond descriptive
+    status, we recommend $5$ seeds $\times$ $200$ steps $\times$ $3$
+    frontier sizes $(70\mathrm{B}, 120\mathrm{B}, 235\mathrm{B})$ with
+    matched rollout budgets and held-out evaluation, not just training
+    reward. Our released scripts and configs are set up so that such a
+    replication can reuse the same evaluation harness.
+\end{itemize}
+
+In short, F5 as originally stated over-reached the 20--30-step Tinker evidence
+base. F5$'$ keeps the useful descriptive signal (some frontier reasoning
+checkpoints do \emph{not} exhibit the mid-training collapse observed at
+smaller scale within the evaluated window) while making the horizon, seeding,
+and task scope explicit, and while explicitly retracting any
+monotonic-in-parameter-count reading.

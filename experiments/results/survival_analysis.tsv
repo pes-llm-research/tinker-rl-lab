@@ -1,0 +1,6 @@
+finding	tier_a_support	tier_b_support	effect_size_cohens_d	bootstrap_ci_low	bootstrap_ci_high	n_runs_used	bh_adjusted_p	conclusion
+F1	no	no	nan	nan	nan	0	nan	insufficient Tier-A/B data (survival: NO)
+F2	no	no	nan	nan	nan	0	nan	insufficient Tier-A/B data (survival: NO)
+F3	yes	no	22.436	0.684	0.761	40	6.722e-11	survives BH (adj p=6.72e-11, |d|=22.44)
+F4	no	no	nan	nan	nan	0	nan	insufficient Tier-A/B data (survival: NO)
+F5	no	no	nan	nan	nan	0	nan	insufficient Tier-A/B data (survival: NO)

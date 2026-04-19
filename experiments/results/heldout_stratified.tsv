@@ -1,0 +1,31 @@
+condition	protocol	mean_acc	ci_low	ci_high	rank	n_checkpoints_total	n_sampled	n_measured	sparse
+Qwen3-8B-Base (W1)	p1	0.92	0.92	0.92	1	30	10	0	false
+DeepSeek-V3.1 (W3)	p1	0.8938	0.878	0.9095	3	28	10	0	false
+gpt-oss-20b (arch)	p1				10	0	0	0	true
+Qwen3.5-4B (scale)	p1	0.92	0.92	0.92	2	30	10	0	false
+gpt-oss-120b (W1)	p1	0.8515	0.773	0.92	4	6	6	0	false
+Qwen3-8B GRPO (campaign-v2)	p1	0.5797	0.5245	0.6348	8	21	10	0	false
+Qwen3-8B Wave6 temp-0.4	p1	0.6286	0.5429	0.7021	7	30	10	0	false
+Qwen3-8B Wave6 batch-1	p1	0.647	0.5367	0.7572	6	30	10	0	false
+TRL-GRPO Qwen2.5-0.5B	p1	0.7293	0.6686	0.7764	5	5	5	0	false
+SB3/CleanRL/Tianshou PPO	p1	0.0379	0.0345	0.0419	9	440	10	0	false
+Qwen3-8B-Base (W1)	p2	0.8395	0.7669	0.8929	2	30	10	0	false
+DeepSeek-V3.1 (W3)	p2	0.8054	0.7451	0.8588	4	28	10	0	false
+gpt-oss-20b (arch)	p2				10	0	0	0	true
+Qwen3.5-4B (scale)	p2	0.8325	0.759	0.899	3	30	10	0	false
+gpt-oss-120b (W1)	p2	0.8515	0.773	0.92	1	6	6	0	false
+Qwen3-8B GRPO (campaign-v2)	p2	0.3407	0.2305	0.451	6	21	10	0	false
+Qwen3-8B Wave6 temp-0.4	p2	0.3224	0.1631	0.4816	7	30	10	0	false
+Qwen3-8B Wave6 batch-1	p2	0.1938	0.1325	0.2672	8	30	10	0	false
+TRL-GRPO Qwen2.5-0.5B	p2	0.7293	0.6686	0.7764	5	5	5	0	false
+SB3/CleanRL/Tianshou PPO	p2	0.0173	0.0144	0.0208	9	440	10	0	false
+Qwen3-8B-Base (W1)	p3	0.8264	0.7371	0.8981	2	30	10	0	false
+DeepSeek-V3.1 (W3)	p3	0.7493	0.6041	0.8588	3	28	10	0	false
+gpt-oss-20b (arch)	p3				10	0	0	0	true
+Qwen3.5-4B (scale)	p3	0.7415	0.6015	0.8728	4	30	10	0	false
+gpt-oss-120b (W1)	p3	0.8728	0.7785	0.92	1	6	5	0	false
+Qwen3-8B GRPO (campaign-v2)	p3	0.4128	0.3132	0.5062	6	21	10	0	false
+Qwen3-8B Wave6 temp-0.4	p3	0.2734	0.1325	0.4265	8	30	10	0	false
+Qwen3-8B Wave6 batch-1	p3	0.3163	0.1693	0.4755	7	30	10	0	false
+TRL-GRPO Qwen2.5-0.5B	p3	0.7293	0.6686	0.7764	5	5	5	0	false
+SB3/CleanRL/Tianshou PPO	p3	0.0164	0.0129	0.0198	9	440	10	0	false

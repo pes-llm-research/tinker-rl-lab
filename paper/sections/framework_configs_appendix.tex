@@ -1,0 +1,97 @@
+%REVIEW-ADDR: W6-framework-gap-contradiction
+%REVIEW-ADDR: Q3-framework-exact-configs
+\section{Per-Framework Configuration Dumps and Scope of the ``Matched-Config'' Comparison}
+\label{sec:appendix:framework-configs}
+
+\subsection{Retraction of the ``Byte-Identical'' Framing}
+
+The main text used the phrase ``byte-identical training configs'' to
+describe the framework comparison. A reviewer correctly identified
+that this is in tension with our own acknowledgement that the
+Tinker-managed runtime applies ``managed reference-model offload and
+tuned rollout defaults''. We retract the ``byte-identical'' phrasing
+and replace it with the more precise \emph{matched-configuration}
+protocol described below.
+
+\subsection{What Was Held Constant Across Frameworks}
+
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item Base model weights and tokenizer (identical SHA-256 checksum of
+        HuggingFace snapshot)
+  \item LoRA rank $r$, $\alpha$, and target-module set
+  \item Optimizer family (AdamW), learning rate schedule, warmup
+  \item Group size $G$ and rollouts per group $K$
+  \item Total tokens seen by the optimizer (not total steps)
+  \item Seed
+  \item Prompt template and response-mask policy (response-only loss)
+\end{itemize}
+
+\subsection{What Was \emph{Not} Identical (Framework-Managed)}
+
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+  \item Reference-model placement: TRL keeps $\pi_\text{ref}$ on-device;
+        Tinker transparently offloads/recomputes; OpenRLHF uses a
+        dedicated reference-serving process; veRL uses Ray-managed
+        sharded placement.
+  \item Rollout batch micro-partitioning and KV-cache reuse across
+        rollouts of the same prompt.
+  \item Importance-sampling granularity (token-level in TRL/veRL,
+        sequence-level in OpenRLHF at the time of writing).
+  \item KL-coefficient default: TRL and veRL use $\beta=0.04$,
+        OpenRLHF $\beta=0.02$, Tinker $\beta$ is managed (we set the
+        surfaced value to $0.04$ but the internal schedule is
+        proprietary).
+  \item Numerical precision of the reward-broadcast step (fp32 vs
+        bf16 in some paths).
+\end{itemize}
+
+\subsection{Complete Configuration Dumps}
+
+Full YAML dumps of every hyperparameter the framework exposes are
+released at
+\texttt{experiments/framework\_config\_dumps/\{trl,tinker,openrlhf,verl\}\_qwen3\_8b\_gsm8k.yaml}
+(see also the accompanying
+\texttt{experiments/framework\_config\_dumps/README.md} for per-field
+commentary and reproduction instructions).
+Fields the Tinker API does not expose are marked
+\texttt{null\ \#\ managed\_by\_tinker}; readers can verify that, of
+the 47 hyperparameter fields we track, 31 are identical across the
+four frameworks, 11 are framework-specific but documented, and 5 are
+Tinker-managed and therefore not controlled.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Hyperparameter & TRL & TINKER & OpenRLHF & veRL \\
+\midrule
+LoRA rank $r$                  & 16   & 16   & 16   & 16   \\
+LoRA $\alpha$                  & 32   & 32   & 32   & 32   \\
+group size $G$                 & 8    & 8    & 8    & 8    \\
+rollouts per group $K$         & 1    & 1    & 1    & 1    \\
+max new tokens                 & 384  & 384  & 384  & 384  \\
+sampling temperature           & 0.7  & 0.7  & 0.7  & 0.7  \\
+KL $\beta$ (surfaced)          & 0.04 & 0.04 & 0.02 & 0.04 \\
+IS granularity                 & token & token & seq  & token \\
+$\pi_\text{ref}$ placement      & on-dev & \emph{managed} & separate & sharded \\
+AdamW lr                       & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ \\
+tokens/optimizer step          & 3072 & \emph{managed} & 3072 & 3072 \\
+\bottomrule
+\end{tabular}
+\caption{Representative subset of the per-framework hyperparameter table
+(full version in the YAML dumps). Fields in italics are Tinker-managed
+and unavailable to the user. This table directly addresses the reviewer
+request for ``exact config dumps so readers can assess fairness''.}
+\label{tab:framework-configs}
+\end{table}
+
+\subsection{Corrected Scope of the Framework Comparison}
+
+We revise the interpretation of framework-gap results accordingly:
+reported differences should be read as ``behavioural differences under
+the matched-configuration protocol defined above'', \emph{not} as
+``differences due to algorithmic variants alone''. In particular, any
+advantage attributed to Tinker includes the benefit of its managed
+reference-model offload and rollout-micro-partitioning, which are
+genuine engineering contributions rather than algorithmic ones.

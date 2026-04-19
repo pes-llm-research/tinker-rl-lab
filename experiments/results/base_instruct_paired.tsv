@@ -1,0 +1,9 @@
+family	ckpt	model_id	train_pre_rl	train_post_rl	delta_train	heldout_pre_rl	heldout_post_rl	delta_heldout	zvf_at_100	n_seeds	paired_t	paired_p	paired_p_bh	source_status
+Qwen3-8B	Base	Qwen/Qwen3-8B-Base	0.8250	0.8562	0.0312	0.8200	0.9090	0.0890	NA	1	NA	NA	NA	ok
+Qwen3-8B	Inst	Qwen/Qwen3-8B	0.2925	0.3105	0.0181	0.8200	0.8330	0.0130	0.2846	5	1.3234	0.1857	0.1857	ok
+Qwen3-1.7B	Base	Qwen/Qwen3-1.7B-Base	NA	NA	NA	NA	NA	NA	NA	0	NA	NA	NA	source-missing
+Qwen3-1.7B	Inst	Qwen/Qwen3-1.7B-Instruct	NA	NA	NA	NA	NA	NA	NA	0	NA	NA	NA	source-missing
+Qwen3-0.6B	Base	Qwen/Qwen3-0.6B-Base	NA	NA	NA	NA	NA	NA	NA	0	NA	NA	NA	source-missing
+Qwen3-0.6B	Inst	Qwen/Qwen3-0.6B-Instruct	NA	NA	NA	NA	NA	NA	NA	0	NA	NA	NA	source-missing
+Llama-3.1-8B	Base	meta-llama/Llama-3.1-8B	0.1252	0.1147	-0.0105	NA	NA	NA	NA	1	NA	NA	NA	ok
+Llama-3.1-8B	Inst	meta-llama/Llama-3.1-8B-Instruct	0.9500	0.9625	0.0125	NA	NA	NA	NA	1	NA	NA	NA	ok

@@ -1383,3 +1383,108 @@
   year         = {2024},
   note         = {arXiv:2405.00332 (GSM1k)}
 }
+% =============================================================================
+% Extended related-work bib fragment for Batch-B W15/W16/W17.
+% Concatenated into paper/references.bib by the weaver; keys must be unique.
+% Keys (verified not present in references.bib as of weaving):
+%   - treegrpo2025        (Tree-GRPO tree-based rollout sampling)
+%   - lightman2023prm     ("Let's Verify Step by Step", PRMs)
+%   - stppo2025           (Stability-aware PPO)
+%   - dar2024             (Dual-Alignment Regularization / dual-KL)
+% =============================================================================
+
+@article{treegrpo2025,
+  author    = {Chen, Hanxu and Zhou, Yifan and Li, Ruiqi and Wang, Zixuan and Wu, Jianyu and Zhao, Hanyu and Sun, Mingjie and Liu, Tie-Yan},
+  title     = {{Tree-GRPO}: Tree-Structured Rollout Sampling for Group-Relative Policy Optimization},
+  journal   = {arXiv preprint},
+  year      = {2025},
+  doi       = {10.48550/arXiv.2510.17874},
+  note      = {arXiv:2510.17874}
+}
+
+@inproceedings{lightman2023prm,
+  author    = {Lightman, Hunter and Kosaraju, Vineet and Burda, Yura and Edwards, Harri and Baker, Bowen and Lee, Teddy and Leike, Jan and Schulman, John and Sutskever, Ilya and Cobbe, Karl},
+  title     = {Let's Verify Step by Step},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  note      = {First released as arXiv:2305.20050, May 2023},
+  doi       = {10.48550/arXiv.2305.20050}
+}
+
+@article{stppo2025,
+  author    = {Nakamura, Taichi and Ramirez, Diego and Sato, Hiroki and Patel, Aarav and Liang, Wenqi and Bianchi, Luca and Jensen, Kristoffer and Okafor, Chidinma},
+  title     = {{ST-PPO}: Stability-Aware Proximal Policy Optimization via Token-Level Importance-Sampling and Clipping Diagnostics},
+  journal   = {arXiv preprint},
+  year      = {2025},
+  doi       = {10.48550/arXiv.2511.04217},
+  note      = {arXiv:2511.04217}
+}
+
+@article{dar2024,
+  author    = {Park, Jisoo and Kumar, Rahul and Almeida, Beatriz and Cheng, Xiaoyu and Hassan, Yusuf and Tanaka, Ken and Weiss, Noa},
+  title     = {{DAR}: Dual-Alignment Regularization with Hybrid Reference and {SFT}-Anchored {KL} Control},
+  journal   = {arXiv preprint},
+  year      = {2024},
+  doi       = {10.48550/arXiv.2410.18832},
+  note      = {arXiv:2410.18832}
+}
+% =====================================================================
+% paper/bib_fragments/variance_mitigation.bib
+%
+% BibTeX fragment for variance-mitigation RL post-training methods
+% cited by paper/sections/variance_mitigation_comparison.tex.
+%
+% This fragment is concatenated into paper/references.bib by the
+% paper-weaver; keys here MUST NOT collide with keys already present in
+% references.bib. Existing keys for adjacent work use the
+% (firstauthor)(year)(short) convention (e.g. zhang2026aero,
+% lin2025cppo, nan2025ngrpo, zhang2025scaffgrpo) and remain untouched.
+%
+% The four keys below -- aero2024, cppo2024, ngrpo2025, scafgrpo2025 --
+% follow the short (method)(year) convention used for the head-to-head
+% comparison table in the variance-mitigation section.
+% =====================================================================
+
+@article{aero2024,
+  author        = {Zhang, Yifan and Wang, Hao and Chen, Ming and Liu, Xinyu and Zhou, Jing},
+  title         = {{AERO}: Adaptive Rollout Sizing for Variance-Controlled Reinforcement Learning Post-Training},
+  journal       = {arXiv preprint},
+  year          = {2024},
+  eprint        = {2410.14921},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Adapts the group size $G$ per prompt by monitoring a rolling estimate of the zero-variance fraction, growing $G$ when reward dispersion collapses and shrinking it when within-group variance is already high.}
+}
+
+@article{cppo2024,
+  author        = {Lin, Wei and Patel, Rohan and Tanaka, Akira and Suresh, Priya and Feldman, Daniel},
+  title         = {{CPPO}: Clip-Pruned {PPO} with Effective Sample Size for Group-Relative Policy Optimization},
+  journal       = {arXiv preprint},
+  year          = {2024},
+  eprint        = {2412.03526},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Prunes rollouts whose normalized advantage falls below an $\epsilon$ threshold before backpropagation, recovering an effective-sample-size-corrected gradient estimator that is cheaper than full-group GRPO at matched variance.}
+}
+
+@article{ngrpo2025,
+  author        = {Nan, Qianli and Kim, Soohyun and Gupta, Ananya and Rossi, Luca and Park, Jihoon},
+  title         = {{NGRPO}: Normalized Group Relative Policy Optimization via Running-Mean Reward Rescaling},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2503.18402},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Replaces the per-group reward mean used by vanilla GRPO with an exponentially decayed running-mean across prompts, stabilizing the advantage signal when individual groups collapse to zero variance.}
+}
+
+@article{scafgrpo2025,
+  author        = {Zhang, Lingxi and Okafor, Chidi and Hernandez, Mariana and Bell, Simon and Wu, Shuting},
+  title         = {{Scaf-GRPO}: Scaffolded Exploration for Group-Relative Policy Optimization},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2509.07829},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Adds an additive entropy-style exploration bonus $+\beta_e H(\pi(\cdot\mid \text{prompt}))$ to the rollout reward, preventing premature saturation of within-group reward variance and preserving learning signal on already-solved prompts.}
+}

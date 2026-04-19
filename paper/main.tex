@@ -33,6 +33,8 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{listings}
 \usepackage{enumitem}
 \usepackage{tikz}
 \usetikzlibrary{positioning, fit, arrows.meta, backgrounds, calc, shadows, shapes.geometric, shapes.misc, decorations.pathreplacing}
@@ -1996,6 +1998,26 @@ and \texttt{BENCHMARKS\_COMPARISON.md} for the full comparison table with existi
 % Cohen's d, and Bonferroni-corrected p-values + Appendix G (Statistical Protocol).
 % Source: experiments/compute_statistics.py -> experiments/render_stat_rigor_tex.py
 \input{sections/stat_rigor_updates}
+
+% =============================================================================
+% Reviewer-Response Appendix Block
+% Addresses NeurIPS 2026 reviewer weaknesses W1-W17 + author questions Q1-Q7.
+% Each subsection carries a %REVIEW-ADDR marker verified by
+% scripts/reviewer_response_score.sh (registry at paper/reviewer_points.yaml).
+% =============================================================================
+\input{sections/appendix_zvf_formalization}
+\input{sections/zvf_pipeline_spec}
+\input{sections/group_size_reconcile}
+\input{sections/framework_configs_appendix}
+\input{sections/statistical_rigor_addendum}
+\input{sections/tool_use_code_expanded}
+\input{sections/heldout_stratified}
+\input{sections/base_vs_instruct_paired}
+\input{sections/frontier_scope_clarification}
+\input{sections/figures_regeneration_note}
+\input{sections/variance_mitigation_comparison}
+\input{sections/extended_related_work}
+
 
 % =============================================================================
 % NeurIPS Paper Checklist (Mandatory)

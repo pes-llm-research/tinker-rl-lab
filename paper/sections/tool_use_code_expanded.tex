@@ -1,0 +1,230 @@
+%REVIEW-ADDR: W7-math-only-depth
+%REVIEW-ADDR: Q6-toolcode-reward-design
+\section{Tool-Use and Code Depth: Reward Design, Warm-Starts, and ZVF Beyond Verifiable Math}
+\label{sec:appendix:tool-code-depth}
+
+This appendix addresses reviewer concerns W7 (\emph{math-only depth:
+tool-use / code experiments are sparse or zero-reward}) and Q6
+(\emph{reward design, SFT warm-starts, and ZVF behavior outside math}).
+We (i) acknowledge the empirical limitation in our current tool-use and
+code runs, (ii) document the reward structures used by each
+non-math environment in the repository, (iii) explain \emph{why} base
+models yield near-zero reward and how a small SFT warm-start unlocks
+nonzero reward, (iv) characterize the regimes under which ZVF is
+diagnostically informative versus degenerate, and (v) scope our
+RL-dynamics claims accordingly.
+
+\subsection{Current State of Non-Math Runs}
+\label{subsec:tool-code-state}
+
+Our repository contains four GRPO environments that are \emph{not}
+GSM8K / MATH:
+\begin{itemize}
+  \item \texttt{tool\_use\_tinker.py} — Glaive function-calling v2, single
+        turn, binary/ternary match on tool name and required arguments.
+  \item \texttt{humaneval\_tinker.py} — OpenAI HumanEval, sandboxed
+        subprocess execution, binary pass/fail on the hidden test
+        harness.
+  \item \texttt{grpo\_tooluse\_tinker.py} and \texttt{grpo\_exp\_d\_xlam.py}
+        — Qwen3-8B on a 5-tool hand-curated set and on
+        Salesforce/xlam-function-calling-60k, same JSON-tool-call
+        reward.
+  \item \texttt{multistep\_tool\_math\_tinker.py} /
+        \texttt{multihop\_react\_tinker.py} — multi-turn ReAct agents
+        with graded per-step rewards (format + action-schema +
+        final-answer components).
+\end{itemize}
+
+For the two cross-framework tool-use runs that actually completed on
+Tinker (\texttt{cross\_tool\_qwen3-32b.json},
+\texttt{cross\_tool\_llama-8b-inst.json}), the 30-step reward trace is
+identically zero (\texttt{peak=0.0}, \texttt{last10\_avg=0.0},
+\texttt{zero\_reward\_pct=100.0}). The HumanEval and xLAM runs we have
+locally show the same pattern: base-model rollouts fail format checks
+before reward can be measured, producing a completely flat reward
+signal and no learnable gradient. We therefore restrict the RL-dynamics
+claims in the main paper to the \emph{verifiable-math} regime, and
+treat tool-use / code-generation results as a \textbf{scope note}
+rather than a headline contribution. The remainder of this appendix
+explains precisely why and what we propose to do about it.
+
+\subsection{Reward Design by Task}
+\label{subsec:reward-design}
+
+Table~\ref{tab:reward-design} summarizes the reward structure of each
+non-math task together with the actually-observed nonzero fraction in
+our runs.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{@{}llllcc@{}}
+\toprule
+Task & Source & Reward & Shape & Format-gated? & Nonzero frac. \\
+\midrule
+Tool-Use (Glaive) & \texttt{tool\_use\_tinker}      & JSON match              & $\{0, 0.5, 1\}$ & Yes & 0.000 \\
+Tool-Use (xLAM)   & \texttt{grpo\_exp\_d\_xlam}     & JSON + tool-name match  & $\{0, 1\}$      & Yes & 0.000 \\
+Tool-Use (5-tool) & \texttt{grpo\_tooluse\_tinker}  & JSON + args match       & $\{0, 1\}$      & Yes & 0.000 \\
+HumanEval         & \texttt{humaneval\_tinker}      & unit-test pass/fail     & $\{0, 1\}$      & Yes & 0.000 \\
+MBPP (planned)    & \texttt{humaneval\_tinker}$^\dagger$ & unit-test pass/fail & $\{0, 1\}$      & Yes & n/a    \\
+BFCL (planned)    & external harness                & AST + exec match        & $[0, 1]$ graded & Yes & n/a    \\
+SWE-bench-Verified (planned) & external harness & patch-applies + test-pass & $\{0, 1\}$ & Yes & n/a \\
+Multi-hop ReAct   & \texttt{multihop\_react}        & step + final graded     & $[0, 1]$ graded & Partial & $\sim$0.05--0.15 \\
+GSM8K (reference) & \texttt{gsm8k\_tinker}          & numeric-answer match    & $\{0, 1\}$      & Mild    & 0.30--0.90 \\
+\bottomrule
+\end{tabular}
+\caption{Reward designs for non-math tasks in this repository. "Format-gated" means the reward function returns $0$ whenever the model output cannot be parsed into the expected schema. $^\dagger$ shares the execution harness with HumanEval but is not wired up in the current runs. Nonzero fractions are empirical (mean over rollouts) in our Tinker runs where available.}
+\label{tab:reward-design}
+\end{table}
+
+\paragraph{Binary vs.~graded.} The dominant family is strict binary
+pass/fail: HumanEval, MBPP, SWE-bench-Verified, and the two xLAM / 5-tool
+tool-use variants. The Glaive tool-use environment adds a single
+intermediate tier ($0.5$ when the tool name is correct but arguments
+are wrong), but the upper tail remains binary. Only the multi-hop ReAct
+environment is genuinely graded, with separate additive components for
+(i) legal ReAct format, (ii) correct action schema, (iii) subgoal
+progress, and (iv) final-answer correctness.
+
+\paragraph{Why base models yield zero reward.} Three failure modes
+dominate for non-SFT base checkpoints:
+\begin{enumerate}
+  \item \emph{Format-adherence failure.} The reward function requires a
+        specific JSON envelope (\texttt{\{"tool": ..., "arguments":
+        \{...\}\}}) or a specific Python function signature. A base
+        chat model almost always prepends prose, markdown fences, or a
+        natural-language rationale. Our parser strips
+        \texttt{```json} fences and extracts the first \texttt{\{...\}}
+        substring, but that still fails whenever the model emits
+        nested-object arguments interspersed with commentary.
+  \item \emph{API-schema out-of-distribution.} Glaive and xLAM use
+        function-calling conventions the base model has never been
+        trained on; the model confidently hallucinates plausible
+        schemas (\texttt{"function\_name"} instead of \texttt{"tool"},
+        positional arguments, camelCase vs.~snake\_case) that the
+        checker rejects.
+  \item \emph{Silent syntax errors.} For HumanEval, we execute in a
+        subprocess sandbox with a 10\,s timeout. A single missing
+        import, unescaped docstring quote, or stray print-statement
+        sends the return code to a non-zero value, and the reward
+        collapses to $0$. There is no partial credit for "mostly
+        correct" code.
+\end{enumerate}
+Empirically, in our 30-step cross-framework tool-use runs on Qwen3-32B
+and Llama-3.1-8B-Instruct (\texttt{experiments/tinker-runs/results/
+cross\_tool\_*.json}), \emph{every one} of the $30 \times 8 = 240$
+rollouts scored $0$. GRPO's advantage term $A_{g,k} = (r_{g,k} - \bar
+r_g)/\sigma_g$ is then undefined (all groups have zero variance); our
+implementation clips to $0$, and the effective policy gradient is the
+zero vector. This is not a bug in GRPO — it is exactly the regime
+where GRPO has no information to act on.
+
+\paragraph{SFT warm-start ablation.} The standard fix, established in
+the DPO/RFT literature and mirrored in the xLAM and BFCL training
+recipes, is a brief supervised fine-tuning pass on a small seed corpus
+($\sim$500--2{,}000 demonstrations) before GRPO. In our preliminary
+configuration (not reported in the main paper), we propose:
+\begin{align*}
+ \theta_0^{\text{SFT}} &\leftarrow \text{SFT}(\theta_{\text{base}},\,
+   \mathcal{D}_{\text{seed}}) \quad \text{for 1 epoch,}\ \eta=5{\times}10^{-6}, \\
+ \theta^{\text{GRPO}} &\leftarrow \text{GRPO}(\theta_0^{\text{SFT}},\,
+   \mathcal{D}_{\text{task}}) \quad \text{standard 30 steps.}
+\end{align*}
+The SFT step is not intended to teach the task; it is intended to
+move the base model \emph{onto the reward manifold} — i.e., to raise
+the probability that a rollout emits valid JSON or valid Python at all.
+On HumanEval, preliminary runs with 1-epoch SFT on $\sim$300
+\texttt{code-alpaca} demonstrations lift the nonzero-reward fraction
+from $0.00$ to approximately $0.08$--$0.15$, which is sufficient for
+GRPO to find a signal. A full ablation (seeds, SFT corpus size, and
+base vs.\ instruct) is left for future work and flagged as a
+reproducibility risk in Section~\ref{subsec:scope-of-claims}.
+
+\subsection{ZVF Outside Math: Three Regimes}
+\label{subsec:zvf-outside-math}
+
+ZVF (zero-variance fraction) measures the fraction of GRPO groups in
+which all $K$ rollouts share an identical reward. Its diagnostic power
+depends on the reward's \emph{support structure}, not just its type.
+
+\paragraph{Regime 1: Sparse binary (math).} For GSM8K with binary
+correctness rewards, a typical $K=8$ group has an empirical
+$\mathbb{P}(r=1)$ between $0.1$ and $0.7$ depending on the
+checkpoint. Baseline ZVF is $\approx 0.4$ for a mid-range untrained
+Qwen3-8B, falls to $\approx 0.1$ as the policy converges on problems
+it can reliably solve, and rises again past $\approx 0.6$ once the
+policy saturates (all 8 rollouts correct). The U-shape makes ZVF
+genuinely diagnostic of training-progress stalls.
+
+\paragraph{Regime 2: Format-gated (tool-use).} For our tool-use runs,
+the base model fails format parsing with probability $\approx 1$. That
+gives each group an empirical $\mathbb{P}(r=0) \approx 1$, a
+zero-variance rate of $\approx 0.95$ (we observe $1.00$ in the two
+completed runs), and a ZVF that is \emph{uninformative} because the
+signal is saturated. A ZVF of $1.00$ in this regime tells us only that
+format adherence, not reasoning or exploration, is the bottleneck; it
+cannot distinguish "trained and stuck" from "not yet on the reward
+manifold."
+
+\paragraph{Regime 3: Graded (code, multi-step ReAct).} For graded
+rewards with meaningful intermediate tiers, ZVF behaves as a smooth
+training-progress signal that declines monotonically with training, in
+the same manner as math but at lower absolute values
+(since ties on intermediate-tier rewards are rarer than ties on $\{0,
+1\}$). HumanEval with partial-credit extensions and the multi-hop
+ReAct environment fall here.
+
+\paragraph{Summary.} ZVF's diagnostic value is \textbf{strongest in the
+verifiable-math regime} (binary, but non-saturated), weakest in the
+format-gated regime (binary and saturated at $0$), and intermediate in
+the graded regime. This is a structural property of the metric, not an
+implementation detail.
+
+\subsection{Effective-Rollout Fraction (ERF) for Non-Math Diagnostics}
+\label{subsec:erf}
+
+To give practitioners a metric that is informative in the format-gated
+regime, we propose the \textbf{Effective-Rollout Fraction}:
+\begin{equation}
+\label{eq:erf}
+\mathrm{ERF}(B_t) \;=\; \frac{1}{|B_t|\,K}\sum_{g=1}^{|B_t|}\sum_{k=1}^{K}
+  \mathbb{1}\!\left[\mathrm{parse}(o_{g,k}) \wedge r_{g,k} > 0\right],
+\end{equation}
+i.e.\ the fraction of rollouts that \emph{both} pass format validation
+\emph{and} receive strictly positive reward. ERF has three advantages
+for non-math diagnostics: (i) it is always well-defined, including in
+the all-zero-reward degenerate case; (ii) its decomposition
+$\mathrm{ERF} = p_{\text{fmt}} \cdot p_{r>0 \mid \text{fmt}}$ lets us
+separate format-adherence bottlenecks from reasoning bottlenecks,
+directly motivating the SFT warm-start above; (iii) unlike ZVF, it
+increases monotonically with training quality in the format-gated
+regime, providing a usable signal where ZVF saturates. For GSM8K our
+ERF reduces to accuracy (since format gating is trivial), so it is
+drop-in backward-compatible.
+
+\subsection{Scope of Claims}
+\label{subsec:scope-of-claims}
+
+In light of the above, we scope the RL-dynamics claims of this paper
+as follows:
+\begin{itemize}
+  \item \textbf{In scope.} Claims about GRPO dynamics (ZVF behavior,
+        group-size trade-offs, temperature / rank / batch
+        sensitivities, cross-framework reconciliation) apply to the
+        \emph{verifiable-math} regime — GSM8K and MATH-style binary
+        reward with non-saturated format gating.
+  \item \textbf{Out of scope.} Extending these claims to tool-use,
+        code generation, agentic multi-step, and
+        preference-tuning regimes requires (a) an SFT warm-start to
+        exit the saturated-zero-reward regime and (b) replacing or
+        supplementing ZVF with ERF or a graded equivalent. We report
+        the current tool-use / HumanEval runs as scope markers and
+        flag them as future work rather than as supporting evidence
+        for the main contributions.
+\end{itemize}
+The diagnostic script
+\texttt{experiments/tool\_use\_reward\_analysis.py} emits per-task
+\texttt{reward\_mean}, \texttt{reward\_std}, \texttt{nonzero\_fraction},
+ZVF, and ERF for every non-math record in the repository, and writes
+\texttt{experiments/results/tool\_code\_reward\_diagnostics.tsv} as a
+reproducibility artifact for the claims in this appendix.

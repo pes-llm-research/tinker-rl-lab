@@ -1,0 +1,5 @@
+source_file	task	experiment	model	n_steps	reward_mean	reward_std	nonzero_fraction	zvf	erf	peak	last10_avg
+cross_tool_qwen3-32b.json	tool_use	cross_tool_qwen3-32b	qwen3-32b	30	0.0000	0.0000	0.0000	1.0000	0.0000	0.0000	0.0000
+cross_tool_llama-8b-inst.json	tool_use	cross_tool_llama-8b-inst	llama-8b-inst	30	0.0000	0.0000	0.0000	1.0000	0.0000	0.0000	0.0000
+all_results_consolidated.json	tool_use	cross_tool_llama-8b-inst	llama-8b-inst	30	0.0000	0.0000	0.0000	1.0000	0.0000	0.0000	0.0000
+all_results_consolidated.json	tool_use	cross_tool_qwen3-32b	qwen3-32b	30	0.0000	0.0000	0.0000	1.0000	0.0000	0.0000	0.0000

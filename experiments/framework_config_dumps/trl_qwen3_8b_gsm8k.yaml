@@ -1,0 +1,78 @@
+# Framework: TRL (huggingface/trl GRPOTrainer)
+# Task: gsm8k on Qwen/Qwen3-8B
+# Purpose: reviewer-requested exact config dump (W6/Q3)
+# Emit path: experiments/framework_config_dumps/trl_qwen3_8b_gsm8k.yaml
+
+metadata:
+  framework: trl
+  framework_version: 0.14.0
+  model: Qwen/Qwen3-8B
+  # SHA256 of the HF snapshot used across frameworks; regenerate with
+  # `huggingface-cli scan-cache --verbose` on the pinned revision.
+  model_sha256: placeholder-sha256-of-qwen3-8b-hf-snapshot
+  task: gsm8k
+  seed: 42
+  source_git_sha: f0edf7265b319401824d8a187df9b57befc3489f
+
+lora:
+  rank: 16
+  alpha: 32
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+  dropout: 0.0
+
+grpo:
+  group_size: 8
+  rollouts_per_group: 1
+  max_new_tokens: 384
+
+sampling:
+  temperature: 0.7
+  top_p: 0.95
+  top_k: null
+  do_sample: true
+
+kl:
+  beta: 0.04
+  surrogate: low_var
+
+importance_sampling:
+  granularity: token
+
+reference_model:
+  placement: on_device
+  offload: false
+  recompute: false
+
+optimizer:
+  name: adamw
+  lr: 1.0e-6
+  weight_decay: 0.0
+  betas:
+    - 0.9
+    - 0.999
+  eps: 1.0e-8
+
+tokens_per_optimizer_step: 3072
+
+ppo:
+  clip_range: null
+  value_clip_range: null
+  critic_lr: null
+  critic_warmup_steps: null
+
+reward:
+  type: binary_outcome
+  broadcast_precision: fp32
+
+runtime:
+  bf16: true
+  gradient_checkpointing: true
+  micro_batch_size: 1
+  gradient_accumulation_steps: 4
+  tensor_parallel_size: 1
+
+# W6/Q3 addresses: reviewer request for exact config dumps

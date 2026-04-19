@@ -19,10 +19,11 @@ Three conclusions are supported conservatively. First, Zero-Variance Fraction
 outcome rewards stop producing within-group learning signal. Because ZVF is
 mechanically coupled to reward sparsity, group size, and baseline accuracy, we
 use it as a descriptive diagnostic rather than a standalone causal predictor.
-Second, trainability depends strongly on initialization and rollout regime:
-instruction-tuned checkpoints and intermediate group sizes are consistently
-easier to optimize than base models or extreme group sizes in our limited
-sweeps, but we do not claim a universal optimal group size. Third, PPO/GRPO
+Second, trainability in our current sweeps varies substantially with
+initialization and rollout regime: instruction-tuned checkpoints were
+generally easier to optimize than comparable base models, and intermediate
+group sizes often behaved better than the smallest or largest settings we
+tested, but we do not claim a universal optimal group size. Third, PPO/GRPO
 rankings and frontier-model stability are heterogeneous across model families
 and end-to-end stacks; our single-seed API runs should be read as case studies,
 not universal laws. A separate held-out GSM8K control shows that the mean

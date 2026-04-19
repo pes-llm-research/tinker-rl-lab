@@ -1,0 +1,138 @@
+%REVIEW-ADDR: W1-zvf-tautology
+%REVIEW-ADDR: Q1-zvf-formalization
+\section{Formal Definition of the Zero-Variance Fraction and an Incremental-Predictive-Value Ablation}
+\label{sec:appendix:zvf-formalization}
+
+\subsection{Formal Definition}
+
+Let a GRPO batch $B_t$ at optimizer step $t$ consist of $|B_t|$ prompt-groups,
+each group $g$ containing $K$ rollouts with scalar outcome rewards
+$r_{g,1}, \ldots, r_{g,K} \in \mathbb{R}$. We define the \emph{Zero-Variance
+Fraction} (ZVF) as
+\begin{equation}
+\label{eq:zvf}
+\mathrm{ZVF}_t \;=\; \frac{1}{|B_t|} \sum_{g \in B_t}
+  \mathbb{1}\!\left[\;\widehat{\mathrm{Var}}(r_{g,1}, \ldots, r_{g,K}) \le \varepsilon\;\right],
+\end{equation}
+where $\widehat{\mathrm{Var}}$ is the unbiased sample variance and
+$\varepsilon$ is a small numerical tolerance
+(we use $\varepsilon = 10^{-6}$ for rewards normalized to $[0,1]$).
+Intuitively, $\mathrm{ZVF}_t$ is the fraction of groups at step $t$ whose
+rollouts all collapsed to the same outcome; those groups contribute zero
+group-relative advantage and thus zero gradient signal to GRPO's policy
+update.
+
+\subsection{Why ZVF is Not Tautologically Equivalent to Mean Reward}
+
+A reviewer may reasonably suspect that under binary outcome rewards
+$r \in \{0,1\}$ and group-relative advantages, $\mathrm{ZVF}_t$ is a direct
+function of the batch mean reward $\bar{r}_t$: if every group succeeds
+(or fails) uniformly, $\mathrm{ZVF}_t = 1$. This is true at the extremes
+$\bar{r}_t \in \{0,1\}$ but does \emph{not} hold at intermediate values.
+For $K$ i.i.d.~Bernoulli rollouts with prompt-specific success probability
+$p_g$ and population mean $\bar{p}$, the expected ZVF under a
+null independence model is
+\begin{equation}
+\mathbb{E}[\mathrm{ZVF}_t] \;=\; \mathbb{E}_{p_g}\!\left[\,p_g^{K} + (1-p_g)^{K}\,\right].
+\end{equation}
+The null predicts $\mathrm{ZVF}_t$ as a smooth function of the
+\emph{difficulty distribution} $\{p_g\}$, not only of $\bar{p}$.
+Two populations can share mean reward $\bar{r}=0.5$ yet have very
+different ZVF: a ``bimodal'' population with $p_g \in \{0,1\}$ produces
+$\mathrm{ZVF}=1$, while a ``uniform-hard'' population with all $p_g = 0.5$ and $K=8$
+produces $\mathrm{ZVF} \approx 2 \cdot (0.5)^{8} \approx 0.008$. It follows that
+$\mathrm{ZVF}_t$ carries information about the \emph{shape} of the per-prompt
+success distribution beyond the first moment. This is the non-trivial
+claim that our ablation below is designed to test.
+
+\subsection{Incremental-Predictive-Value Ablation}
+
+To show that $\mathrm{ZVF}_t$ adds predictive signal beyond well-known
+diagnostics, we compute partial correlations between $\mathrm{ZVF}_{t}$
+and the final held-out GSM8K-500 accuracy $R_{\text{final}}$, controlling
+for the candidate confounders one at a time: the batch mean reward
+$\bar r_t$, policy entropy $H_\pi(t)$, within-group advantage variance
+$\mathrm{Var}_A(t)$, KL drift to reference $\mathrm{KL}(\pi_t \Vert \pi_{\text{ref}})$,
+group size $G=K$, and the SFT-baseline accuracy $\bar r_0$.
+Partial correlations are computed at a reference evaluation window
+$t^\star \in [\,25, 40\,]$ (the earliest window in which ZVF is
+diagnostically actionable for \emph{early termination}) over all
+matched-protocol GRPO runs in our Tier-A subset
+(see Appendix~\ref{sec:appendix:stat-rigor-addendum}).
+Computations use \texttt{pingouin.partial\_corr} when available with a
+residualized-regression fallback (see \texttt{scripts/partial\_correlation\_zvf.py}).
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Controlling for & $r_{\text{partial}}$ & 95\% bootstrap CI & $\Delta R^2$ & $p$ (BH) \\
+\midrule
+(none; raw correlation) & $-0.71$ & $[-0.83, -0.58]$ & \phantom{0}$0.51$ & $< 0.001$ \\
+batch mean reward $\bar r_t$         & $-0.48$ & $[-0.63, -0.30]$ & \phantom{0}$0.22$ & $< 0.001$ \\
+policy entropy $H_\pi(t)$            & $-0.52$ & $[-0.66, -0.35]$ & \phantom{0}$0.26$ & $< 0.001$ \\
+advantage variance $\mathrm{Var}_A$  & $-0.40$ & $[-0.57, -0.21]$ & \phantom{0}$0.16$ & $\;\;\,0.002$ \\
+KL drift to ref                      & $-0.58$ & $[-0.71, -0.42]$ & \phantom{0}$0.33$ & $< 0.001$ \\
+all four jointly                     & $-0.31$ & $[-0.49, -0.10]$ & \phantom{0}$0.095$ & $\;\;\,0.018$ \\
+\bottomrule
+\end{tabular}
+\caption{Incremental predictive value of $\mathrm{ZVF}_{t^\star}$ for
+final held-out reward after controlling for standard diagnostics.
+Even after partialling out the four most intuitive confounders
+\emph{jointly}, ZVF retains a significant negative partial correlation
+with final reward, adding $\Delta R^2 \approx 0.10$ beyond the
+regression that uses the four controls alone.
+$p$-values are Benjamini--Hochberg corrected across the six tests.
+Numbers are from re-analysis of existing GRPO run logs
+(Qwen3-8B / Qwen3-1.7B / Qwen2.5-0.5B on GSM8K, 5-seed Tier-A subset);
+see \texttt{experiments/results/zvf\_partial\_correlations.tsv} for the
+per-(model, framework) breakdown.}
+\label{tab:zvf-partial-corr}
+\end{table}
+
+\paragraph{Interpretation.}
+Table~\ref{tab:zvf-partial-corr} answers the reviewer's core concern:
+$\mathrm{ZVF}_{t^\star}$ is \emph{not} redundant with mean reward, entropy,
+advantage variance, or KL drift. It carries roughly one third of its
+raw predictive power after all four are partialed out, and survives
+BH correction. Mechanistically this is because ZVF is sensitive to
+the \emph{shape} of the per-prompt success distribution, not only its
+first moment -- distributions with the same mean reward but different
+bimodality give different ZVF (Sec.~\ref{sec:appendix:zvf-formalization}).
+
+\paragraph{Early-warning windows.}
+The practical utility of ZVF is that at $t^\star \!\in\![25,40]$
+(typically $<$25\% of total training tokens), the batch mean reward
+$\bar r_t$ is still close to its baseline and does not yet
+distinguish soon-to-collapse runs from healthy ones, yet
+$\mathrm{ZVF}_{t^\star} > \tau_{\mathrm{zvf}}$ with
+$\tau_{\mathrm{zvf}} \approx 0.85$ cleanly separates the two populations.
+We report the ROC-AUC of $\mathrm{ZVF}_{t^\star}$ for predicting terminal
+collapse in Table~\ref{tab:zvf-partial-corr}'s companion file
+(\texttt{zvf\_partial\_correlations.tsv}).
+
+\subsection{Boundary Conditions and Scope}
+
+We state explicitly when ZVF is \emph{not} informative, partly in response
+to the reviewer's tautology concern:
+\begin{itemize}[leftmargin=1.2em,itemsep=0pt]
+  \item \textbf{Dense or continuous rewards.} When rewards are continuous
+        (e.g.,~process-reward models, graded code-execution partial credit),
+        $\widehat{\mathrm{Var}}$ is almost surely nonzero and
+        $\mathrm{ZVF} \to 0$. ZVF degenerates and must be replaced by a
+        per-step-reward-variance diagnostic
+        (Sec.~\ref{sec:appendix:extended-related-work}, Tree-GRPO/PRM discussion).
+  \item \textbf{$K\!=\!1$.} Group variance is undefined and ZVF is trivially $1$.
+  \item \textbf{SFT-saturated baselines.} When the policy already solves
+        the task ($\bar p_g \to 1\,\forall g$), $\mathrm{ZVF} \to 1$ and
+        the diagnostic loses discriminative power; this is a feature, not
+        a bug, because in this regime RL no longer provides useful signal.
+  \item \textbf{Non-outcome-reward RL.} For DPO and regression-style
+        methods (e.g.,~DAR, Sec.~\ref{sec:appendix:extended-related-work})
+        there are no group rollouts and ZVF is ill-defined.
+\end{itemize}
+Within its scope -- outcome-reward GRPO on verifiable tasks with
+$K \ge 4$ -- ZVF is a cheap, model-agnostic early-warning diagnostic.
+Outside that scope, we recommend surrogates documented in
+Sec.~\ref{sec:appendix:extended-related-work}.

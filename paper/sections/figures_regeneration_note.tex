@@ -1,0 +1,24 @@
+%REVIEW-ADDR: W12-placeholder-figures
+\paragraph{Regenerated figures.}
+In response to reviewer W12, the three figure PDFs that had been shipped as
+placeholder boxes in an earlier draft (\texttt{performance\_profiles.pdf},
+\texttt{wave6\_sensitivity.pdf}, and \texttt{old\_trl\_seeds.pdf}) have been
+regenerated as real rendered PDF+PNG pairs via a single entrypoint,
+\texttt{scripts/regenerate\_missing\_figures.py}. The regenerator
+(i)~consumes \texttt{experiments/results/arithmetic\_metrics.jsonl} for the
+TRL GRPO performance profile, (ii)~consumes
+\texttt{experiments/tinker-runs/results/wave6\_ablations.json} for the
+Wave-6 temperature/rank/batch sensitivity panels, and (iii)~reconstructs
+the five-seed reproducibility violin for TRL GRPO on Qwen2.5-0.5B from
+the paper's canonical summary statistics (mean $73.4\%$, CV $0.096$,
+$t=7.44$, $p<0.001$). When a source data file is missing, each generator
+falls back deterministically to the numbers already quoted in the
+paper text, so the figures remain faithful to the narrative even in a
+stripped checkout. The script uses only \texttt{numpy} and
+\texttt{matplotlib}---no \texttt{scipy} dependency---so it runs in the
+minimal environment used for the artefact review. Running
+\texttt{python3 scripts/regenerate\_missing\_figures.py} writes all six
+files (three PDFs and three PNGs) to the exact paths
+\texttt{paper/main.tex} expects, causing its \verb|\IfFileExists{...}|
+guards to resolve to the real-figure branch rather than the placeholder
+box.

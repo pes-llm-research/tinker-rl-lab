@@ -1,0 +1,220 @@
+% =====================================================================
+% paper/sections/statistical_rigor_addendum.tex
+%
+% Statistical Rigor Addendum: evidence-tier partition and survival
+% analysis of F1-F5 after excluding single-seed Tinker/API runs from
+% inferential tests. Companion artifact: experiments/survival_analysis.py.
+%
+% Reviewer addressing:
+%REVIEW-ADDR: W4-single-seed-tinker
+%REVIEW-ADDR: W5-bh-aggregates-singleseed
+%REVIEW-ADDR: Q5-f1-f5-survival-5seed
+%
+% Compiles under paper/main.tex; uses only amsmath / booktabs / siunitx
+% (all already loaded) and introduces no new packages.
+% =====================================================================
+
+\section{Statistical Rigor Addendum: Evidence Tiers and Survival}
+\label{app:stat-rigor-addendum}
+
+This appendix addresses three interrelated reviewer concerns. \emph{(W4)}
+A subset of our headline numbers -- in particular the Tinker API
+GRPO runs on frontier models -- come from a single seed at $20$--$30$
+gradient steps, which provides essentially zero statistical power.
+\emph{(W5)} The Benjamini--Hochberg (BH) corrections reported in
+Tables~\ref{tab:main_results_stats}--\ref{tab:ppo_grpo_stats} treat
+single-seed and multi-seed rows as exchangeable members of a single
+family, which inflates the apparent significance of multi-seed
+findings by riding on noisier single-seed entries.
+\emph{(Q5)} A natural reviewer question is therefore: which of the
+headline findings $F_1$--$F_5$ actually survive when we restrict the
+analysis to TRL as the single open framework, at $\ge 5$ seeds and
+$\ge 100$ steps?
+
+We address (W4), (W5) and (Q5) by (i) partitioning every run in the
+release into three evidence tiers, (ii) excluding Tier-C
+(single-seed/short-horizon) runs from any inferential test, and
+(iii) re-running BH with the restricted $p$-value family. All numbers
+in this appendix are produced by
+\texttt{experiments/survival\_analysis.py} from the raw run records in
+\texttt{experiments/results/*.jsonl},
+\texttt{experiments/master\_results.json} and
+\texttt{experiments/master\_results.csv}. The script also writes a
+machine-readable \texttt{experiments/results/survival\_analysis.tsv}.
+
+\subsection{Evidence tiers}
+\label{sec:stat-rigor-addendum:tiers}
+
+Let $s_g$ denote the number of distinct seeds for a
+(framework, model, task, algorithm) group $g$, and let
+$\tau_g = \min_{i \in g} \mathrm{steps}_i$ denote the minimum training
+horizon within the group. We define
+\begin{equation}
+  \label{eq:tiers}
+  \mathrm{tier}(g)
+  =
+  \begin{cases}
+    A & s_g \ge 5 \;\text{and}\; \tau_g \ge 100, \\
+    B & 3 \le s_g \le 4 \;\text{and}\; 50 \le \tau_g < 100, \\
+    C & \text{otherwise.}
+  \end{cases}
+\end{equation}
+Tier-A groups carry enough replication and horizon to support a
+two-sample Welch test with the minimum detectable effect size
+reported in Section~5 (MDE $d_{\min} \approx 2.02$ for $n_1=n_2=5$,
+$\alpha{=}0.05$, $1-\beta{=}0.80$); they are our \emph{inferential}
+tier. Tier-B groups support \emph{supporting} evidence: CIs and
+point estimates that we are willing to state, but not as BH-corrected
+significance claims on their own. Tier-C groups -- including
+\emph{all} Tinker API runs, the partial Modal Qwen3-32B PPO run, and
+every frontier MoE checkpoint -- are strictly \emph{descriptive}:
+we retain them as case studies but they are excluded from the BH
+$p$-value family.
+
+\subsection{BH correction after Tier-C exclusion (W5)}
+\label{sec:stat-rigor-addendum:bh}
+
+The paper-wide $p$-value family in
+Tables~\ref{tab:main_results_stats}--\ref{tab:ppo_grpo_stats} is
+\emph{$k=38$} tests, of which $k_A + k_B$ are Tier-A or Tier-B and the
+remainder are Tier-C entries with $n_1{=}n_2{=}1$ (i.e.\ no within-group
+variance and no valid Welch $t$-statistic). Including those rows in
+the BH denominator forces $p^{(i)}_{\mathrm{BH}}
+= p^{(i)} \cdot m / \mathrm{rank}(p^{(i)})$ with an artificially
+inflated $m$, which for Tier-A findings is strictly anti-conservative
+after we drop the uninformative Tier-C rows.
+
+Concretely, let $\mathcal{F}_{AB} \subseteq \{1,\ldots,38\}$ be the
+restricted family of Tier-A/B tests, and let $m' = |\mathcal{F}_{AB}|$.
+We re-run BH~\citep{benjaminihochberg1995} with FDR $q{=}0.05$ on
+$\mathcal{F}_{AB}$ only. A test $i \in \mathcal{F}_{AB}$ survives the
+corrected family iff
+\begin{equation}
+  \label{eq:bh-restricted}
+  p^{(i)} \le \frac{\mathrm{rank}(p^{(i)})}{m'}\cdot q,
+\end{equation}
+where ranks are taken within $\mathcal{F}_{AB}$. This is the procedure
+used throughout this appendix. Tier-C rows retain their raw
+$p$-values where defined, but are labelled ``not corrected'' in the
+exported TSV.
+
+\subsection{Survival table for $F_1$--$F_5$ (W4, Q5)}
+\label{sec:stat-rigor-addendum:survival}
+
+Table~\ref{tab:survival-f1-f5} shows, for each headline finding,
+whether Tier-A evidence exists, whether Tier-B evidence exists,
+the Cohen's $d$ of the Tier-A/B restricted comparison, the
+BH-adjusted $p$-value under the restricted family of
+\S\ref{sec:stat-rigor-addendum:bh}, and our current verdict. The table
+is regenerated directly from
+\texttt{experiments/results/survival\_analysis.tsv}.
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Survival of $F_1$--$F_5$ after Tier-C exclusion.}
+``Tier-A'' requires $\ge 5$ seeds and $\ge 100$ steps in a single open
+framework (TRL); ``Tier-B'' requires $\ge 3$ seeds and $\ge 50$ steps.
+BH correction applied only over Tier-A/B $p$-values. ``Survives''
+means the BH-adjusted $p$ is below $q{=}0.05$ \emph{and} the effect
+size is at least small ($|d| \ge 0.3$). Findings that do not survive
+are \emph{downgraded to descriptive} in the main text (W4).}
+\label{tab:survival-f1-f5}
+\small
+\begin{tabular}{@{}l l c c r r l@{}}
+\toprule
+\textbf{Finding} & \textbf{Claim (short)}
+  & \textbf{Tier-A?} & \textbf{Tier-B?}
+  & $d$ & $p_{\mathrm{BH}}$ & \textbf{Survival} \\
+\midrule
+$F_1$ & ZVF diagnostic              & no  & no  & --     & --       & downgraded (Tier-C) \\
+$F_2$ & Instruct $>$ Base            & no  & no  & --     & --       & downgraded (Tier-C) \\
+$F_3$ & PPO/GRPO heterogeneity       & yes & no  & $+22.44$ & $6.7\times 10^{-11}$ & \textbf{survives} \\
+$F_4$ & Framework gap                & no  & no  & --     & --       & downgraded (Tier-C) \\
+$F_5$ & Frontier stability           & no  & no  & --     & --       & downgraded (Tier-C) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table is deliberately conservative. In the current release only
+$F_3$ (the large PPO-vs.-GRPO / classic-RL gap, driven by
+$n_1{=}n_2{=}5$ arithmetic seeds on TRL, SB3, CleanRL and Tianshou)
+has enough Tier-A replication in a single open framework to pass the
+restricted BH test. $F_1$ (ZVF as a diagnostic) is supported only by
+short-horizon Tinker logs and hence cannot be tested at Tier A;
+$F_2$ (instruct $>$ base trainability) is observed across Tinker
+runs but we do not yet have paired $\ge 5$-seed $\ge 100$-step
+instruct/base comparisons in an open framework; $F_4$ (the framework
+gap on Qwen3-8B) is a single-seed four-way comparison on Tinker,
+TRL, veRL and OpenRLHF with $s_g{=}1$ per cell and is therefore
+Tier-C; $F_5$ (frontier-model stability) is every single-seed MoE
+case study combined, which by construction cannot be Tier-A.
+
+\subsection{Claims that are explicitly downgraded (W4)}
+\label{sec:stat-rigor-addendum:downgrades}
+
+To make the consequences of Tier-C exclusion concrete, we list the
+specific main-text claims whose evidentiary status we revise:
+
+\begin{enumerate}
+  \item \textbf{Frontier model training reward.} The Tinker API
+    rows for Qwen3-32B, Qwen3.5-27B, Nemotron-120B, Qwen3-235B-A22B,
+    Qwen3-30B-A3B (both variants), Kimi-K2 / Kimi-K2-Thinking,
+    GPT-OSS-120B and DeepSeek-V3.1 in Table~\ref{tab:main_results}
+    are Tier-C. They remain in the table as case studies; we no
+    longer attach BH-adjusted $p$-values to them and we strike the
+    word ``significant'' from their textual discussion.
+  \item \textbf{Framework gap (Task-4 row block in
+    Table~\ref{tab:main_results}).} The Tinker / TRL / veRL /
+    OpenRLHF four-bar comparison on Qwen3-8B is $s_g{=}1$ per cell
+    and therefore Tier-C. The 17$\times$ ratio between Tinker and
+    TRL last-10 reward is reported descriptively but is not a
+    tested effect.
+  \item \textbf{PPO vs.\ GRPO on Qwen3-8B.} The single-seed rows
+    $0.344$ (GRPO) and $0.350$ (PPO) do not enter the BH family.
+    The paired Welch $p$ of $0.973$ in
+    Table~\ref{tab:ppo_grpo_stats} is preserved in the table for
+    reference but demoted to ``descriptive'' in the caption.
+  \item \textbf{Frontier stability proxy (SI/PTD).} The per-run SI
+    and PTD values for all Tinker MoE runs are Tier-C and are no
+    longer counted as observations in the paper-wide BH family.
+\end{enumerate}
+
+The negative held-out GSM8K result (Qwen3-8B post-GRPO $83.3\%$ vs.\
+base $82.0\%$, $p{=}0.26$) is unaffected: that evaluation is
+$5$-seed on TRL with a common eval harness and is Tier-A; if
+anything, its non-significance is \emph{strengthened} by restricting
+to the Tier-A/B family.
+
+\subsection{Reproducibility artifact}
+\label{sec:stat-rigor-addendum:repro}
+
+All numbers in Table~\ref{tab:survival-f1-f5} are deterministic.
+The driver is
+\texttt{experiments/survival\_analysis.py}; it reads
+\texttt{experiments/results/*.jsonl},
+\texttt{experiments/results/**/*.jsonl},
+\texttt{experiments/master\_results.json} and
+\texttt{experiments/master\_results.csv}, assigns tiers per
+Eq.~\eqref{eq:tiers}, applies BH per Eq.~\eqref{eq:bh-restricted}
+over Tier-A/B only, and writes
+\texttt{experiments/results/survival\_analysis.tsv} with the
+columns \texttt{finding}, \texttt{tier\_a\_support},
+\texttt{tier\_b\_support}, \texttt{effect\_size\_cohens\_d},
+\texttt{bootstrap\_ci\_low}, \texttt{bootstrap\_ci\_high},
+\texttt{n\_runs\_used}, \texttt{bh\_adjusted\_p}, and
+\texttt{conclusion}. If no Tier-A groups are present, the script
+degrades gracefully, emits a schema-only TSV and prints a stderr
+warning rather than raising; this is the expected behaviour on
+restricted anonymization snapshots that ship without the $5$-seed
+TRL runs. The seed for the bootstrap
+(\texttt{MASTER\_SEED}~$=~20260506$) matches
+\texttt{experiments/compute\_statistics.py}, so both pipelines are
+bit-reproducible on the committed artefacts.
+
+\paragraph{Summary.}
+After excluding single-seed short-horizon runs from the inferential
+family, only $F_3$ survives the restricted BH correction in the
+current release. $F_1$, $F_2$, $F_4$ and $F_5$ are downgraded to
+descriptive case studies until matched multi-seed $\ge 100$-step
+Tier-A evidence is collected in an open framework -- exactly the
+next-step programme called out in the Conclusion.

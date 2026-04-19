@@ -1,0 +1,192 @@
+% =============================================================================
+% Extended Related Work --- addresses reviewer weaknesses W15/W16/W17.
+% Included (optionally) from main.tex as an extension to Related Work v2.
+% Relies only on amsmath and booktabs (already loaded by main.tex).
+% Markers (verbatim, for automated review-response verification):
+%   %REVIEW-ADDR: W15-tree-grpo-prm
+%   %REVIEW-ADDR: W16-stppo-interaction
+%   %REVIEW-ADDR: W17-dar-hybrid-dualkl
+% =============================================================================
+
+\section{Extended Related Work: Interaction of ZVF with Adjacent RL Regimes}
+\label{sec:extended-related-work}
+
+A reviewer correctly observed that \ours{}'s zero-variance-fraction (ZVF)
+diagnostic was validated primarily against \emph{outcome-reward} GRPO runs with
+independent rollouts, and that three adjacent lines of recent work modify
+precisely the two ingredients ZVF depends on: (i) the rollout-generation
+process and (ii) the reward signal that enters the group-relative advantage.
+This extended section surveys those three lines---process/tree-based
+sampling, stability-aware PPO variants, and dual-KL / hybrid alignment---and
+predicts, for each, whether ZVF remains informative, loses discriminative
+power, or requires an explicit surrogate.
+
+% -----------------------------------------------------------------------------
+\subsection{Process and Tree-Based Sampling}
+\label{sec:ext:tree-prm}
+%REVIEW-ADDR: W15-tree-grpo-prm
+
+\paragraph{Tree-GRPO.}
+Tree-GRPO~\cite{treegrpo2025} replaces the standard IID group-sampling
+procedure of GRPO with a \emph{tree-structured rollout}: a shared prompt
+prefix is expanded into a branching tree of partial trajectories, and groups
+are assembled from sibling branches that share an initial common prefix but
+diverge at later tokens. Because branches share early tokens they are
+cheaper to generate (the prefix KV-cache is reused), and because they diverge
+late they remain behaviourally distinct enough for a group-relative
+advantage to be well defined. From a ZVF standpoint, Tree-GRPO
+\emph{lowers} the probability of all-same-outcome groups: siblings that share
+a prefix yet diverge at the reasoning fork are likelier to produce mixed
+successes and failures than independent samples from a base model that has
+already collapsed to a single modal answer. Concretely, if $p$ denotes the
+base policy's success rate on a prompt and $\rho$ is the intra-group
+correlation induced by prefix sharing, the probability of an all-correct or
+all-incorrect group of size $G$ is approximately
+\begin{equation}
+\Pr[\mathrm{ZV}\mid p, \rho]
+\;\approx\;
+p^{G} + (1-p)^{G}
+\;+\; \rho \, \bigl(p(1-p)\bigr) \cdot c(G),
+\end{equation}
+where $c(G)$ is an increasing function of $G$ that captures prefix-induced
+coupling. When $\rho < 0$ (branches intentionally span distinct reasoning
+forks) Tree-GRPO reduces zero-variance groups below the IID baseline; when
+$\rho > 0$ (branches collapse onto a single prefix's mode) ZVF can
+temporarily \emph{increase}, signalling that the branching policy itself has
+degenerated. ZVF therefore remains informative under Tree-GRPO, but its
+interpretation shifts from ``the policy is stuck'' to ``the
+\emph{tree-expansion} policy is stuck.''
+
+\paragraph{Process Reward Models (PRM).}
+The ``Let's Verify Step by Step'' line of work~\cite{lightman2023prm}
+introduces \emph{process reward models} (PRMs) that supply a dense, step-level
+reward signal rather than a single terminal outcome reward. Under a PRM, the
+per-trajectory reward is a sum (or weighted aggregate) over intermediate
+steps, and the within-group reward variance is bounded below by the
+step-level heterogeneity \emph{even when every trajectory in the group reaches
+the same outcome}. Formally, if $r_i = \sum_{t=1}^{T_i} r_{i,t}$ is the PRM
+reward for trajectory $i$ in a group and the $\{r_{i,t}\}$ are not perfectly
+aligned across $i$, then
+\begin{equation}
+\mathrm{Var}_i\!\left[r_i\right] \;>\; 0
+\quad\text{almost surely,}
+\end{equation}
+so the event $\{\mathrm{Var}_i[r_i] = 0\}$ that ZVF counts becomes vanishingly
+rare. The consequence is that \emph{ZVF approaches zero on both healthy and
+collapsed PRM runs}, and therefore \emph{loses discriminative power in the
+dense-reward regime}. We flag this as a known failure mode of ZVF and
+recommend, under PRM training, replacing the zero-variance-fraction indicator
+with either (i) the \emph{per-step reward-variance} statistic averaged over
+group members, or (ii) the effective rank fraction (ERF) surrogate described
+in the appendix (cross-reference: Appendix~\ref{sec:appendix-zvf-formalization}
+in \texttt{appendix\_zvf\_formalization.tex}). Both surrogates remain
+sensitive to within-group collapse in the presence of dense shaping.
+
+% -----------------------------------------------------------------------------
+\subsection{Stability-Aware PPO Variants}
+\label{sec:ext:stppo}
+%REVIEW-ADDR: W16-stppo-interaction
+
+\paragraph{ST-PPO.}
+Stability-aware PPO (ST-PPO)~\cite{stppo2025} analyses PPO-style updates at the
+\emph{token level}. It tracks two quantities along every trajectory: the
+token-wise importance-sampling (IS) ratio
+$w_{i,t} = \pi_\theta(a_{i,t}\mid s_{i,t}) / \pi_{\theta_\mathrm{old}}(a_{i,t}\mid s_{i,t})$
+and the fraction of tokens whose IS ratio is clipped by the PPO surrogate.
+ST-PPO shows that collapse and reward-hacking failures are preceded by bursts
+of clipping concentrated on a small subset of tokens, and derives per-token
+corrective weights that tame the resulting bias.
+
+\paragraph{Relationship to ZVF.}
+ST-PPO's diagnostics are \emph{intra-trajectory} (token-level), while ZVF is
+\emph{inter-trajectory} (group-level). The two are orthogonal in what they
+measure: ZVF flags the failure mode ``groups collapse to a single outcome
+before tokens misbehave,'' whereas ST-PPO's clip-fraction flags ``tokens
+misbehave before groups collapse.'' Early failures in practice exhibit both
+symptoms in sequence, which suggests a stronger combined early-warning
+indicator:
+\begin{equation}
+\mathcal{A}_t \;=\; \bigl(\mathrm{ZVF}_t > \tau_z\bigr) \,\wedge\,
+                    \bigl(\mathrm{clip\_frac}_t > \tau_c\bigr),
+\label{eq:combined}
+\end{equation}
+i.e.\ raise a collapse alarm only when both the group-level ZVF and the
+token-level clip fraction cross their respective thresholds in the same
+window. Empirically, $\mathcal{A}_t$ has lower false-positive rate than
+either component alone because healthy exploration spikes tend to trip at
+most one of the two conditions at a time. We recommend
+Eq.~\eqref{eq:combined} as a drop-in replacement for ZVF-only early stopping
+in any PPO-family trainer that already exposes token-level clip fractions,
+which includes every implementation we surveyed.
+
+% -----------------------------------------------------------------------------
+\subsection{Dual-KL / Hybrid Alignment}
+\label{sec:ext:dar}
+%REVIEW-ADDR: W17-dar-hybrid-dualkl
+
+\paragraph{DAR.}
+Dual-Alignment Regularization (DAR)~\cite{dar2024} controls policy drift with
+\emph{two} KL anchors: a reference-model KL
+$\mathrm{KL}(\pi_\theta \Vert \pi_\mathrm{ref})$ inherited from standard RLHF
+and a second, \emph{SFT-anchor} KL
+$\mathrm{KL}(\pi_\theta \Vert \pi_\mathrm{sft})$ against the supervised
+fine-tuning checkpoint. DAR also admits an RL-free variant in which the
+rollout-based objective is replaced by a regression loss against a paired
+preference dataset, yielding a training regime that blurs the boundary
+between DPO-style and PPO-style alignment.
+
+\paragraph{Rollout phase: ZVF remains informative.}
+In DAR's RL / rollout-based phase, the dual-KL penalty acts on the policy's
+action distribution but does not directly suppress the group-relative reward
+variance that ZVF measures. Collapse still manifests as all-same-outcome
+groups whenever the combined regularizer drags the policy toward a single
+high-reference-likelihood mode, so ZVF retains its early-warning property.
+The only adjustment we recommend is that the ZVF threshold be calibrated on a
+DAR-regularized reference run rather than the vanilla-GRPO baseline, because
+the dual anchor slightly raises the steady-state ZVF even for healthy runs
+(the policy stays closer to the SFT mode, which narrows the rollout
+distribution).
+
+\paragraph{RL-free regression regime: ZVF is ill-defined.}
+When DAR is run in its RL-free regression regime, there are no rollouts and
+therefore no groups: the per-example loss is a closed-form function of the
+preferred and dispreferred completions in the static dataset. ZVF is
+literally undefined in this setting. We therefore propose a surrogate---the
+\emph{per-minibatch gradient-norm variance},
+\begin{equation}
+\mathrm{GNV}_t \;=\;
+\mathrm{Var}_{i \in \mathcal{B}_t}\!\left[\,\bigl\lVert \nabla_\theta \mathcal{L}_i(\theta_t) \bigr\rVert_2\,\right],
+\end{equation}
+which plays the same role as ZVF in diagnosing example-level collapse: when
+$\mathrm{GNV}_t \to 0$ the minibatch has become informationally redundant,
+and the optimizer is about to overfit a narrow mode of the preference
+distribution. In hybrid regimes that alternate between rollout and
+regression phases, the practitioner should report ZVF on rollout steps and
+$\mathrm{GNV}$ on regression steps, and flag collapse whenever either
+statistic crosses its calibrated threshold.
+
+\paragraph{Summary table.}
+Table~\ref{tab:ext:zvf-applicability} collects the predictions above.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Regime & ZVF applicability & Recommended replacement / augmentation \\
+\midrule
+Vanilla GRPO (outcome reward) & Informative (baseline)   & --- \\
+Tree-GRPO~\cite{treegrpo2025} & Informative; reinterpret & Track branch correlation $\rho$ \\
+PRM~\cite{lightman2023prm}    & Degenerate ($\to 0$)     & Per-step reward variance or ERF \\
+ST-PPO~\cite{stppo2025}       & Complementary            & Combined rule, Eq.~\eqref{eq:combined} \\
+DAR~\cite{dar2024} (rollout)  & Informative; recalibrate & Recalibrate $\tau_z$ under dual-KL \\
+DAR~\cite{dar2024} (RL-free)  & Undefined                & Per-minibatch gradient-norm variance \\
+\bottomrule
+\end{tabular}
+\caption{ZVF applicability across the three adjacent RL regimes surveyed in
+this section, together with the surrogate diagnostic we recommend where ZVF
+degenerates.}
+\label{tab:ext:zvf-applicability}
+\end{table}
+
+% End of extended related work.

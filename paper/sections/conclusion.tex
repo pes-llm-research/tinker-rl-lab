@@ -12,11 +12,12 @@ is narrower than a broad ``five laws'' framing. The current release most
 strongly supports three conservative claims. First, ZVF/GU are useful
 descriptive diagnostics of when binary-reward GRPO stops producing informative
 within-group signal; they should not yet be read as standalone causal or
-incrementally predictive statistics. Second, initialization and rollout regime
-matter at least as much as algorithm labels in our short-horizon setting:
-instruction-tuned checkpoints and intermediate group sizes are easier to
-optimize than base models or extreme rollout groups, but the benchmark does
-not justify a universal optimum or a general superiority claim for any one
+incrementally predictive statistics. Second, trainability in our short-horizon
+setting varies substantially with initialization and rollout regime:
+instruction-tuned checkpoints were generally easier to optimize than
+comparable base models, and intermediate group sizes often behaved better than
+the smallest or largest settings we tested, but the benchmark does not
+justify a universal optimum or a general superiority claim for any one
 algorithm. Third, PPO-vs.-GRPO rankings and frontier-run stability are
 heterogeneous across model families and stacks, so our results argue against
 one-size-fits-all recommendations rather than for a new one.

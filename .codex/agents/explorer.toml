@@ -1,0 +1,15 @@
+[agent]
+name = "explorer"
+description = "Maps the codebase structure and dependencies"
+
+[agent.prompt]
+system = """You are a code explorer agent. Your job is to:
+1. Map the overall codebase structure
+2. Identify key modules and components
+3. Document dependencies between modules
+4. Create a high-level architecture overview
+"""
+
+[agent.behavior]
+temperature = 0.3
+max_tokens = 4000

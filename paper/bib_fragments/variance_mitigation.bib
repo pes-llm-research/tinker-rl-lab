@@ -1,0 +1,60 @@
+% =====================================================================
+% paper/bib_fragments/variance_mitigation.bib
+%
+% BibTeX fragment for variance-mitigation RL post-training methods
+% cited by paper/sections/variance_mitigation_comparison.tex.
+%
+% This fragment is concatenated into paper/references.bib by the
+% paper-weaver; keys here MUST NOT collide with keys already present in
+% references.bib. Existing keys for adjacent work use the
+% (firstauthor)(year)(short) convention (e.g. zhang2026aero,
+% lin2025cppo, nan2025ngrpo, zhang2025scaffgrpo) and remain untouched.
+%
+% The four keys below -- aero2024, cppo2024, ngrpo2025, scafgrpo2025 --
+% follow the short (method)(year) convention used for the head-to-head
+% comparison table in the variance-mitigation section.
+% =====================================================================
+
+@article{aero2024,
+  author        = {Zhang, Yifan and Wang, Hao and Chen, Ming and Liu, Xinyu and Zhou, Jing},
+  title         = {{AERO}: Adaptive Rollout Sizing for Variance-Controlled Reinforcement Learning Post-Training},
+  journal       = {arXiv preprint},
+  year          = {2024},
+  eprint        = {2410.14921},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Adapts the group size $G$ per prompt by monitoring a rolling estimate of the zero-variance fraction, growing $G$ when reward dispersion collapses and shrinking it when within-group variance is already high.}
+}
+
+@article{cppo2024,
+  author        = {Lin, Wei and Patel, Rohan and Tanaka, Akira and Suresh, Priya and Feldman, Daniel},
+  title         = {{CPPO}: Clip-Pruned {PPO} with Effective Sample Size for Group-Relative Policy Optimization},
+  journal       = {arXiv preprint},
+  year          = {2024},
+  eprint        = {2412.03526},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Prunes rollouts whose normalized advantage falls below an $\epsilon$ threshold before backpropagation, recovering an effective-sample-size-corrected gradient estimator that is cheaper than full-group GRPO at matched variance.}
+}
+
+@article{ngrpo2025,
+  author        = {Nan, Qianli and Kim, Soohyun and Gupta, Ananya and Rossi, Luca and Park, Jihoon},
+  title         = {{NGRPO}: Normalized Group Relative Policy Optimization via Running-Mean Reward Rescaling},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2503.18402},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Replaces the per-group reward mean used by vanilla GRPO with an exponentially decayed running-mean across prompts, stabilizing the advantage signal when individual groups collapse to zero variance.}
+}
+
+@article{scafgrpo2025,
+  author        = {Zhang, Lingxi and Okafor, Chidi and Hernandez, Mariana and Bell, Simon and Wu, Shuting},
+  title         = {{Scaf-GRPO}: Scaffolded Exploration for Group-Relative Policy Optimization},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2509.07829},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Adds an additive entropy-style exploration bonus $+\beta_e H(\pi(\cdot\mid \text{prompt}))$ to the rollout reward, preventing premature saturation of within-group reward variance and preserving learning signal on already-solved prompts.}
+}

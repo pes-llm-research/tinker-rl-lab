@@ -1,8 +1,11 @@
-This is BibTeX, Version 0.99d (TeX Live 2025/dev/Debian)
+This is BibTeX, Version 0.99e (TeX Live 2026)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: plainnat.bst
 Database file #1: references.bib
+Warning--I didn't find a database entry for "benjaminihochberg1995"
+Warning--I didn't find a database entry for "Clark2016"
+Warning--I didn't find a database entry for "Casper2023"
 Warning--empty journal in azar2024ipo
 Warning--empty journal in havrilla2023trlx
 Warning--can't use both volume and number fields in henderson2018deep
@@ -11,45 +14,45 @@ Warning--empty booktitle in sedghpour2024artifact
 Warning--empty booktitle in schulman2017proximal
 Warning--empty booktitle in yao2023deepspeedchat
 Warning--empty journal in zhang2025verifybench
-You've used 157 entries,
+You've used 165 entries,
             2773 wiz_defined-function locations,
-            1324 strings with 38337 characters,
-and the built_in function-call counts, 89162 in all, are:
-= -- 7162
-> -- 8325
+            1364 strings with 40929 characters,
+and the built_in function-call counts, 94092 in all, are:
+= -- 7549
+> -- 8826
 < -- 56
-+ -- 2828
-- -- 2649
-* -- 7800
-:= -- 14749
-add.period$ -- 663
-call.type$ -- 157
-change.case$ -- 1297
-chr.to.int$ -- 135
-cite$ -- 322
-duplicate$ -- 3187
-empty$ -- 5327
-format.name$ -- 2840
-if$ -- 17926
-int.to.chr$ -- 23
++ -- 3000
+- -- 2808
+* -- 8273
+:= -- 15573
+add.period$ -- 699
+call.type$ -- 165
+change.case$ -- 1374
+chr.to.int$ -- 138
+cite$ -- 338
+duplicate$ -- 3351
+empty$ -- 5585
+format.name$ -- 3007
+if$ -- 18897
+int.to.chr$ -- 28
 int.to.str$ -- 1
-missing$ -- 136
-newline$ -- 983
-num.names$ -- 628
-pop$ -- 2649
+missing$ -- 144
+newline$ -- 1035
+num.names$ -- 660
+pop$ -- 2795
 preamble$ -- 1
-purify$ -- 1140
+purify$ -- 1209
 quote$ -- 0
-skip$ -- 2801
+skip$ -- 2937
 stack$ -- 0
-substring$ -- 600
-swap$ -- 262
+substring$ -- 616
+swap$ -- 280
 text.length$ -- 6
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 1727
+type$ -- 1815
 warning$ -- 8
-while$ -- 494
+while$ -- 518
 width$ -- 0
-write$ -- 2280
-(There were 8 warnings)
+write$ -- 2400
+(There were 11 warnings)
