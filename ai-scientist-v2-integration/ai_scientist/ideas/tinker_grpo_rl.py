@@ -280,6 +280,11 @@ if "TINKER_API_KEY" not in os.environ:
     out = Path(working_dir) / "final_info.json"
     out.write_text(json.dumps(final_info, indent=2))
     print(f"Wrote placeholder {out}")
+    print("\nMETRICS SUMMARY:")
+    print("- Dataset: gsm8k (placeholder)")
+    print("  - last_10_accuracy: final=0.000, best=0.000")
+    print("  - training_loss: final=nan, best=nan")
+    print("  - duration_seconds: final=0.000, best=0.000")
 else:
     print("Loading GSM8K…")
     ds = load_dataset("openai/gsm8k", "main")
@@ -360,3 +365,9 @@ else:
         f"{stats['last_10_accuracy']['stderr']:.3f}  "
         f"peak={stats['peak_accuracy']['mean']:.3f}"
     )
+    print("\nMETRICS SUMMARY:")
+    print("- Dataset: gsm8k")
+    for k in keys:
+        mean_v = stats[k]["mean"]
+        best_v = max(stats[k]["list"]) if k != "training_loss" else min(stats[k]["list"])
+        print(f"  - {k}: final={mean_v:.4f}, best={best_v:.4f}")
