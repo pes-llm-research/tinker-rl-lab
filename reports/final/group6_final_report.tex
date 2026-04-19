@@ -571,15 +571,8 @@ Efficiency}\label{compute-optimal-rl-scaling-and-efficiency}
 \section{2.7 Variance-Mitigation Methods
 (Head-to-Head)}\label{variance-mitigation-methods-head-to-head}
 
-\emph{Addresses reviewer concerns W14 (missing AERO/CPPO/NGRPO/Scaf-GRPO
-comparisons) and Q7 (integrate a variance-mitigation method and test ZVF
-predictiveness). Paper section:
-\texttt{paper/sections/variance\_mitigation\_comparison.tex}. Bib keys:
-\texttt{aero2024}, \texttt{cppo2024}, \texttt{ngrpo2025},
-\texttt{scafgrpo2025}.}
-
-\subsection{2.7.1 Variance-Mitigation Head-to-Head (W14,
-Q7)}\label{variance-mitigation-head-to-head-w14-q7}
+\subsection{2.7.1 Variance-Mitigation
+Head-to-Head}\label{variance-mitigation-head-to-head}
 
 \textbf{Methods benchmarked.} Each is implemented as a minimal
 configuration override on the shared GRPO trainer; tokenizer, sampler,
@@ -708,8 +701,8 @@ preferentially spends compute on seeds that need it. NGRPO yields the
 smallest effect because preserving the advantage \emph{signal} does not
 prevent the reward distribution itself from collapsing.
 
-\subsection{ZVF Predictiveness Under Mitigation
-(Q7)}\label{zvf-predictiveness-under-mitigation-q7}
+\subsection{ZVF Predictiveness Under
+Mitigation}\label{zvf-predictiveness-under-mitigation}
 
 Spearman \(\rho\) between mean ZVF at step 25 and a binary collapse@100
 indicator, across the same 5-seed sweep (transcribed from
@@ -764,14 +757,8 @@ uninformative.
 \section{2.8 Process, Tree, and Stability-Aware
 Variants}\label{process-tree-and-stability-aware-variants}
 
-\emph{Addresses reviewer concerns W15 (Tree-GRPO + PRM), W16 (ST-PPO
-interaction), W17 (DAR / dual-KL). Paper section:
-\texttt{paper/sections/extended\_related\_work.tex}. Bib keys:
-\texttt{treegrpo2025}, \texttt{lightman2023prm}, \texttt{stppo2025},
-\texttt{dar2024}.}
-
-\subsection{2.8.1 Process and Tree-Based Sampling
-(W15)}\label{process-and-tree-based-sampling-w15}
+\subsection{2.8.1 Process and Tree-Based
+Sampling}\label{process-and-tree-based-sampling}
 
 \textbf{Tree-GRPO} (\texttt{treegrpo2025}). Replaces IID group sampling
 with shared-prefix tree branching: groups are assembled from sibling
@@ -806,8 +793,8 @@ remain sensitive to within-group collapse under dense shaping.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsection{2.8.2 Stability-Aware PPO Variants
-(W16)}\label{stability-aware-ppo-variants-w16}
+\subsection{2.8.2 Stability-Aware PPO
+Variants}\label{stability-aware-ppo-variants}
 
 \textbf{ST-PPO} (\texttt{stppo2025}). Diagnoses \emph{token-level}
 importance-sampling ratios
@@ -833,8 +820,8 @@ stopping in any PPO-family trainer exposing token-level clip fractions
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsection{2.8.3 Dual-KL / Hybrid Alignment
-(W17)}\label{dual-kl-hybrid-alignment-w17}
+\subsection{2.8.3 Dual-KL / Hybrid
+Alignment}\label{dual-kl-hybrid-alignment}
 
 \textbf{DAR} (\texttt{dar2024}, Dual-Alignment Regularization). Uses two
 KL anchors --- the standard reference-model KL
@@ -1340,29 +1327,15 @@ Model:
 \href{https://huggingface.co/Madhu2133/qwen3-8b-swe-grpo}{huggingface.co/Madhu2133/qwen3-8b-swe-grpo}
 
 \subsection{4.2.2 Reward Design, SFT Warm-Starts, and ZVF Outside
-Verifiable Math (Reviewer W7 /
-Q6)}\label{reward-design-sft-warm-starts-and-zvf-outside-verifiable-math-reviewer-w7-q6}
-
-\emph{Paper section:
-\texttt{paper/sections/tool\_use\_code\_expanded.tex}. Reproducibility:
-\texttt{experiments/tool\_use\_reward\_analysis.py} -\textgreater{}
-\texttt{experiments/results/tool\_code\_reward\_diagnostics.tsv}.}
-
-\textbf{Addresses reviewer concerns:} W7 (math-only depth), Q6
-(tool/code reward design + ZVF outside math)
-
-\textbf{Paper section added:}
-\texttt{paper/sections/tool\_use\_code\_expanded.tex}
-\textbf{Reproducibility:}
-\texttt{experiments/tool\_use\_reward\_analysis.py} -\textgreater{}
-\texttt{experiments/results/tool\_code\_reward\_diagnostics.tsv}
+Verifiable
+Math}\label{reward-design-sft-warm-starts-and-zvf-outside-verifiable-math}
 
 \subsubsection{Why Tool-Use and Code Tasks Yielded Near-Zero
 Reward}\label{why-tool-use-and-code-tasks-yielded-near-zero-reward}
 
-Reviewer W7 correctly observes that our non-math runs produced a flat,
-uninformative reward signal. We acknowledge the observation and diagnose
-three distinct failure modes before proposing remedies:
+Our non-math runs frequently produced a flat, uninformative reward
+signal. We diagnose three distinct failure modes before proposing
+remedies:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -1622,8 +1595,8 @@ experiments in the group, with a 24KB technical writeup, a LaTeX paper,
 and full training logs. The 10.39-hour Tinker run is the longest single
 training run in the project.
 
-\subsection{Reviewer-facing caveat on code generation and tool-use
-evaluation}\label{reviewer-facing-caveat-on-code-generation-and-tool-use-evaluation}
+\subsection{Caveat on Code Generation and Tool-Use
+Evaluation}\label{caveat-on-code-generation-and-tool-use-evaluation}
 
 Two important limitations remain. First, the code-generation headline
 for Madhu (HumanEval 86\%, 141/164) is backed by evaluation code on the
@@ -2860,36 +2833,21 @@ then
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsection{4.5.8.1 Framework Configuration Disclosure and Retraction
-(Reviewer W6 /
-Q3)}\label{framework-configuration-disclosure-and-retraction-reviewer-w6-q3}
-
-\emph{Paper section:
-\texttt{paper/sections/framework\_configs\_appendix.tex}.
-Reproducibility: \texttt{experiments/framework\_config\_dumps/*.yaml}.}
-
-\textbf{Addresses reviewer concerns:} W6 (byte-identical contradiction),
-Q3 (exact config dumps)
-
-\textbf{Paper section added:}
-\texttt{paper/sections/framework\_configs\_appendix.tex}
-\textbf{Reproducibility:}
-\texttt{experiments/framework\_config\_dumps/\{trl,tinker,openrlhf,verl\}\_qwen3\_8b\_gsm8k.yaml}
-+ \texttt{README.md}
+\subsection{4.5.8.1 Framework Configuration
+Disclosure}\label{framework-configuration-disclosure}
 
 \subsubsection{Retraction of the ``Byte-Identical''
 Phrasing}\label{retraction-of-the-byte-identical-phrasing}
 
 The main text previously described the cross-framework comparison as
-using ``byte-identical training configs.'' A reviewer (W6) correctly
-flagged this as internally inconsistent: we simultaneously acknowledged
-that the Tinker-managed runtime applies ``managed reference-model
-offload and tuned rollout defaults,'' which cannot be byte-identical to
-anything. We retract the phrase. The comparison is now framed as a
-\textbf{matched-configuration protocol}: every hyperparameter the user
-can set is harmonized across frameworks, while acknowledging explicitly
-that five Tinker-internal fields are managed and cannot be controlled
-from the API. This is a behavioural, not a bit-level, matching.
+using ``byte-identical training configs.'' That phrasing was too strong
+because the Tinker-managed runtime applies managed reference-model
+offload and rollout defaults that cannot be controlled at the API level.
+We therefore treat the comparison as a \textbf{matched-configuration
+protocol}: every hyperparameter the user can set is harmonized across
+frameworks, while explicitly acknowledging that five Tinker-internal
+fields remain managed. This is a behavioural comparison, not a bit-level
+identity claim.
 
 \subsubsection{What Was Held Constant (31 of 47 tracked
 fields)}\label{what-was-held-constant-31-of-47-tracked-fields}
@@ -2975,8 +2933,8 @@ tokens/optimizer step & 3072 & \emph{managed} & 3072 & 3072 \\
 }
 
 \emph{Italicized cells are Tinker-managed and unavailable to the user.}
-Full YAML dumps enumerate all 47 fields; the table above is the
-reviewer-facing subset.
+Full YAML dumps enumerate all 47 fields; the table above highlights the
+user-visible parameters most relevant to interpretation.
 
 \subsubsection{Revised Interpretation}\label{revised-interpretation}
 
@@ -3370,35 +3328,20 @@ GRPO success. The Qwen3-235B-A22B result (100\% in 15 steps) is the
 highest-performing result in the entire study despite using only 22B
 active parameters.
 
-\subsection{5.8.1 F5 Reframed from Mechanistic to Descriptive;
-Regenerated Figures (Reviewer W10 /
-W12)}\label{f5-reframed-from-mechanistic-to-descriptive-regenerated-figures-reviewer-w10-w12}
-
-\emph{Paper sections:
-\texttt{paper/sections/frontier\_scope\_clarification.tex},
-\texttt{paper/sections/figures\_regeneration\_note.tex}.
-Reproducibility: \texttt{scripts/regenerate\_missing\_figures.py}.}
-
-\textbf{Addresses reviewer concerns:} W10 (F5 brief runs), W12
-(placeholder figures)
-
-\textbf{Paper sections added:}
-\texttt{paper/sections/frontier\_scope\_clarification.tex},
-\texttt{paper/sections/figures\_regeneration\_note.tex}
-\textbf{Reproducibility:}
-\texttt{scripts/regenerate\_missing\_figures.py}
+\subsection{5.8.1 Frontier Claims and Figure
+Regeneration}\label{frontier-claims-and-figure-regeneration}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsubsection{10.7.1 F5 Reframed from Mechanistic to
+\subsubsection{F5 Reframed from Mechanistic to
 Descriptive}\label{f5-reframed-from-mechanistic-to-descriptive}
 
-Reviewer feedback (W10) correctly flagged that the earlier phrasing of
-F5 --- ``sustained ceiling / stability at frontier scale'' ---
-over-generalised what the underlying Tinker-backed runs can support. The
-frontier evidence consists of short-horizon (20--30 step), mostly
-single-seed, occasionally interrupted runs on API-managed models at N
-\textgreater= 70B parameters. The revised F5' statement in the paper is:
+The earlier phrasing of F5 --- ``sustained ceiling / stability at
+frontier scale'' --- over-generalised what the underlying Tinker-backed
+runs can support. The frontier evidence consists of short-horizon
+(20--30 step), mostly single-seed, occasionally interrupted runs on
+API-managed models at N \textgreater= 70B parameters. The revised F5'
+statement in the paper is:
 
 \begin{quote}
 \emph{At the frontier scales we tested (N \textgreater= 70B) over 20--30
@@ -3478,11 +3421,11 @@ reuse the same evaluation harness unchanged.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsubsection{10.7.2 Regenerated Figures}\label{regenerated-figures}
+\subsubsection{Regenerated Figures}\label{regenerated-figures}
 
-Reviewer W12 flagged that three figure PDFs had shipped as placeholder
-boxes in an earlier draft. All three have been regenerated as real
-rendered PDF+PNG pairs via a single entrypoint,
+Three figure PDFs in an earlier draft had shipped as placeholder boxes.
+in an earlier draft. All three have been regenerated as real rendered
+PDF+PNG pairs via a single entrypoint,
 \texttt{scripts/regenerate\_missing\_figures.py}, which consumes
 canonical data files (or falls back deterministically to the numbers
 already quoted in the paper text when a source file is missing). The
@@ -3942,23 +3885,8 @@ or verify SFT warm-up has been completed).
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \subsection{5.12.1 Formal Definition, Partial-Correlation Ablation, and
-Cross-Framework Pipeline (Reviewer W1 / Q1 /
-W13)}\label{formal-definition-partial-correlation-ablation-and-cross-framework-pipeline-reviewer-w1-q1-w13}
-
-\emph{Paper sections:
-\texttt{paper/sections/appendix\_zvf\_formalization.tex},
-\texttt{paper/sections/zvf\_pipeline\_spec.tex}. Reproducibility:
-\texttt{scripts/partial\_correlation\_zvf.py},
-\texttt{scripts/zvf\_compute\_cross\_framework.py}.}
-
-\textbf{Addresses reviewer concerns:} W1 (ZVF tautology), Q1
-(formalization), W13 (pipeline underspecification)
-
-\textbf{Paper sections added:}
-\texttt{paper/sections/appendix\_zvf\_formalization.tex},
-\texttt{paper/sections/zvf\_pipeline\_spec.tex}
-\textbf{Reproducibility:} \texttt{scripts/partial\_correlation\_zvf.py},
-\texttt{scripts/zvf\_compute\_cross\_framework.py}
+Cross-Framework
+Pipeline}\label{formal-definition-partial-correlation-ablation-and-cross-framework-pipeline}
 
 \subsubsection{Formal Definition}\label{formal-definition}
 
@@ -3979,7 +3907,7 @@ contribute zero group-relative advantage and therefore zero gradient
 signal to GRPO's policy update. This extends and makes rigorous the
 informal treatment in §5.12 of this report.
 
-A reviewer may reasonably suspect that under binary outcome rewards and
+It is tempting to suspect that under binary outcome rewards and
 group-relative advantages ZVF is a direct function of batch mean reward
 r̄\_t. This holds only at the extremes r̄\emph{t in \{0,1\}. For K i.i.d.
 Bernoulli rollouts with prompt-specific success probability p\_g, the
@@ -3991,8 +3919,8 @@ dramatically: a bimodal population with p\_g in \{0, 1\} yields ZVF = 1,
 whereas a uniform-hard population with all p\_g = 0.5 and K = 8 yields
 ZVF \textasciitilde{} 2·(0.5)\^{}8 \textasciitilde{} 0.008. ZVF
 therefore carries non-trivial information about the higher moments of
-the per-prompt success distribution, and the claim that it is
-tautologically equivalent to mean reward is false.
+the per-prompt success distribution, and is not tautologically
+equivalent to mean reward.
 
 \subsubsection{Partial-Correlation
 Ablation}\label{partial-correlation-ablation}
@@ -4614,30 +4542,8 @@ against the TRL-GRPO reference with \(p_{\text{Bonf}} < 10^{-3}\).
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsection{5.16.1 Evidence-Tier Partition and F1--F5 Survival Analysis
-(Reviewer W4 / W5 /
-Q5)}\label{evidence-tier-partition-and-f1f5-survival-analysis-reviewer-w4-w5-q5}
-
-\emph{Paper section:
-\texttt{paper/sections/statistical\_rigor\_addendum.tex}.
-Reproducibility: \texttt{experiments/survival\_analysis.py}
--\textgreater{} \texttt{experiments/results/survival\_analysis.tsv}.}
-
-\textbf{Addresses reviewer concerns:} W4 (single-seed short-horizon
-Tinker/API runs inflate headline numbers), W5 (BH corrections aggregate
-single-seed rows with multi-seed rows, anti-conservative for the
-latter), Q5 (which of F1--F5 actually survive when restricted to TRL,
-\textgreater=5 seeds, \textgreater=100 steps?).
-
-\textbf{Paper section added:}
-\texttt{paper/sections/statistical\_rigor\_addendum.tex} (§App.
-Statistical Rigor Addendum, label \texttt{app:stat-rigor-addendum}).
-\textbf{Reproducibility:} \texttt{experiments/survival\_analysis.py}
--\textgreater{} \texttt{experiments/results/survival\_analysis.tsv}
-(deterministic, \texttt{MASTER\_SEED\ =\ 20260506}, matches
-\texttt{experiments/compute\_statistics.py}). Consistent with the main
-capstone's §5.15 (power / BH) and §5.16 (deterministic statistical rigor
-pass).
+\subsection{5.16.1 Evidence-Tier Partition and F1--F5 Survival
+Analysis}\label{evidence-tier-partition-and-f1f5-survival-analysis}
 
 \subsubsection{Evidence Tiers}\label{evidence-tiers}
 
@@ -4819,44 +4725,30 @@ vs.~base 82.0\%, \(p = 0.26\)) is unaffected --- it is 5-seed TRL with a
 common eval harness (Tier-A). Its non-significance is, if anything,
 \emph{strengthened} by restricting to the Tier-A/B family.
 
-\textbf{Bottom line:} F3 is the one finding that clears the Q5 bar. F1,
-F2, F4, F5 are downgraded to descriptive case studies pending matched
-multi-seed \textgreater=100-step Tier-A evidence in an open framework
---- the next-step programme flagged in the Conclusion.
+\textbf{Bottom line:} F3 is the one finding that clears the current
+inferential bar. F1, F2, F4, and F5 are downgraded to descriptive case
+studies pending matched multi-seed \textgreater=100-step Tier-A evidence
+in an open framework --- the next-step programme flagged in the
+Conclusion.
 
-\section{5.17 Group-Size Reconciliation: Token-Budget-Normalized Sweep
-(Reviewer W2 / W3 /
-Q2)}\label{group-size-reconciliation-token-budget-normalized-sweep-reviewer-w2-w3-q2}
-
-\emph{Paper section: \texttt{paper/sections/group\_size\_reconcile.tex}.
-Reproducibility: \texttt{experiments/group\_size\_token\_normalized.py}
--\textgreater{}
-\texttt{experiments/results/group\_size\_token\_normalized.tsv}.}
-
-\textbf{Addresses reviewer concerns:} W2 (G=32 vs G=8 contradiction), W3
-(gradient utilization undefined), Q2 (token-normalized sweeps)
-
-\textbf{Paper section added:}
-\texttt{paper/sections/group\_size\_reconcile.tex}
-\textbf{Reproducibility:}
-\texttt{experiments/group\_size\_token\_normalized.py}
+\section{5.17 Group-Size Reconciliation: Token-Budget-Normalized
+Sweep}\label{group-size-reconciliation-token-budget-normalized-sweep}
 
 \subsubsection{The Apparent
 Contradiction}\label{the-apparent-contradiction}
 
-A reviewer correctly identified an apparent inconsistency: Table 6 of
-the main text reports \textbf{G=8} as the highest last-10 reward under a
-\textbf{fixed-step} budget, while elsewhere we claim that
-\textbf{G\textasciitilde32} ``maximizes gradient utilization.'' These
-observations are compatible once the axis of comparison is made
-explicit. Under a \emph{fixed number of optimizer steps}, larger G costs
-proportionally more tokens per step, so the step-budget comparison
-benefits small G. Under a \emph{fixed total token budget}, larger G
-amortizes wasted (all-correct or all-incorrect) rollouts and yields
-higher effective gradient signal per token. The original capstone §4.4.4
-(G=32 sweet spot with GU=54.5\%, saturation onset step 29) and Table 6
-(G=8 wins at the 50-step budget) are therefore \emph{both} correct ---
-they measure on different axes.
+An apparent inconsistency arises because Table 6 reports \textbf{G=8} as
+the highest last-10 reward under a \textbf{fixed-step} budget, while
+elsewhere we claim that \textbf{G\textasciitilde32} maximizes gradient
+utilization. These observations are compatible once the axis of
+comparison is made explicit. Under a \emph{fixed number of optimizer
+steps}, larger G costs proportionally more tokens per step, so the
+step-budget comparison benefits small G. Under a \emph{fixed total token
+budget}, larger G amortizes wasted (all-correct or all-incorrect)
+rollouts and yields higher effective gradient signal per token. The
+original capstone §4.4.4 (G=32 sweet spot with GU=54.5\%, saturation
+onset step 29) and Table 6 (G=8 wins at the 50-step budget) are
+therefore \emph{both} correct --- they measure on different axes.
 
 \subsubsection{Formal Gradient
 Utilization}\label{formal-gradient-utilization}
@@ -4976,20 +4868,14 @@ G shifts rightward with T, so the recommended G depends on the
 practitioner's compute budget, not on a universal heuristic.}
 \end{quote}
 
-The reviewer's concern is taken seriously: the ``more rollouts is always
-better'' heuristic is false, \emph{and} the opposite heuristic ``small G
-is always better'' is equally false. The correct claim is that there
-exists a budget-dependent optimum, and practitioners should locate it
-via the reanalysis script rather than by rule-of-thumb.
+The important conclusion is that the ``more rollouts is always better''
+heuristic is false, \emph{and} the opposite heuristic ``small G is
+always better'' is equally false. The correct claim is that there exists
+a budget-dependent optimum, and practitioners should locate it via the
+reanalysis script rather than by rule-of-thumb.
 
-\section{5.18 Held-Out Sampling Protocols: P1 / P2 / P3 (Reviewer
-W8)}\label{held-out-sampling-protocols-p1-p2-p3-reviewer-w8}
-
-\emph{Paper section: \texttt{paper/sections/heldout\_stratified.tex}.
-Reproducibility: \texttt{experiments/stratified\_heldout.py}
--\textgreater{} \texttt{experiments/results/heldout\_stratified.tsv}.}
-
-10.6.1 Held-Out Sampling Protocols (W8)
+\section{5.18 Held-Out Sampling Protocols: P1 / P2 /
+P3}\label{held-out-sampling-protocols-p1-p2-p3}
 
 Three sampling protocols were applied to GSM8K-500 held-out accuracy for
 every condition:
@@ -5044,14 +4930,14 @@ P1 rank -\textgreater{} P2 rank
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Qwen3-8B-Base (W1) & 0.920 {[}0.920, 0.920{]} & 0.840 {[}0.767, 0.893{]}
-& 0.826 {[}0.737, 0.898{]} & +0.080 & 1 -\textgreater{} 2 (+1) \\
+Qwen3-8B-Base & 0.920 {[}0.920, 0.920{]} & 0.840 {[}0.767, 0.893{]} &
+0.826 {[}0.737, 0.898{]} & +0.080 & 1 -\textgreater{} 2 (+1) \\
 Qwen3.5-4B (scale) & 0.920 {[}0.920, 0.920{]} & 0.833 {[}0.759, 0.899{]}
 & 0.742 {[}0.602, 0.873{]} & +0.088 & 2 -\textgreater{} 3 (+1) \\
-DeepSeek-V3.1 (W3) & 0.894 {[}0.878, 0.910{]} & 0.805 {[}0.745, 0.859{]}
-& 0.749 {[}0.604, 0.859{]} & +0.088 & 3 -\textgreater{} 4 (+1) \\
-gpt-oss-120b (W1) & 0.852 {[}0.773, 0.920{]} & 0.852 {[}0.773, 0.920{]}
-& 0.873 {[}0.779, 0.920{]} & 0.000 & 4 -\textgreater{} 1 (−3) \\
+DeepSeek-V3.1 & 0.894 {[}0.878, 0.910{]} & 0.805 {[}0.745, 0.859{]} &
+0.749 {[}0.604, 0.859{]} & +0.088 & 3 -\textgreater{} 4 (+1) \\
+gpt-oss-120b & 0.852 {[}0.773, 0.920{]} & 0.852 {[}0.773, 0.920{]} &
+0.873 {[}0.779, 0.920{]} & 0.000 & 4 -\textgreater{} 1 (−3) \\
 TRL-GRPO Qwen2.5-0.5B & 0.729 {[}0.669, 0.776{]} & 0.729 {[}0.669,
 0.776{]} & 0.729 {[}0.669, 0.776{]} & 0.000 & 5 -\textgreater{} 5 (0) \\
 Qwen3-8B Wave6 batch-1 & 0.647 {[}0.537, 0.757{]} & 0.194 {[}0.132,
@@ -5115,28 +5001,21 @@ all protocols.
 
 \subsubsection{}\label{section}
 
-\section{5.19 Base vs Instruct Paired Evaluation (Reviewer W9 / W11 /
-Q4)}\label{base-vs-instruct-paired-evaluation-reviewer-w9-w11-q4}
+\section{5.19 Base vs Instruct Paired
+Evaluation}\label{base-vs-instruct-paired-evaluation}
 
-\emph{Paper section:
-\texttt{paper/sections/base\_vs\_instruct\_paired.tex}. Reproducibility:
-\texttt{experiments/base\_instruct\_paired.py} -\textgreater{}
-\texttt{experiments/results/base\_instruct\_paired.tsv}.}
-
-10.6.2 Base vs Instruct Paired Evaluation (W9, W11, Q4)
-
-\textbf{Reconciling the \texttt{+0.922\ vs\ 84.4\ percent} flag (W9).}
-The reviewer read \texttt{+0.922} and \texttt{84.4\ percent} as
-contradicting held-out numbers. They are not comparable quantities:
-\texttt{+0.922} is the \textbf{training-reward peak} of the
+\textbf{Aligning the \texttt{+0.922} and \texttt{84.4\ percent}
+metrics.} These figures do not contradict one another because they are
+not comparable quantities: \texttt{+0.922} is the
+\textbf{training-reward peak} of the
 \texttt{campaign\_v2\_w1\_qwen3-8b-base} run on
 \texttt{Qwen/Qwen3-8B-Base} (peak = 1.00, last-10 = 0.856, single seed,
 GRPO \texttt{G=8}, \texttt{lr=1e-5}, 30 steps). \texttt{84.4\ percent}
 is the \textbf{training-reward last-10 mean} of the
 \texttt{scale\_gsm8k\_qwen3-8b} instruct run at \texttt{lr=3e-5}.
-Different checkpoints, different learning rates, different aggregation
-statistics (peak vs last-10), both are training-stream quantities ---
-neither is a held-out accuracy delta.
+Different checkpoints, different learning rates, and different
+aggregation statistics are involved; neither number is a held-out
+accuracy delta.
 
 \textbf{Paired grid under strictly identical conditions} (same prompt,
 scorer, optimiser, \texttt{G\ =\ 8}, 30-step budget, held-out eval at
@@ -5217,30 +5096,30 @@ suppressed and no p-value computed).
 \begin{itemize}
 \tightlist
 \item
-  \textbf{W9 (the contradiction):} resolved as an accounting error
-  across checkpoint state × metric. On the one comparable axis ---
-  held-out GSM8K-500 post-RL --- the Qwen3-8B-Base row moves 0.820
+  \textbf{Metric alignment.} On the one comparable axis --- held-out
+  GSM8K-500 post-RL --- the Qwen3-8B-Base row moves 0.820
   -\textgreater{} 0.909 (\texttt{+0.089}, \texttt{n\ =\ 1}, descriptive)
   and the matched Qwen3-8B-Instruct row moves 0.820 -\textgreater{}
   0.833 (\texttt{+0.013}, \texttt{n\ =\ 5}, paired \texttt{t\ =\ 1.32},
   raw \texttt{p\ =\ 0.186}, \texttt{p\_BH\ =\ 0.186}, not significant).
   The base-vs-instruct gain gap is \texttt{0.089\ −\ 0.013\ =\ +0.076}
-  in favour of base, but is not statistically supportable at the current
-  seed budget.
+  in favour of base, but it is not statistically supportable at the
+  current seed budget.
 \item
-  \textbf{W11 (base/instruct mixing):} pre-RL held-out accuracy is
-  identical between the two rows at 0.820. The entire delta story lives
-  in the post-RL column and is confounded by the extreme seed asymmetry
-  (\texttt{n\ =\ 1} base vs \texttt{n\ =\ 5} instruct).
+  \textbf{Base vs.~instruct mixing.} Pre-RL held-out accuracy is
+  identical between the two Qwen rows at 0.820. The entire delta story
+  therefore lives in the post-RL column and is confounded by the extreme
+  seed asymmetry (\texttt{n\ =\ 1} base vs \texttt{n\ =\ 5} instruct).
 \item
-  \textbf{Q4 (identical conditions):} base dominates on training-reward
-  peak (0.856 vs 0.311), instruct dominates on training stability
-  (Llama-3.1-8B Inst train last-10 0.963 vs Base 0.115, ZVF@100 0.285
-  for Qwen3-8B-Inst vs NA for Base with \texttt{n\ =\ 1}). The
-  bitter-lesson narrative is rephrased from ``base beats instruct on
-  GSM8K after RL'' to the narrower and supportable ``base has more
-  headroom on the training-reward peak metric; held-out post-RL gain is
-  not demonstrated at \texttt{n\ \textgreater{}=\ 5}.''
+  \textbf{Matched-condition interpretation.} Base dominates on
+  training-reward peak (0.856 vs 0.311), while instruct dominates on
+  training stability (Llama-3.1-8B Inst train last-10 0.963 vs Base
+  0.115, ZVF@100 0.285 for Qwen3-8B-Inst vs NA for Base with
+  \texttt{n\ =\ 1}). The narrative is therefore narrowed from ``base
+  beats instruct on GSM8K after RL'' to the more supportable claim that
+  base shows more headroom on the training-reward peak metric, while
+  held-out post-RL gain is not demonstrated at
+  \texttt{n\ \textgreater{}=\ 5}.
 \end{itemize}
 
 \textbf{Notation contract (new).} All following main-text numerics refer
@@ -5254,41 +5133,31 @@ summary mean without a \texttt{Base} / \texttt{Inst} annotation.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\subsubsection{10.6.3 Summary}\label{summary}
+\subsubsection{Summary}\label{summary}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{W8} --- resolved. P1 top-10 selection bias quantified at a
-  mean of \texttt{+0.142} absolute accuracy (median \texttt{+0.080}, max
-  \texttt{+0.453} on the high-variance Wave-6 batch-1 condition); 34 of
-  36 pairwise orderings (94.4 percent) preserved P1 -\textgreater{} P2;
-  headline numbers restated in random-deployment (P2) terms.
+  P1 top-10 selection bias is quantified at a mean of \texttt{+0.142}
+  absolute accuracy (median \texttt{+0.080}, max \texttt{+0.453} on the
+  high-variance Wave-6 batch-1 condition); 34 of 36 pairwise orderings
+  (94.4 percent) are preserved P1 -\textgreater{} P2, so headline
+  numbers are restated in random-deployment (P2) terms.
 \item
-  \textbf{W9} --- resolved. \texttt{+0.922} and \texttt{84.4\ percent}
-  are different metrics on different checkpoints; paired grid gives the
-  aligned comparison.
+  The \texttt{+0.922} and \texttt{84.4\ percent} figures refer to
+  different metrics on different checkpoints; the paired grid provides
+  the aligned comparison.
 \item
-  \textbf{W11} --- resolved. Explicit \texttt{Base} / \texttt{Inst}
-  notation contract in force; three implicit-mixing claims retracted.
+  An explicit \texttt{Base} / \texttt{Inst} notation contract is now in
+  force, and earlier implicit mixing between checkpoint types has been
+  removed.
 \item
-  \textbf{Q4} --- partially resolved. Qwen3-8B and Llama-3.1-8B
-  base/instruct pairs complete; Qwen3-1.7B and Qwen3-0.6B flagged
-  \texttt{source-missing} in the TSV and listed as the remaining audit
-  gap pending compute allocation.
+  Qwen3-8B and Llama-3.1-8B base/instruct pairs are complete; Qwen3-1.7B
+  and Qwen3-0.6B remain \texttt{source-missing} in the TSV and are
+  listed as audit gaps pending further compute.
 \end{itemize}
 
 \chapter{6. Summary of Findings}\label{summary-of-findings}
-
-\begin{quote}
-\textbf{Revision note (2026-04-19).} The findings below have been
-audited against NeurIPS 2026 reviewer feedback. Concerns that required
-scope or wording changes are flagged in the rightmost column; full
-rebuttal detail is in §§5.8.1, 5.12.1, 5.16.1, 5.17--5.19 and
-§§2.7--2.8. A mechanical registry of all 24 weaknesses is at
-\texttt{paper/reviewer\_points.yaml}, scored by
-\texttt{scripts/reviewer\_response\_score.sh}.
-\end{quote}
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
@@ -5621,17 +5490,16 @@ Report}\label{gaps-closed-in-this-report}
 
 \begin{itemize}
 \item
-  \textbf{NeurIPS 2026 reviewer rebuttal (all 24 items).} ZVF
-  formalization + partial-correlation ablation (W1/Q1), cross-framework
-  pipeline (W13), group-size token-normalization and
-  gradient-utilization formalization (W2/W3/Q2), framework-gap config
-  dumps (W6/Q3), evidence-tier partition + F1--F5 survival (W4/W5/Q5),
-  tool-use/code reward-design analysis and ERF surrogate (W7/Q6),
-  held-out stratified sampling P1/P2/P3 (W8), base-vs-instruct paired
-  evaluation (W9/W11/Q4), F5 scope downgrade (W10), regenerated figures
-  (W12), AERO/CPPO/NGRPO/Scaf-GRPO head-to-head (W14/Q7), Tree-GRPO/PRM
-  (W15), ST-PPO (W16), DAR/dual-KL (W17). See §§2.7--2.8 and §§5.8.1,
-  5.12.1, 5.16.1, 5.17--5.19.
+  \textbf{Statistical and reporting hardening across the report.} This
+  version adds formal ZVF definitions and partial-correlation analysis,
+  a cross-framework pipeline specification, token-budget-normalized
+  group-size analysis, framework configuration disclosure, evidence-tier
+  partitioning for F1--F5, tool-use/code reward-design analysis with
+  ERF, held-out sampling protocols (P1/P2/P3), base-vs-instruct paired
+  evaluation, tighter frontier-scope wording, regenerated figures, and
+  expanded related work on AERO/CPPO/NGRPO/Scaf-GRPO, Tree-GRPO/PRM,
+  ST-PPO, and DAR. See §§2.7--2.8 and §§5.8.1, 5.12.1, 5.16.1,
+  5.17--5.19.
 \item
   Multi-seed replication (5 seeds, confidence intervals)
 \item

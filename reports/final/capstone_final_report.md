@@ -140,9 +140,7 @@ Several papers address the length bias problem in GRPO — where longer response
 
 ### 2.7 Variance-Mitigation Methods (Head-to-Head)
 
-*Addresses reviewer concerns W14 (missing AERO/CPPO/NGRPO/Scaf-GRPO comparisons) and Q7 (integrate a variance-mitigation method and test ZVF predictiveness). Paper section: `paper/sections/variance_mitigation_comparison.tex`. Bib keys: `aero2024`, `cppo2024`, `ngrpo2025`, `scafgrpo2025`.*
-
-#### 2.7.1 Variance-Mitigation Head-to-Head (W14, Q7)
+#### 2.7.1 Variance-Mitigation Head-to-Head
 
 **Methods benchmarked.** Each is implemented as a minimal configuration override on the shared GRPO trainer; tokenizer, sampler, optimizer, LoRA adapters, evaluation harness, and seed sweep are held identical across the five runs. Only the variance-mitigation hook differs.
 
@@ -177,7 +175,7 @@ Only AERO consults a ZVF-style signal at runtime; Scaf-GRPO is the only method t
 
 **Directional reading.** All four methods reduce mean ZVF at step 50 and extend time-to-collapse. Scaf-GRPO (suppression at the reward-landscape level) produces the strongest held-out improvement (+3.4 points) and latest collapse. AERO (adaptive rollout sizing) has modest effect on final reward but large effect on collapse rate — it preferentially spends compute on seeds that need it. NGRPO yields the smallest effect because preserving the advantage *signal* does not prevent the reward distribution itself from collapsing.
 
-#### ZVF Predictiveness Under Mitigation (Q7)
+#### ZVF Predictiveness Under Mitigation
 
 Spearman $\rho$ between mean ZVF at step 25 and a binary collapse@100 indicator, across the same 5-seed sweep (transcribed from `tab:variance-zvf-rho`):
 
@@ -196,9 +194,7 @@ Spearman $\rho$ between mean ZVF at step 25 and a binary collapse@100 indicator,
 
 ### 2.8 Process, Tree, and Stability-Aware Variants
 
-*Addresses reviewer concerns W15 (Tree-GRPO + PRM), W16 (ST-PPO interaction), W17 (DAR / dual-KL). Paper section: `paper/sections/extended_related_work.tex`. Bib keys: `treegrpo2025`, `lightman2023prm`, `stppo2025`, `dar2024`.*
-
-#### 2.8.1 Process and Tree-Based Sampling (W15)
+#### 2.8.1 Process and Tree-Based Sampling
 
 **Tree-GRPO** (`treegrpo2025`). Replaces IID group sampling with shared-prefix tree branching: groups are assembled from sibling branches that share an initial prefix but diverge at later tokens (prefix KV-cache is reused, so cost drops). Prefix-induced intra-group correlation $\rho$ shifts the zero-variance probability to approximately
 
@@ -210,7 +206,7 @@ where $c(G)$ is increasing in $G$. When $\rho < 0$ (branches intentionally span 
 
 ---
 
-#### 2.8.2 Stability-Aware PPO Variants (W16)
+#### 2.8.2 Stability-Aware PPO Variants
 
 **ST-PPO** (`stppo2025`). Diagnoses *token-level* importance-sampling ratios $w_{i,t} = \pi_\theta(a_{i,t} \mid s_{i,t}) / \pi_{\theta_{\text{old}}}(a_{i,t} \mid s_{i,t})$ and the fraction of tokens clipped by the PPO surrogate. ST-PPO shows that collapse is preceded by bursts of clipping concentrated on a small subset of tokens.
 
@@ -222,7 +218,7 @@ which has lower false-positive rate than either component alone — healthy expl
 
 ---
 
-#### 2.8.3 Dual-KL / Hybrid Alignment (W17)
+#### 2.8.3 Dual-KL / Hybrid Alignment
 
 **DAR** (`dar2024`, Dual-Alignment Regularization). Uses two KL anchors — the standard reference-model KL $\mathrm{KL}(\pi_\theta \Vert \pi_{\text{ref}})$ plus an SFT-anchor KL $\mathrm{KL}(\pi_\theta \Vert \pi_{\text{sft}})$. DAR admits an *RL-free regression* variant in which the rollout-based objective is replaced by a regression loss against a paired preference dataset (blurring the DPO/PPO boundary).
 
@@ -464,18 +460,11 @@ Madhu (HuggingFace: [Madhu2133](https://huggingface.co/Madhu2133), GitHub: [madh
 Model: [huggingface.co/Madhu2133/qwen3-8b-swe-grpo](https://huggingface.co/Madhu2133/qwen3-8b-swe-grpo)
 
 
-#### 4.2.2 Reward Design, SFT Warm-Starts, and ZVF Outside Verifiable Math (Reviewer W7 / Q6)
-
-*Paper section: `paper/sections/tool_use_code_expanded.tex`. Reproducibility: `experiments/tool_use_reward_analysis.py` → `experiments/results/tool_code_reward_diagnostics.tsv`.*
-
-**Addresses reviewer concerns:** W7 (math-only depth), Q6 (tool/code reward design + ZVF outside math)
-
-**Paper section added:** `paper/sections/tool_use_code_expanded.tex`
-**Reproducibility:** `experiments/tool_use_reward_analysis.py` → `experiments/results/tool_code_reward_diagnostics.tsv`
+#### 4.2.2 Reward Design, SFT Warm-Starts, and ZVF Outside Verifiable Math
 
 ##### Why Tool-Use and Code Tasks Yielded Near-Zero Reward
 
-Reviewer W7 correctly observes that our non-math runs produced a flat, uninformative reward signal. We acknowledge the observation and diagnose three distinct failure modes before proposing remedies:
+Our non-math runs frequently produced a flat, uninformative reward signal. We diagnose three distinct failure modes before proposing remedies:
 
 1. **Format-adherence failure.** Base chat models almost always prepend prose or markdown fences before the JSON envelope required by the Glaive / xLAM / 5-tool checkers. Our parser strips ```json fences and extracts the first `{...}` substring, but nested-object arguments interleaved with commentary still fail the schema check.
 2. **API-schema out-of-distribution.** Glaive and xLAM use function-calling conventions the base checkpoints were never trained on (`"function_name"` vs. `"tool"`, positional vs. keyword arguments, camelCase vs. snake_case). The model confidently hallucinates plausible but rejected schemas.
@@ -554,7 +543,7 @@ Net GRPO improvement is +0.6 percentage points above baseline, which is within m
 
 **Strengths:** Rafi produced one of the most thoroughly documented experiments in the group, with a 24KB technical writeup, a LaTeX paper, and full training logs. The 10.39-hour Tinker run is the longest single training run in the project.
 
-#### Reviewer-facing caveat on code generation and tool-use evaluation
+#### Caveat on Code Generation and Tool-Use Evaluation
 
 Two important limitations remain. First, the code-generation headline for Madhu (HumanEval 86%, 141/164) is backed by evaluation code on the full 164-problem harness; an earlier report version cited a 50-problem subset (32%→40%, Fisher's exact \(p{=}0.53\)) from an intermediate checkpoint. Second, the multi-turn tool-calling scores (for example 0.90/0.92) are **custom reward-derived scenario scores** from a small internal evaluation set; we did not measure inter-rater reliability or use standardized evaluators.
 
@@ -943,18 +932,11 @@ The gap between Tinker and TRL on the identical config (17× at last-10) isolate
 ---
 
 
-#### 4.5.8.1 Framework Configuration Disclosure and Retraction (Reviewer W6 / Q3)
-
-*Paper section: `paper/sections/framework_configs_appendix.tex`. Reproducibility: `experiments/framework_config_dumps/*.yaml`.*
-
-**Addresses reviewer concerns:** W6 (byte-identical contradiction), Q3 (exact config dumps)
-
-**Paper section added:** `paper/sections/framework_configs_appendix.tex`
-**Reproducibility:** `experiments/framework_config_dumps/{trl,tinker,openrlhf,verl}_qwen3_8b_gsm8k.yaml` + `README.md`
+#### 4.5.8.1 Framework Configuration Disclosure
 
 ##### Retraction of the "Byte-Identical" Phrasing
 
-The main text previously described the cross-framework comparison as using "byte-identical training configs." A reviewer (W6) correctly flagged this as internally inconsistent: we simultaneously acknowledged that the Tinker-managed runtime applies "managed reference-model offload and tuned rollout defaults," which cannot be byte-identical to anything. We retract the phrase. The comparison is now framed as a **matched-configuration protocol**: every hyperparameter the user can set is harmonized across frameworks, while acknowledging explicitly that five Tinker-internal fields are managed and cannot be controlled from the API. This is a behavioural, not a bit-level, matching.
+The main text previously described the cross-framework comparison as using "byte-identical training configs." That phrasing was too strong because the Tinker-managed runtime applies managed reference-model offload and rollout defaults that cannot be controlled at the API level. We therefore treat the comparison as a **matched-configuration protocol**: every hyperparameter the user can set is harmonized across frameworks, while explicitly acknowledging that five Tinker-internal fields remain managed. This is a behavioural comparison, not a bit-level identity claim.
 
 ##### What Was Held Constant (31 of 47 tracked fields)
 
@@ -994,7 +976,7 @@ reference-model placement (`on_device` / `managed` / `separate_process` / `shard
 | AdamW lr | 1×10⁻⁶ | 1×10⁻⁶ | 1×10⁻⁶ | 1×10⁻⁶ |
 | tokens/optimizer step | 3072 | *managed* | 3072 | 3072 |
 
-*Italicized cells are Tinker-managed and unavailable to the user.* Full YAML dumps enumerate all 47 fields; the table above is the reviewer-facing subset.
+*Italicized cells are Tinker-managed and unavailable to the user.* Full YAML dumps enumerate all 47 fields; the table above highlights the user-visible parameters most relevant to interpretation.
 
 ##### Revised Interpretation
 
@@ -1136,20 +1118,13 @@ The World-Class Suite provides a more complete picture of frontier model behavio
 **Key observation:** The scaling pattern is not monotonic. Nemotron-120B at 120B dense parameters achieves lower sustained performance (16.2%) than Qwen3-8B at instruct-tuned 8B. Instruction tuning quality appears to dominate parameter count as a predictor of GRPO success. The Qwen3-235B-A22B result (100% in 15 steps) is the highest-performing result in the entire study despite using only 22B active parameters.
 
 
-#### 5.8.1 F5 Reframed from Mechanistic to Descriptive; Regenerated Figures (Reviewer W10 / W12)
-
-*Paper sections: `paper/sections/frontier_scope_clarification.tex`, `paper/sections/figures_regeneration_note.tex`. Reproducibility: `scripts/regenerate_missing_figures.py`.*
-
-**Addresses reviewer concerns:** W10 (F5 brief runs), W12 (placeholder figures)
-
-**Paper sections added:** `paper/sections/frontier_scope_clarification.tex`, `paper/sections/figures_regeneration_note.tex`
-**Reproducibility:** `scripts/regenerate_missing_figures.py`
+#### 5.8.1 Frontier Claims and Figure Regeneration
 
 ---
 
-##### 10.7.1 F5 Reframed from Mechanistic to Descriptive
+##### F5 Reframed from Mechanistic to Descriptive
 
-Reviewer feedback (W10) correctly flagged that the earlier phrasing of F5 —
+The earlier phrasing of F5 —
 "sustained ceiling / stability at frontier scale" — over-generalised what the
 underlying Tinker-backed runs can support. The frontier evidence consists of
 short-horizon (20–30 step), mostly single-seed, occasionally interrupted runs
@@ -1196,9 +1171,9 @@ such a replication can reuse the same evaluation harness unchanged.
 
 ---
 
-##### 10.7.2 Regenerated Figures
+##### Regenerated Figures
 
-Reviewer W12 flagged that three figure PDFs had shipped as placeholder boxes
+Three figure PDFs in an earlier draft had shipped as placeholder boxes.
 in an earlier draft. All three have been regenerated as real rendered PDF+PNG
 pairs via a single entrypoint, `scripts/regenerate_missing_figures.py`, which
 consumes canonical data files (or falls back deterministically to the numbers
@@ -1361,14 +1336,7 @@ Tool-use experiments without SFT warm-up have ZVF=100% from step 0 — no gradie
 ---
 
 
-#### 5.12.1 Formal Definition, Partial-Correlation Ablation, and Cross-Framework Pipeline (Reviewer W1 / Q1 / W13)
-
-*Paper sections: `paper/sections/appendix_zvf_formalization.tex`, `paper/sections/zvf_pipeline_spec.tex`. Reproducibility: `scripts/partial_correlation_zvf.py`, `scripts/zvf_compute_cross_framework.py`.*
-
-**Addresses reviewer concerns:** W1 (ZVF tautology), Q1 (formalization), W13 (pipeline underspecification)
-
-**Paper sections added:** `paper/sections/appendix_zvf_formalization.tex`, `paper/sections/zvf_pipeline_spec.tex`
-**Reproducibility:** `scripts/partial_correlation_zvf.py`, `scripts/zvf_compute_cross_framework.py`
+#### 5.12.1 Formal Definition, Partial-Correlation Ablation, and Cross-Framework Pipeline
 
 ##### Formal Definition
 
@@ -1378,7 +1346,7 @@ Let a GRPO batch B_t at optimizer step t consist of |B_t| prompt-groups, each gr
 
 where Var̂ is the unbiased sample variance and ε = 10⁻⁶ for rewards normalized to [0,1]. Intuitively, ZVF_t is the fraction of groups at step t whose rollouts all collapsed to the same outcome; those groups contribute zero group-relative advantage and therefore zero gradient signal to GRPO's policy update. This extends and makes rigorous the informal treatment in §5.12 of this report.
 
-A reviewer may reasonably suspect that under binary outcome rewards and group-relative advantages ZVF is a direct function of batch mean reward r̄_t. This holds only at the extremes r̄_t ∈ {0,1}. For K i.i.d. Bernoulli rollouts with prompt-specific success probability p_g, the expected ZVF under the null independence model is E[ZVF_t] = E_{p_g}[p_g^K + (1 − p_g)^K], which depends on the *shape* of the difficulty distribution, not only its mean. Concretely, two populations with the same mean reward r̄ = 0.5 can differ dramatically: a bimodal population with p_g ∈ {0, 1} yields ZVF = 1, whereas a uniform-hard population with all p_g = 0.5 and K = 8 yields ZVF ≈ 2·(0.5)⁸ ≈ 0.008. ZVF therefore carries non-trivial information about the higher moments of the per-prompt success distribution, and the claim that it is tautologically equivalent to mean reward is false.
+It is tempting to suspect that under binary outcome rewards and group-relative advantages ZVF is a direct function of batch mean reward r̄_t. This holds only at the extremes r̄_t ∈ {0,1}. For K i.i.d. Bernoulli rollouts with prompt-specific success probability p_g, the expected ZVF under the null independence model is E[ZVF_t] = E_{p_g}[p_g^K + (1 − p_g)^K], which depends on the *shape* of the difficulty distribution, not only its mean. Concretely, two populations with the same mean reward r̄ = 0.5 can differ dramatically: a bimodal population with p_g ∈ {0, 1} yields ZVF = 1, whereas a uniform-hard population with all p_g = 0.5 and K = 8 yields ZVF ≈ 2·(0.5)⁸ ≈ 0.008. ZVF therefore carries non-trivial information about the higher moments of the per-prompt success distribution, and is not tautologically equivalent to mean reward.
 
 ##### Partial-Correlation Ablation
 
@@ -1592,14 +1560,7 @@ All other headline claims survive: TRL-GRPO cross-seed mean \(= 0.734\) (95% CI 
 ---
 
 
-#### 5.16.1 Evidence-Tier Partition and F1–F5 Survival Analysis (Reviewer W4 / W5 / Q5)
-
-*Paper section: `paper/sections/statistical_rigor_addendum.tex`. Reproducibility: `experiments/survival_analysis.py` → `experiments/results/survival_analysis.tsv`.*
-
-**Addresses reviewer concerns:** W4 (single-seed short-horizon Tinker/API runs inflate headline numbers), W5 (BH corrections aggregate single-seed rows with multi-seed rows, anti-conservative for the latter), Q5 (which of F1–F5 actually survive when restricted to TRL, ≥5 seeds, ≥100 steps?).
-
-**Paper section added:** `paper/sections/statistical_rigor_addendum.tex` (§App. Statistical Rigor Addendum, label `app:stat-rigor-addendum`).
-**Reproducibility:** `experiments/survival_analysis.py` → `experiments/results/survival_analysis.tsv` (deterministic, `MASTER_SEED = 20260506`, matches `experiments/compute_statistics.py`). Consistent with the main capstone's §5.15 (power / BH) and §5.16 (deterministic statistical rigor pass).
+#### 5.16.1 Evidence-Tier Partition and F1–F5 Survival Analysis
 
 ##### Evidence Tiers
 
@@ -1651,20 +1612,13 @@ Per `paper/sections/statistical_rigor_addendum.tex` §downgrades, the following 
 
 The **negative held-out GSM8K result** (Qwen3-8B post-GRPO 83.3% vs. base 82.0%, $p = 0.26$) is unaffected — it is 5-seed TRL with a common eval harness (Tier-A). Its non-significance is, if anything, *strengthened* by restricting to the Tier-A/B family.
 
-**Bottom line:** F3 is the one finding that clears the Q5 bar. F1, F2, F4, F5 are downgraded to descriptive case studies pending matched multi-seed ≥100-step Tier-A evidence in an open framework — the next-step programme flagged in the Conclusion.
+**Bottom line:** F3 is the one finding that clears the current inferential bar. F1, F2, F4, and F5 are downgraded to descriptive case studies pending matched multi-seed ≥100-step Tier-A evidence in an open framework — the next-step programme flagged in the Conclusion.
 
-### 5.17 Group-Size Reconciliation: Token-Budget-Normalized Sweep (Reviewer W2 / W3 / Q2)
-
-*Paper section: `paper/sections/group_size_reconcile.tex`. Reproducibility: `experiments/group_size_token_normalized.py` → `experiments/results/group_size_token_normalized.tsv`.*
-
-**Addresses reviewer concerns:** W2 (G=32 vs G=8 contradiction), W3 (gradient utilization undefined), Q2 (token-normalized sweeps)
-
-**Paper section added:** `paper/sections/group_size_reconcile.tex`
-**Reproducibility:** `experiments/group_size_token_normalized.py`
+### 5.17 Group-Size Reconciliation: Token-Budget-Normalized Sweep
 
 ##### The Apparent Contradiction
 
-A reviewer correctly identified an apparent inconsistency: Table 6 of the main text reports **G=8** as the highest last-10 reward under a **fixed-step** budget, while elsewhere we claim that **G≈32** "maximizes gradient utilization." These observations are compatible once the axis of comparison is made explicit. Under a *fixed number of optimizer steps*, larger G costs proportionally more tokens per step, so the step-budget comparison benefits small G. Under a *fixed total token budget*, larger G amortizes wasted (all-correct or all-incorrect) rollouts and yields higher effective gradient signal per token. The original capstone §4.4.4 (G=32 sweet spot with GU=54.5%, saturation onset step 29) and Table 6 (G=8 wins at the 50-step budget) are therefore *both* correct — they measure on different axes.
+An apparent inconsistency arises because Table 6 reports **G=8** as the highest last-10 reward under a **fixed-step** budget, while elsewhere we claim that **G≈32** maximizes gradient utilization. These observations are compatible once the axis of comparison is made explicit. Under a *fixed number of optimizer steps*, larger G costs proportionally more tokens per step, so the step-budget comparison benefits small G. Under a *fixed total token budget*, larger G amortizes wasted (all-correct or all-incorrect) rollouts and yields higher effective gradient signal per token. The original capstone §4.4.4 (G=32 sweet spot with GU=54.5%, saturation onset step 29) and Table 6 (G=8 wins at the 50-step budget) are therefore *both* correct — they measure on different axes.
 
 ##### Formal Gradient Utilization
 
@@ -1707,13 +1661,9 @@ The CI excludes zero, so the shift is statistically real rather than noise. Ther
 
 > *Under a fixed* step *budget at small total token counts, G=8 attains the highest last-10 reward (Table 6). Under fixed* total tokens *at the canonical training scale used elsewhere in the paper (T ≥ 16M), G≈32 maximizes both held-out accuracy and the ĜU estimator defined in Eq. (eq:gu). The inverted-U apex in log G shifts rightward with T, so the recommended G depends on the practitioner's compute budget, not on a universal heuristic.*
 
-The reviewer's concern is taken seriously: the "more rollouts is always better" heuristic is false, *and* the opposite heuristic "small G is always better" is equally false. The correct claim is that there exists a budget-dependent optimum, and practitioners should locate it via the reanalysis script rather than by rule-of-thumb.
+The important conclusion is that the "more rollouts is always better" heuristic is false, *and* the opposite heuristic "small G is always better" is equally false. The correct claim is that there exists a budget-dependent optimum, and practitioners should locate it via the reanalysis script rather than by rule-of-thumb.
 
-### 5.18 Held-Out Sampling Protocols: P1 / P2 / P3 (Reviewer W8)
-
-*Paper section: `paper/sections/heldout_stratified.tex`. Reproducibility: `experiments/stratified_heldout.py` → `experiments/results/heldout_stratified.tsv`.*
-
-10.6.1 Held-Out Sampling Protocols (W8)
+### 5.18 Held-Out Sampling Protocols: P1 / P2 / P3
 
 Three sampling protocols were applied to GSM8K-500 held-out accuracy for every condition:
 
@@ -1727,10 +1677,10 @@ All protocols evaluated at `T = 0`, `N = 500`, bootstrap CIs with `N_boot = 1000
 
 | Condition                    | P1 (top-10)                  | P2 (random)                  | P3 (stratified)              | Δ (P1 − P2) | P1 rank → P2 rank |
 |------------------------------|------------------------------|------------------------------|------------------------------|-------------|-------------------|
-| Qwen3-8B-Base (W1)           | 0.920 [0.920, 0.920]         | 0.840 [0.767, 0.893]         | 0.826 [0.737, 0.898]         | +0.080      | 1 → 2 (+1)        |
+| Qwen3-8B-Base                | 0.920 [0.920, 0.920]         | 0.840 [0.767, 0.893]         | 0.826 [0.737, 0.898]         | +0.080      | 1 → 2 (+1)        |
 | Qwen3.5-4B (scale)           | 0.920 [0.920, 0.920]         | 0.833 [0.759, 0.899]         | 0.742 [0.602, 0.873]         | +0.088      | 2 → 3 (+1)        |
-| DeepSeek-V3.1 (W3)           | 0.894 [0.878, 0.910]         | 0.805 [0.745, 0.859]         | 0.749 [0.604, 0.859]         | +0.088      | 3 → 4 (+1)        |
-| gpt-oss-120b (W1)            | 0.852 [0.773, 0.920]         | 0.852 [0.773, 0.920]         | 0.873 [0.779, 0.920]         | 0.000       | 4 → 1 (−3)        |
+| DeepSeek-V3.1                | 0.894 [0.878, 0.910]         | 0.805 [0.745, 0.859]         | 0.749 [0.604, 0.859]         | +0.088      | 3 → 4 (+1)        |
+| gpt-oss-120b                 | 0.852 [0.773, 0.920]         | 0.852 [0.773, 0.920]         | 0.873 [0.779, 0.920]         | 0.000       | 4 → 1 (−3)        |
 | TRL-GRPO Qwen2.5-0.5B        | 0.729 [0.669, 0.776]         | 0.729 [0.669, 0.776]         | 0.729 [0.669, 0.776]         | 0.000       | 5 → 5 (0)         |
 | Qwen3-8B Wave6 batch-1       | 0.647 [0.537, 0.757]         | 0.194 [0.132, 0.267]         | 0.316 [0.169, 0.476]         | +0.453      | 6 → 8 (+2)        |
 | Qwen3-8B Wave6 temp-0.4      | 0.629 [0.543, 0.702]         | 0.322 [0.163, 0.482]         | 0.273 [0.132, 0.427]         | +0.306      | 7 → 7 (0)         |
@@ -1751,13 +1701,9 @@ The revised practitioner-facing headline for Qwen3-8B-Base drops from **0.920 (b
 
 #####
 
-### 5.19 Base vs Instruct Paired Evaluation (Reviewer W9 / W11 / Q4)
+### 5.19 Base vs Instruct Paired Evaluation
 
-*Paper section: `paper/sections/base_vs_instruct_paired.tex`. Reproducibility: `experiments/base_instruct_paired.py` → `experiments/results/base_instruct_paired.tsv`.*
-
-10.6.2 Base vs Instruct Paired Evaluation (W9, W11, Q4)
-
-**Reconciling the `+0.922 vs 84.4 percent` flag (W9).** The reviewer read `+0.922` and `84.4 percent` as contradicting held-out numbers. They are not comparable quantities: `+0.922` is the **training-reward peak** of the `campaign_v2_w1_qwen3-8b-base` run on `Qwen/Qwen3-8B-Base` (peak = 1.00, last-10 = 0.856, single seed, GRPO `G=8`, `lr=1e-5`, 30 steps). `84.4 percent` is the **training-reward last-10 mean** of the `scale_gsm8k_qwen3-8b` instruct run at `lr=3e-5`. Different checkpoints, different learning rates, different aggregation statistics (peak vs last-10), both are training-stream quantities — neither is a held-out accuracy delta.
+**Aligning the `+0.922` and `84.4 percent` metrics.** These figures do not contradict one another because they are not comparable quantities: `+0.922` is the **training-reward peak** of the `campaign_v2_w1_qwen3-8b-base` run on `Qwen/Qwen3-8B-Base` (peak = 1.00, last-10 = 0.856, single seed, GRPO `G=8`, `lr=1e-5`, 30 steps). `84.4 percent` is the **training-reward last-10 mean** of the `scale_gsm8k_qwen3-8b` instruct run at `lr=3e-5`. Different checkpoints, different learning rates, and different aggregation statistics are involved; neither number is a held-out accuracy delta.
 
 **Paired grid under strictly identical conditions** (same prompt, scorer, optimiser, `G = 8`, 30-step budget, held-out eval at `T = 0`, `N = 500`; values transcribed from `base_instruct_paired.tsv`):
 
@@ -1776,25 +1722,22 @@ d.o. = descriptive only (`n_seeds < 5`, CIs suppressed and no p-value computed).
 
 **What the paired grid says.**
 
-- **W9 (the contradiction):** resolved as an accounting error across checkpoint state × metric. On the one comparable axis — held-out GSM8K-500 post-RL — the Qwen3-8B-Base row moves 0.820 → 0.909 (`+0.089`, `n = 1`, descriptive) and the matched Qwen3-8B-Instruct row moves 0.820 → 0.833 (`+0.013`, `n = 5`, paired `t = 1.32`, raw `p = 0.186`, `p_BH = 0.186`, not significant). The base-vs-instruct gain gap is `0.089 − 0.013 = +0.076` in favour of base, but is not statistically supportable at the current seed budget.
-- **W11 (base/instruct mixing):** pre-RL held-out accuracy is identical between the two rows at 0.820. The entire delta story lives in the post-RL column and is confounded by the extreme seed asymmetry (`n = 1` base vs `n = 5` instruct).
-- **Q4 (identical conditions):** base dominates on training-reward peak (0.856 vs 0.311), instruct dominates on training stability (Llama-3.1-8B Inst train last-10 0.963 vs Base 0.115, ZVF@100 0.285 for Qwen3-8B-Inst vs NA for Base with `n = 1`). The bitter-lesson narrative is rephrased from "base beats instruct on GSM8K after RL" to the narrower and supportable "base has more headroom on the training-reward peak metric; held-out post-RL gain is not demonstrated at `n ≥ 5`."
+- **Metric alignment.** On the one comparable axis — held-out GSM8K-500 post-RL — the Qwen3-8B-Base row moves 0.820 → 0.909 (`+0.089`, `n = 1`, descriptive) and the matched Qwen3-8B-Instruct row moves 0.820 → 0.833 (`+0.013`, `n = 5`, paired `t = 1.32`, raw `p = 0.186`, `p_BH = 0.186`, not significant). The base-vs-instruct gain gap is `0.089 − 0.013 = +0.076` in favour of base, but it is not statistically supportable at the current seed budget.
+- **Base vs. instruct mixing.** Pre-RL held-out accuracy is identical between the two Qwen rows at 0.820. The entire delta story therefore lives in the post-RL column and is confounded by the extreme seed asymmetry (`n = 1` base vs `n = 5` instruct).
+- **Matched-condition interpretation.** Base dominates on training-reward peak (0.856 vs 0.311), while instruct dominates on training stability (Llama-3.1-8B Inst train last-10 0.963 vs Base 0.115, ZVF@100 0.285 for Qwen3-8B-Inst vs NA for Base with `n = 1`). The narrative is therefore narrowed from "base beats instruct on GSM8K after RL" to the more supportable claim that base shows more headroom on the training-reward peak metric, while held-out post-RL gain is not demonstrated at `n ≥ 5`.
 
 **Notation contract (new).** All following main-text numerics refer to the instruct checkpoint of each model unless suffixed `(base)`. Three previously-implicit phrasings were retracted in `paper/sections/base_vs_instruct_paired.tex`: (i) "Qwen3-8B improves GSM8K by +0.922" (training-reward peak on base, not held-out); (ii) any reading of the 84.4 percent training last-10 cell as a held-out accuracy; (iii) any pooling of base and instruct rows in a single summary mean without a `Base` / `Inst` annotation.
 
 ---
 
-##### 10.6.3 Summary
+##### Summary
 
-- **W8** — resolved. P1 top-10 selection bias quantified at a mean of `+0.142` absolute accuracy (median `+0.080`, max `+0.453` on the high-variance Wave-6 batch-1 condition); 34 of 36 pairwise orderings (94.4 percent) preserved P1 → P2; headline numbers restated in random-deployment (P2) terms.
-- **W9** — resolved. `+0.922` and `84.4 percent` are different metrics on different checkpoints; paired grid gives the aligned comparison.
-- **W11** — resolved. Explicit `Base` / `Inst` notation contract in force; three implicit-mixing claims retracted.
-- **Q4** — partially resolved. Qwen3-8B and Llama-3.1-8B base/instruct pairs complete; Qwen3-1.7B and Qwen3-0.6B flagged `source-missing` in the TSV and listed as the remaining audit gap pending compute allocation.
+- P1 top-10 selection bias is quantified at a mean of `+0.142` absolute accuracy (median `+0.080`, max `+0.453` on the high-variance Wave-6 batch-1 condition); 34 of 36 pairwise orderings (94.4 percent) are preserved P1 → P2, so headline numbers are restated in random-deployment (P2) terms.
+- The `+0.922` and `84.4 percent` figures refer to different metrics on different checkpoints; the paired grid provides the aligned comparison.
+- An explicit `Base` / `Inst` notation contract is now in force, and earlier implicit mixing between checkpoint types has been removed.
+- Qwen3-8B and Llama-3.1-8B base/instruct pairs are complete; Qwen3-1.7B and Qwen3-0.6B remain `source-missing` in the TSV and are listed as audit gaps pending further compute.
 
 ## 6. Summary of Findings
-
-> **Revision note (2026-04-19).** The findings below have been audited against NeurIPS 2026 reviewer feedback. Concerns that required scope or wording changes are flagged in the rightmost column; full rebuttal detail is in §§5.8.1, 5.12.1, 5.16.1, 5.17–5.19 and §§2.7–2.8. A mechanical registry of all 24 weaknesses is at `paper/reviewer_points.yaml`, scored by `scripts/reviewer_response_score.sh`.
-
 
 | # | Finding | Type | Evidence | Source |
 |---|---------|------|----------|--------|
@@ -1890,7 +1833,7 @@ Power analysis (Section 5.15.1) establishes that single-seed Tinker experiments 
 
 ### 7.1 Gaps Closed in This Report
 
-- **NeurIPS 2026 reviewer rebuttal (all 24 items).** ZVF formalization + partial-correlation ablation (W1/Q1), cross-framework pipeline (W13), group-size token-normalization and gradient-utilization formalization (W2/W3/Q2), framework-gap config dumps (W6/Q3), evidence-tier partition + F1–F5 survival (W4/W5/Q5), tool-use/code reward-design analysis and ERF surrogate (W7/Q6), held-out stratified sampling P1/P2/P3 (W8), base-vs-instruct paired evaluation (W9/W11/Q4), F5 scope downgrade (W10), regenerated figures (W12), AERO/CPPO/NGRPO/Scaf-GRPO head-to-head (W14/Q7), Tree-GRPO/PRM (W15), ST-PPO (W16), DAR/dual-KL (W17). See §§2.7–2.8 and §§5.8.1, 5.12.1, 5.16.1, 5.17–5.19.
+- **Statistical and reporting hardening across the report.** This version adds formal ZVF definitions and partial-correlation analysis, a cross-framework pipeline specification, token-budget-normalized group-size analysis, framework configuration disclosure, evidence-tier partitioning for F1–F5, tool-use/code reward-design analysis with ERF, held-out sampling protocols (P1/P2/P3), base-vs-instruct paired evaluation, tighter frontier-scope wording, regenerated figures, and expanded related work on AERO/CPPO/NGRPO/Scaf-GRPO, Tree-GRPO/PRM, ST-PPO, and DAR. See §§2.7–2.8 and §§5.8.1, 5.12.1, 5.16.1, 5.17–5.19.
 
 - Multi-seed replication (5 seeds, confidence intervals)
 - LoRA rank ablation (rank 8/16/32/64, parameter-efficiency frontier)
