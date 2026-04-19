@@ -35,13 +35,13 @@ LOG = ROOT / "blind_review" / "paper_changes.log"
 # repository root.  The rewrite pass below also rewrites any \input{SRC}
 # references inside main_anon.tex to point at the DST copies.
 INCLUDE_FILES = [
-    ("paper/ethics_statement.tex",       "paper/ethics_statement_anon.tex"),
-    ("paper/sections/abstract.tex",      "paper/sections/abstract_anon.tex"),
-    ("paper/sections/intro.tex",         "paper/sections/intro_anon.tex"),
+    ("paper/ethics_statement.tex", "paper/ethics_statement_anon.tex"),
+    ("paper/sections/abstract.tex", "paper/sections/abstract_anon.tex"),
+    ("paper/sections/intro.tex", "paper/sections/intro_anon.tex"),
     ("paper/sections/related_work_v2.tex", "paper/sections/related_work_v2_anon.tex"),
-    ("paper/sections/conclusion.tex",    "paper/sections/conclusion_anon.tex"),
+    ("paper/sections/conclusion.tex", "paper/sections/conclusion_anon.tex"),
     ("paper/sections/stat_rigor_updates.tex", "paper/sections/stat_rigor_updates_anon.tex"),
-    ("paper/sections/checklist.tex",     "paper/sections/checklist_anon.tex"),
+    ("paper/sections/checklist.tex", "paper/sections/checklist_anon.tex"),
 ]
 
 
@@ -432,7 +432,9 @@ def anonymize(text: str, *, require_author_block: bool = True) -> tuple[str, lis
     return text, changes
 
 
-def _run_substitutions(text: str, changes: list[str], *, skip_author_block: bool) -> tuple[str, list[str]]:
+def _run_substitutions(
+    text: str, changes: list[str], *, skip_author_block: bool
+) -> tuple[str, list[str]]:
     """Internal helper used by :func:`anonymize` to apply every substitution
     pass *except* step 1 (author block rewrite).  Kept as a separate
     function so included fragments can reuse the same pipeline without
@@ -441,7 +443,9 @@ def _run_substitutions(text: str, changes: list[str], *, skip_author_block: bool
     # Implementation: temporarily prepend a synthetic author block, run the
     # full pipeline, then strip the synthetic block back out.  This avoids
     # duplicating the substitution list.
-    sentinel_block = "\\author{%\n  Arvind C R\\\\\n  PES University\\\\\n  \\texttt{arvindcr4@gmail.com}%\n}\n"
+    sentinel_block = (
+        "\\author{%\n  Arvind C R\\\\\n  PES University\\\\\n  \\texttt{arvindcr4@gmail.com}%\n}\n"
+    )
     sentinel_tag = "%__ANON_SENTINEL_START__\n"
     synthetic = sentinel_tag + sentinel_block + "%__ANON_SENTINEL_END__\n"
     wrapped = synthetic + text
@@ -455,7 +459,7 @@ def _run_substitutions(text: str, changes: list[str], *, skip_author_block: bool
     if idx != -1:
         # Drop through end of that line
         newline = anon_wrapped.find("\n", idx)
-        anon_wrapped = anon_wrapped[newline + 1:]
+        anon_wrapped = anon_wrapped[newline + 1 :]
     # Extend the change log but drop the author-block line (it's synthetic)
     filtered = [c for c in inc_changes if "author block replaced" not in c]
     changes.extend(filtered)
@@ -473,7 +477,9 @@ def main() -> None:
         pat = re.compile(r"\\input\{" + re.escape(src_key) + r"\}")
         new_anon_text, n = pat.subn(r"\\input{" + dst_key + r"}", anon_text)
         anon_text = new_anon_text
-        changes.append(f"- rewrote \\input{{{src_key}}} -> \\input{{{dst_key}}}: {n} replacement(s)")
+        changes.append(
+            f"- rewrote \\input{{{src_key}}} -> \\input{{{dst_key}}}: {n} replacement(s)"
+        )
 
     DST.write_text(anon_text, encoding="utf-8")
 

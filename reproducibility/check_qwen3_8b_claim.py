@@ -14,6 +14,7 @@ percentage points (the "±2%" spec in Task 13 step 5).
 
 Exit 0 iff both PPO and GRPO deltas are below the 2-pp threshold.
 """
+
 from __future__ import annotations
 import json
 import sys
@@ -25,13 +26,13 @@ MASTER = ROOT / "experiments" / "master_results.json"
 
 # Published claim (see paper/main.tex L906-907, abstract L26-27, intro L69)
 CLAIM = {
-    "grpo": 0.344,   # 34.4% last-10 on Qwen3-8B / GSM8K, Tinker, G=8, seed 42
-    "ppo":  0.225,   # 22.5% last-10 on Qwen3-8B / GSM8K, Modal H100
+    "grpo": 0.344,  # 34.4% last-10 on Qwen3-8B / GSM8K, Tinker, G=8, seed 42
+    "ppo": 0.225,  # 22.5% last-10 on Qwen3-8B / GSM8K, Modal H100
 }
 # Which master_results rows correspond
 ROW_NAMES = {
     "grpo": "scale_gsm8k_qwen3-8b",
-    "ppo":  "ppo_qwen3-8b",
+    "ppo": "ppo_qwen3-8b",
 }
 TOLERANCE_PP = 2.0  # percentage points
 
@@ -60,7 +61,9 @@ def load_rows():
 def recompute_last10(row) -> float:
     trace = row.get("reward_trace") or []
     if len(trace) < 10:
-        raise RuntimeError(f"row {_row_key(row)} has only {len(trace)} steps — cannot compute last-10")
+        raise RuntimeError(
+            f"row {_row_key(row)} has only {len(trace)} steps — cannot compute last-10"
+        )
     return mean(trace[-10:])
 
 
@@ -80,15 +83,17 @@ def main() -> int:
         ok = delta_pp <= TOLERANCE_PP
         if not ok:
             all_ok = False
-        report.append({
-            "algo": algo,
-            "row": name,
-            "claimed_last10": claimed,
-            "recomputed_last10": round(recomputed, 4),
-            "delta_percentage_points": round(delta_pp, 3),
-            "tolerance_pp": TOLERANCE_PP,
-            "passed": ok,
-        })
+        report.append(
+            {
+                "algo": algo,
+                "row": name,
+                "claimed_last10": claimed,
+                "recomputed_last10": round(recomputed, 4),
+                "delta_percentage_points": round(delta_pp, 3),
+                "tolerance_pp": TOLERANCE_PP,
+                "passed": ok,
+            }
+        )
 
     summary = {
         "claim": "Qwen3-8B / GSM8K — GRPO last-10 = 34.4%, PPO last-10 = 22.5% (Task 13 step 5 headline claim)",
