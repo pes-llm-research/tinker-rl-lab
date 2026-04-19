@@ -19,6 +19,7 @@ TEMPLATE_GRACEFUL_API_KEY=0
 TEMPLATE_SAVES_EXPERIMENT_DATA=0
 CONFIG_TIMEOUT_ADEQUATE=0
 TEMPLATE_RUNS_CLEANLY=0
+TEMPLATE_PRINTS_METRICS=0
 
 # --- 1. Dependency readiness (20 points) ---
 MISSING=""
@@ -159,7 +160,17 @@ else
     echo "CONFIG_MISSING=1"
 fi
 
-# --- 9. Template runs cleanly without TINKER_API_KEY (20 points) ---
+# --- 9. Template prints structured metrics (10 points) ---
+if [ "$TEMPLATE_PARSES" -eq 1 ]; then
+    if grep -q "METRICS SUMMARY" "$TEMPLATE"; then
+        TEMPLATE_PRINTS_METRICS=1
+        SCORE=$((SCORE + 10))
+    else
+        echo "TEMPLATE_MISSING_METRICS_SUMMARY=1"
+    fi
+fi
+
+# --- 10. Template runs cleanly without TINKER_API_KEY (20 points) ---
 if [ "$TEMPLATE_PARSES" -eq 1 ]; then
     TMPDIR=$(mktemp -d)
     cd "$TMPDIR"
@@ -185,4 +196,5 @@ echo "METRIC template_no_main_guard=$TEMPLATE_NO_MAIN_GUARD"
 echo "METRIC template_graceful_api_key=$TEMPLATE_GRACEFUL_API_KEY"
 echo "METRIC template_saves_experiment_data=$TEMPLATE_SAVES_EXPERIMENT_DATA"
 echo "METRIC config_timeout_adequate=$CONFIG_TIMEOUT_ADEQUATE"
+echo "METRIC template_prints_metrics=$TEMPLATE_PRINTS_METRICS"
 echo "METRIC template_runs_cleanly=$TEMPLATE_RUNS_CLEANLY"
