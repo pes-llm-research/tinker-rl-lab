@@ -1,0 +1,55 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main_anon.aux
+The style file: plainnat.bst
+Database file #1: references.bib
+Warning--empty journal in azar2024ipo
+Warning--empty journal in havrilla2023trlx
+Warning--can't use both volume and number fields in henderson2018deep
+Warning--empty journal in luong2024reft
+Warning--empty booktitle in sedghpour2024artifact
+Warning--empty booktitle in schulman2017proximal
+Warning--empty booktitle in yao2023deepspeedchat
+Warning--empty journal in zhang2025verifybench
+You've used 157 entries,
+            2773 wiz_defined-function locations,
+            1324 strings with 38347 characters,
+and the built_in function-call counts, 89162 in all, are:
+= -- 7162
+> -- 8325
+< -- 56
++ -- 2828
+- -- 2649
+* -- 7800
+:= -- 14749
+add.period$ -- 663
+call.type$ -- 157
+change.case$ -- 1297
+chr.to.int$ -- 135
+cite$ -- 322
+duplicate$ -- 3187
+empty$ -- 5327
+format.name$ -- 2840
+if$ -- 17926
+int.to.chr$ -- 23
+int.to.str$ -- 1
+missing$ -- 136
+newline$ -- 983
+num.names$ -- 628
+pop$ -- 2649
+preamble$ -- 1
+purify$ -- 1140
+quote$ -- 0
+skip$ -- 2801
+stack$ -- 0
+substring$ -- 600
+swap$ -- 262
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 1727
+warning$ -- 8
+while$ -- 494
+width$ -- 0
+write$ -- 2280
+(There were 8 warnings)

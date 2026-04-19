@@ -485,8 +485,8 @@ $^\star$ Still running at time of writing; partial metrics from steps completed.
 \label{sec:framework_gap}
 
 We report a matched-task Qwen3-8B-family launcher comparison (seed~42, group
-size $G=8$, learning rate $10^{-5}$, GSM8K-500, 30 steps) across four launchers
-in this repository: Tinker (managed), TRL~\citep{vonwerra2022trl} on Modal
+size $G=8$, learning rate $10^{-5}$, GSM8K-500, 30 steps) across four launchers:
+Tinker (managed), TRL~\citep{vonwerra2022trl} on Modal
 H100, verl on Modal H100 and OpenRLHF on Modal H100. The compared runs are not
 a pure framework-only ablation because the Tinker run uses Qwen3-8B-Base,
 whereas the TRL/verl/OpenRLHF runs use Qwen3-8B; managed-default differences
@@ -500,7 +500,7 @@ four-bar last-10-reward chart (Figure~\ref{fig:framework_gap}).
 \includegraphics[width=0.8\columnwidth]{figures/v2/framework_comparison.pdf}
 \caption{Task~4 matched launcher comparison. A matched-task GRPO setup
 ($G{=}8$, lr${=}10^{-5}$, GSM8K-500, 30 steps, seed~42) was run through four
-launch paths in this repository. The Tinker-managed run uses Qwen3-8B-Base,
+launch paths. The Tinker-managed run uses Qwen3-8B-Base,
 whereas the TRL, verl, and OpenRLHF runs use Qwen3-8B, so this figure should
 be read as a mixed-checkpoint launcher comparison rather than a pure
 framework-only ablation. In this specific comparison, the Tinker-managed
@@ -592,9 +592,8 @@ from training batches. The held-out runs use greedy decoding ($T{=}0$,
 \texttt{max\_tokens}$=512$), whereas \emph{last-10} is computed from
 stochastic training rollouts. The two metrics therefore share the same
 boxed-answer scorer but are not directly comparable.
-The evaluator and the raw per-problem trace are released at
-\texttt{experiments/modal/modal\_heldout\_eval.py} and
-\texttt{experiments/results/heldout\_gsm8k.json}.
+The evaluator and the raw per-problem trace are included in the artifact
+bundle.
 
 \begin{table}[htbp]
 \centering
@@ -643,7 +642,7 @@ both land near 91\% held-out accuracy despite training \emph{last-10} values
 of 98.8\% and 85.6\%. Because the table is a post-hoc top-10 selection, it
 does not establish generalisation, absence of optimism, or a capacity ceiling.
 Consistent with that caution, a separate five-seed Qwen3-8B (non-Base)
-post-GRPO control reported in our released artifacts shows only a small,
+post-GRPO control run shows only a small,
 non-significant held-out advantage over the corresponding Qwen3-8B-Base arm
 (83.3\% vs.~82.0\%, $t = 1.32$, $p = 0.26$).
 
@@ -685,28 +684,34 @@ As a baseline we also fit a power-law $R(t) = a\,t^{b} + c$.
 
 \paragraph{Fit Quality and Family Breakdown.}
 Both models yield modest fits given short trace lengths (median 20--30 steps).
-The exponential saturation model achieves a higher mean $R^{2}$ ($0.210$ vs.\ $0.170$),
-confirming its preferability. DeepSeek-V3.1 achieves the highest asymptotic reward
-($R_{\max} \approx 0.83$); classical PPO baselines (SB3, CleanRL, Tianshou) exhibit
-near-zero reward ceilings ($R_{\max} \approx 0.01$), confirming the gap between
-value-based RL and LLM fine-tuning. Qwen3-MoE shows the best-explained saturation
-curve ($R^{2} = 0.797$), suggesting its sparse architecture converges more smoothly.
+The exponential saturation model achieves a slightly higher mean $R^{2}$
+($0.210$ vs.\ $0.170$), so we use it as the more descriptive summary rather
+than as a validated generative law. DeepSeek-V3.1 achieves the highest fitted
+asymptotic reward ($R_{\max} \approx 0.83$); classical PPO baselines (SB3,
+CleanRL, Tianshou) fit near-zero reward ceilings ($R_{\max} \approx 0.01$) in
+this sample. Qwen3-MoE has the highest single-run saturation fit
+($R^{2} = 0.797$), but with short traces and mixed tasks we treat that as a
+descriptive fit-quality result rather than architecture-specific evidence.
 
 \paragraph{Three-Phase Learning Dynamics.}
-Following~\citet{nimmaturi2025scalinglaws}, 15 of 28 experiments (53.6\%) satisfy
-a three-phase criterion (slow start~$\to$ rapid improvement~$\to$ saturation).
-The fraction rises to \textbf{73\%} for LLM fine-tuning experiments, providing
-strong empirical support for this hypothesis in the transformer fine-tuning setting.
-The 80\% reward threshold is crossed at approximately \textbf{62\%} of total
-training steps, implying significant compute waste in the tail.
+Following~\citet{nimmaturi2025scalinglaws}, 15 of 28 experiments (53.6\%)
+satisfy a three-phase criterion (slow start~$\to$ rapid improvement~$\to$
+saturation). The fraction rises to \textbf{73\%} for LLM fine-tuning
+experiments, which is directionally consistent with that template rather than
+a strong confirmation of it. In runs where the saturation fit is at least
+reasonable, the fitted 80\% reward threshold is crossed at approximately
+\textbf{62\%} of total training steps, suggesting that some late training mass
+may be low-yield.
 
 \paragraph{Scale Correlations.}
-Larger models learn faster ($r = 0.468$ between model size and $k$, $p = 0.012$)
-and reach higher reward ceilings ($r = 0.533$ between model size and $R_{\max}$,
-$p = 0.004$). Convergence speed measured in gradient steps---rather than wall-clock
-time---does not depend significantly on model scale ($r = -0.088$, $p = 0.658$),
-suggesting that larger models are more efficient per step but not necessarily
-requiring fewer steps to converge.
+In this sample, larger models are associated with faster fitted convergence
+rates ($r = 0.468$ between model size and $k$, $p = 0.012$) and higher fitted
+reward ceilings ($r = 0.533$ between model size and $R_{\max}$, $p = 0.004$).
+These correlations are descriptive and entangled with model family and task
+mix. Convergence speed measured in gradient steps---rather than wall-clock
+time---does not depend significantly on model scale ($r = -0.088$, $p =
+0.658$), so we do not infer that larger models strictly require fewer steps to
+converge.
 
 \begin{figure}[htbp]
 \centering
@@ -748,8 +753,8 @@ To complement the cross-model heatmap above, we ran a targeted 12-run
 sensitivity sweep on Qwen3-8B / GSM8K (seed 42, 30 steps, group size 8,
 learning rate $1\!\times\!10^{-5}$) that varies one knob at a time around
 the canonical configuration (rank 32, temperature 0.8, per-step batch 2).
-Raw traces live in \texttt{experiments/tinker-runs/results/wave6\_ablations.json};
-the figure script is \texttt{paper/figures/wave6\_sensitivity.py}.
+The underlying ablation traces and plotting script are archived with the
+artifact bundle.
 
 \begin{figure}[htbp]
 \centering
@@ -1040,11 +1045,11 @@ $\alpha=0.05$ (two-tailed). MDE: minimum detectable effect at 80\% power.}
 \toprule
 \textbf{Comparison} & $n_A$ & $n_B$ & \textbf{Cohen's $d$} & \textbf{95\% CI} & $p$-value & \textbf{Power} & \textbf{MDE} \\
 \midrule
-GRPO vs PPO (Qwen3-8B) & $10$ & $10$ & $-0.14$ & $[-1.02, 0.74]$ & 0.761 & $0.06$ & $1.25$ \\
-PPO vs GRPO (Llama-3.1-8B-Inst) & $10$ & $10$ & $12.75$ & $[8.49, 17.00]$ & $<$0.001$^{*\dag}$ & $1.00$ & $1.25$ \\
-LLM-native vs Classic RL & $5$ & $15$ & $21.84$ & $[14.63, 29.04]$ & $<$0.001$^{*\dag}$ & $1.00$ & $1.45$ \\
+GRPO (Tinker) vs PPO (Modal H100) on Qwen3-8B & $10$ & $10$ & $-0.14$ & $[-1.02, 0.74]$ & 0.761 & $0.06$ & $1.25$ \\
+PPO (Modal H100) vs GRPO (Tinker) on Llama-3.1-8B-Inst & $10$ & $10$ & $12.75$ & $[8.49, 17.00]$ & $<$0.001$^{*\dag}$ & $1.00$ & $1.25$ \\
+LLM-native stacks vs Classic RL stacks & $5$ & $15$ & $21.84$ & $[14.63, 29.04]$ & $<$0.001$^{*\dag}$ & $1.00$ & $1.45$ \\
 Dense vs MoE Qwen3 & $30$ & $3$ & $-4.79$ & $[-6.47, -3.11]$ & $<$0.001$^{*\dag}$ & $1.00$ & $1.70$ \\
-Tinker vs TRL (LLM-native) & $20$ & $5$ & $1.17$ & $[0.13, 2.21]$ & 0.016$^\dag$ & $0.65$ & $1.40$ \\
+Tinker-managed vs TRL (LLM-native launchers) & $20$ & $5$ & $1.17$ & $[0.13, 2.21]$ & 0.016$^\dag$ & $0.65$ & $1.40$ \\
 \midrule
 \multicolumn{8}{l}{\small $^*$Bonferroni: $\alpha' = 0.0100$; $^\dag$BH--FDR $<0.05$ across $k=5$ tests.} \\
 \bottomrule
@@ -1116,10 +1121,10 @@ GRPO experiments show significantly lower instability than classic-RL PPO:
 mean SI of $0.162 \pm 0.157$ vs.\ $0.814 \pm 0.370$
 (Mann--Whitney $U = 1.0$, $p = 0.005$); mean PTD of $0.212 \pm 0.205$
 vs.\ $0.619 \pm 0.139$ ($p = 0.018$).
-This stability advantage is consistent with GRPO's reference-free
-objective: by computing advantages relative to group baselines rather
-than a reference policy, GRPO avoids the compounding drift that
-KL-penalized objectives can accumulate~\citep{shao2024deepseekmath}.
+This difference is compatible with accounts of GRPO's group-relative
+objective reducing some forms of reference-model mismatch, but our benchmark
+does not isolate mechanism: algorithm, implementation, model family, and task
+mix all vary across the pooled comparison~\citep{shao2024deepseekmath}.
 
 \paragraph{Nemotron-120B Collapse Case Study.}
 Nemotron-120B presents the clearest case of catastrophic policy drift
@@ -1135,9 +1140,9 @@ neighborhood of the reference initialization throughout training.
 \paragraph{Honest Limitation.}
 These proxy metrics capture \emph{symptoms} of policy drift (reward
 instability) rather than \emph{direct measurements} of distributional
-divergence. The corrected KL tracking implementation is included in
-the released code; future work will validate the proxy--KL
-correspondence and quantify per-token divergence trajectories.
+divergence. The corrected KL tracking implementation is included in the
+artifact release, but this paper does not yet validate the proxy--KL
+correspondence or quantify per-token divergence trajectories.
 
 \begin{figure}[t]
 \centering
@@ -1357,8 +1362,8 @@ We swept group size $G \in \{2, 4, 8, 16\}$ on the Qwen3-8B family
 (Table~\ref{tab:main_results}, Group Size block).
 In the 30-step Qwen3-8B/Tinker sweep reported in the main table, $G{=}8$
 achieves the highest last-10 training reward among $G \in \{2,4,8,16\}$. We
-avoid treating that as a universal optimum: in separate seed-fixed sweeps
-reported in our released artifacts, larger groups can support different
+avoid treating that as a universal optimum: in separate seed-fixed sweeps,
+larger groups can support different
 rankings and often reduce
 zero-variance or zero-loss behavior even when reward-optimal $G$ is unclear.
 Our conservative conclusion is therefore that group size matters and is
@@ -1538,23 +1543,26 @@ and (4) a binary \textbf{verbosity-trap flag}, set when peak occurs before 65\%
 of training and terminal reward falls below 90\% of peak.
 
 \paragraph{Comparative results.}
-GRPO runs ($n = 11$) exhibit a mean instability index of $0.267 \pm 0.335$,
-compared with $0.785 \pm 0.297$ for PPO-labelled runs ($n = 17$). Among the
-eleven GRPO experiments, four (36\%) exhibit the verbosity-trap pattern,
+GRPO-labelled runs ($n = 11$) exhibit a mean instability index of
+$0.267 \pm 0.335$, compared with $0.785 \pm 0.297$ for PPO-labelled runs
+($n = 17$). We treat this pooled contrast cautiously because it mixes
+frameworks, model families, tasks, and reward functions. Among the eleven
+GRPO-labelled experiments, four (36\%) exhibit the verbosity-trap pattern,
 including both Qwen3-8B runs and Nemotron-120B. The Nemotron-120B GRPO
 experiment records the highest instability index ($1.194$), with regression
 severity of $1.0$ and a terminal/peak reward ratio of $0.57$. By contrast,
-the two DeepSeek-V3.1 GRPO runs show markedly lower instability ($0.143$
-mean), suggesting that sufficiently capable frontier models may partially
-self-regulate against length exploitation.
+the two DeepSeek-V3.1 GRPO runs are simply low-instability examples in this
+pooled corpus ($0.143$ mean), not clean evidence of frontier self-regulation.
 
 \paragraph{Implications.}
-GRPO training produces reward trajectories that are more volatile in the tail,
-more susceptible to mid-training collapse, and less monotonically improving
-than PPO-on-LLM counterparts~\cite{liu2025drgrpo,wang2025madgrpo}.
-Direct mitigation strategies---sequence-length normalization, token-budget
-penalties, or the ``Dr.~GRPO'' correction~\cite{liu2025drgrpo}---are not yet
-represented in the current experiment set and constitute a natural next ablation.
+In this heterogeneous pooled sample, GRPO-labelled runs are on average more
+volatile in the tail, more susceptible to mid-training collapse, and less
+monotonically improving than the PPO-labelled runs we logged
+~\cite{liu2025drgrpo,wang2025madgrpo}. We do not read that contrast as a
+pure algorithm-only result because the pooled sample also differs in stack,
+model family, task, and reward design. Sequence-length normalization,
+token-budget penalties, or the ``Dr.~GRPO'' correction~\cite{liu2025drgrpo}
+remain plausible mitigations and natural next ablations.
 
 \begin{figure}[htbp]
 \centering
@@ -1689,27 +1697,26 @@ enable such analysis.
 The 73-percentage-point gap between LLM-native libraries (Tinker, TRL) and
 classic RL libraries (SB3, CleanRL, Tianshou) on the identical arithmetic task
 --- Cohen's $d = 21.84$, the largest effect in our entire study by two orders
-of magnitude --- replicates and \emph{extends} the classic finding of
-\citet{henderson2018deep} from game-playing RL to the LLM post-training
-regime.
-The mechanism here is not merely random-seed sensitivity but a categorical
-architectural mismatch: classic RL libraries treat the language model as a
-standard MDP policy with a scalar state embedding, apply advantage normalization
-designed for continuous action spaces, and do not handle the auto-regressive
-token generation loop correctly.
-The result is near-random performance not because the algorithm is wrong but
-because the implementation does not instantiate the algorithm the paper
-describes.
+of magnitude --- shows that implementation-layer choices can dominate
+short-horizon LLM post-training outcomes. In that sense it echoes
+\citet{henderson2018deep}, but the present comparison is still a stack-level
+result rather than a pure algorithmic estimate.
+The mechanism here is plausibly an architectural mismatch: classic RL
+libraries treat the language model as a standard MDP policy with a scalar
+state embedding, apply advantage normalization designed for continuous action
+spaces, and do not handle the auto-regressive token generation loop
+correctly. Our evidence is therefore strongest for an implementation-layer gap,
+not for a categorical claim about PPO-like optimization itself.
 
 This finding has a direct practical implication: \emph{published claims that
-``PPO fails on LLM reasoning'' or ``classic RL is unsuitable for language models''
-may be confounded by implementation failures rather than algorithmic limitations}.
-Our data show that SB3 PPO achieves $0.010 \pm 0.002$ accuracy on arithmetic,
-but this is not evidence about PPO-the-algorithm; it is evidence about
-SB3's tokenization and rollout pipeline applied to a text-generation task it
-was not designed for.
+``PPO fails on LLM reasoning'' or ``classic RL is unsuitable for language
+models'' may be confounded by implementation mismatch rather than algorithmic
+limitations}. Our data show that SB3 PPO achieves $0.010 \pm 0.002$ accuracy
+on arithmetic, but this is evidence about an SB3-style tokenization and rollout
+pipeline applied to autoregressive generation, not about PPO in the abstract.
 Papers in the GRPO literature that compare against PPO baselines without
-auditing the implementation layer may be comparing against a broken baseline.
+auditing the implementation layer may be comparing against an
+implementation-limited baseline rather than an algorithmically informative one.
 We recommend that future algorithm comparisons specify which implementation of
 PPO is used and verify it against a known-good LLM post-training framework.
 
@@ -1734,10 +1741,10 @@ reward mean, entropy, advantage variance, and KL.
 \citet{nimmaturi2025scalinglaws} derive a three-phase exponential saturation
 law for GRPO, finding that 80\% of training steps contribute marginally and
 proposing early stopping.
-We confirm the three-phase pattern in 73\% of LLM fine-tuning experiments,
-broadly consistent with their result.
-However, our data reveal a critical boundary condition: the saturation
-framework \emph{fails for unstable training runs}.
+We recover a three-phase-looking pattern in 73\% of LLM fine-tuning
+experiments, broadly consistent with their result.
+However, our data also reveal a critical boundary condition: the saturation
+framework is a poor description of unstable training runs.
 Nemotron-120B's trajectory (87.5\% peak $\to$ 16.2\% last-10) is
 non-monotonic and cannot be fit by the exponential saturation model ---
 it is better characterized as a reward excursion followed by policy
@@ -1797,9 +1804,9 @@ Nemotron-120B's collapse is almost certainly case (a), given that its reward
 decline is monotonic and persistent; but for models with moderate PTD (0.1--0.3),
 the two causes are indistinguishable from reward trajectories alone.
 
-Corrected KL tracking code is released in \texttt{src/grpo\_trainer.py} and
-should be validated on at least the two Modal runs (Qwen3-8B and
-Llama-3.1-8B) where GPU access is reproducible.
+The artifact release includes corrected KL tracking code, but we have not yet
+run a dedicated matched rerun validating proxy--KL correspondence on the two
+Modal cases (Qwen3-8B and Llama-3.1-8B) where GPU access is reproducible.
 Additionally, the per-token divergence framework of \citet{liu2025rlsubnetworks}
 --- which measures which parameters actually update during RL fine-tuning ---
 could reveal whether the small subnetwork they identify has higher KL per
