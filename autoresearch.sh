@@ -4,6 +4,11 @@ set -euo pipefail
 # AI-Scientist-v2 Runnability Benchmark for Tinker-RL-Lab
 # Measures how well the AI Scientist can run experiments on this repo.
 
+# Apply integration patches first
+if [ -f "ai-scientist-v2-integration/patch.sh" ]; then
+    bash ai-scientist-v2-integration/patch.sh >/dev/null 2>&1
+fi
+
 SCORE=0
 DEPS_READY=0
 TEMPLATE_PARSES=0
