@@ -19,7 +19,7 @@ protocol described below.
   \item Base model weights and tokenizer (identical SHA-256 checksum of
         HuggingFace snapshot)
   \item LoRA rank $r$, $\alpha$, and target-module set
-  \item Optimizer family (AdamW), learning rate schedule, warmup
+  \item Surfaced optimizer family (AdamW) and requested learning rate
   \item Group size $G$ and rollouts per group $K$
   \item Total tokens seen by the optimizer (not total steps)
   \item Seed
@@ -59,6 +59,18 @@ the 47 hyperparameter fields we track, 31 are identical across the
 four frameworks, 11 are framework-specific but documented, and 5 are
 Tinker-managed and therefore not controlled.
 
+\subsection{Measured vs.\ documented rows in the current artifact}
+
+The configuration dumps are released as \emph{surfaced-config artifacts}.
+In the current anonymous bundle, the Tinker and TRL framework-gap rows are
+backed by measured runs, whereas the OpenRLHF and veRL rows in
+\texttt{experiments/results/framework\_comparison.json} are deterministic
+dry-run placeholders emitted by the aggregation script when those
+frameworks were unavailable in the sandbox. We therefore use the four YAMLs
+to document the intended matched-configuration scaffold across all four
+frameworks, but we treat only the Tinker-vs.-TRL comparison as empirical
+evidence in this artifact.
+
 \begin{table}[ht]
 \centering
 \small
@@ -72,17 +84,20 @@ group size $G$                 & 8    & 8    & 8    & 8    \\
 rollouts per group $K$         & 1    & 1    & 1    & 1    \\
 max new tokens                 & 384  & 384  & 384  & 384  \\
 sampling temperature           & 0.7  & 0.7  & 0.7  & 0.7  \\
-KL $\beta$ (surfaced)          & 0.04 & 0.04 & 0.02 & 0.04 \\
+KL $\beta$ (surfaced)          & 0.04 & \emph{managed} & 0.02 & 0.04 \\
 IS granularity                 & token & token & seq  & token \\
 $\pi_\text{ref}$ placement      & on-dev & \emph{managed} & separate & sharded \\
-AdamW lr                       & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ & $1\!\times\!10^{-6}$ \\
+AdamW lr                       & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ \\
 tokens/optimizer step          & 3072 & \emph{managed} & 3072 & 3072 \\
 \bottomrule
 \end{tabular}
 \caption{Representative subset of the per-framework hyperparameter table
 (full version in the YAML dumps). Fields in italics are Tinker-managed
-and unavailable to the user. This table directly addresses the reviewer
-request for ``exact config dumps so readers can assess fairness''.}
+and unavailable to the user. OpenRLHF and veRL entries document the
+intended surfaced configuration of the comparison scaffold; in the current
+artifact their performance rows are dry-run placeholders rather than new
+measured baselines. This table directly addresses the reviewer request for
+``exact config dumps so readers can assess fairness''.}
 \label{tab:framework-configs}
 \end{table}
 
@@ -94,4 +109,7 @@ the matched-configuration protocol defined above'', \emph{not} as
 ``differences due to algorithmic variants alone''. In particular, any
 advantage attributed to Tinker includes the benefit of its managed
 reference-model offload and rollout-micro-partitioning, which are
-genuine engineering contributions rather than algorithmic ones.
+genuine engineering contributions rather than algorithmic ones. In the
+current artifact, the only measured gap is Tinker versus TRL; OpenRLHF and
+veRL remain documented comparison targets whose surfaced configurations are
+released, but whose runtime rows are not treated as fresh empirical evidence.
