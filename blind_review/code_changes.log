@@ -1,0 +1,468 @@
+# Code anonymisation change log
+
+Tarball: blind_review/tinker-rl-lab-anon.tar.gz
+Tarball SHA-256: ef03e4ab3855e33d810a27c73296e90271efd1a4e39283b553d09b53744fb011
+Tarball size: 22514454 bytes
+
+## Totals by rule
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 39
+- ``PES University'' -> Anonymous Institution: 34
+- GH handle arvindcr4 -> anonymous: 32
+- GH org pes-llm-research -> anonymous-org: 27
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 24
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 21
+- notebook metadata.colab removed: 12
+- name Mohammad Rafi -> Anonymous: 10
+- first name Madhu -> Anonymous: 8
+- first name Arumugam -> Anonymous: 6
+- name Sandhya Jeyaraj -> Anonymous: 6
+- name Madhu Kumara L -> Anonymous: 6
+- ``PES LLM Research Team'' -> Anonymous Authors: 5
+- first name Sandhya -> Anonymous: 5
+- ``PES LLM Research'' -> Anonymous: 4
+- name Arvind C R -> Anonymous: 4
+- name Arumugam Chetty K -> Anonymous: 4
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 3
+- first name Arvind -> Anonymous: 3
+- first name Dhruva -> Anonymous: 3
+- GH handle madhukumara1993 -> anonymous: 3
+- lowercase arumugam (slug/id) -> anonymous: 3
+- name Dhruva N Murthy -> Anonymous: 3
+- name Arumugam K -> Anonymous: 2
+- LICENSE copyright line already anonymous: 1
+- email redacted: 1
+- name Narayana Darapaneni -> Anonymous: 1
+- name Anwesh Reddy Padhuri -> Anonymous: 1
+
+## Excluded files / directories
+
+- autoresearch-dashboard.md
+- blind_review/
+- experiments/collab-results/LLM_Tool_Call_Finetuning.pptx
+- experiments/collab-results/exp3_multiturn.pptx
+- paper/acm_main.tex
+- paper/ethics_statement.tex
+- paper/limitations_update.tex
+- paper/main.aux
+- paper/main.bbl
+- paper/main.blg
+- paper/main.out
+- paper/main.pdf
+- paper/main.tex
+- paper/neurips_checklist_update.tex
+- reports/final/CONSOLIDATED_REVIEW_IMPROVEMENTS.md
+- reports/final/PAPER_IMPROVEMENT_PLAN.md
+- reports/final/capstone_final_report.docx
+- reports/final/capstone_final_report.md
+- reports/final/grpo_agentic_llm_paper.md
+- reports/final/grpo_agentic_llm_paper.tex
+- scripts/anonymize.sh
+- team-analysis.pplx.md
+- team-links-audit.pplx.md
+- verify_links_entities.txt
+
+## Post-scan: no residual identifiers detected
+
+## Per-file edits
+
+### ARTIFACT.md
+
+- GH handle arvindcr4 -> anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### LICENSE
+
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
+- LICENSE copyright line already anonymous: 1
+
+### README.md
+
+- GH handle arvindcr4 -> anonymous: 5
+- GH org pes-llm-research -> anonymous-org: 1
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
+- ``PES LLM Research'' -> Anonymous: 2
+
+### advanced_rl_colab.ipynb
+
+- notebook metadata.colab removed: 1
+- ``PES University'' -> Anonymous Institution: 1
+- ``PES University'' -> Anonymous Institution: 1
+
+### agentic-rl-finetuning/notebooks/axolotl_dpo_experiment.ipynb
+
+- notebook metadata.colab removed: 1
+
+### agentic-rl-finetuning/notebooks/axolotl_sft_qlora.ipynb
+
+- notebook metadata.colab removed: 1
+
+### ai-scientist-template/latex/template.tex
+
+- ``PES University'' -> Anonymous Institution: 1
+- name Arvind C R -> Anonymous: 1
+- email redacted: 1
+
+### atropos/configs/humaneval_qwen_8b.yaml
+
+- first name Madhu -> Anonymous: 1
+
+### atropos/configs/tool_use_qwen_0_5b.yaml
+
+- first name Arumugam -> Anonymous: 1
+
+### atropos/generate_slides.py
+
+- ``PES University'' -> Anonymous Institution: 1
+- name Narayana Darapaneni -> Anonymous: 1
+- name Anwesh Reddy Padhuri -> Anonymous: 1
+- name Sandhya Jeyaraj -> Anonymous: 2
+- name Madhu Kumara L -> Anonymous: 2
+- name Mohammad Rafi -> Anonymous: 2
+- name Arumugam Chetty K -> Anonymous: 2
+- first name Arvind -> Anonymous: 2
+- first name Dhruva -> Anonymous: 2
+
+### atropos/notebooks/bootstrap_threshold.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/colab_ssh_setup.ipynb
+
+- notebook metadata.colab removed: 1
+
+### atropos/notebooks/experiment_overview.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/generate_notebooks.py
+
+- ``PES University'' -> Anonymous Institution: 2
+
+### atropos/notebooks/gsm8k_llama_3b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/gsm8k_llama_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/gsm8k_qwen_30b_moe.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/gsm8k_qwen_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/humaneval_qwen_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- first name Madhu -> Anonymous: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+- first name Madhu -> Anonymous: 1
+
+### atropos/notebooks/math_curriculum.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/math_llama_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/math_qwen_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/notebooks/moe_routing_ablation.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/run_experiments_colab.ipynb
+
+- notebook metadata.colab removed: 1
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/systematic_scaling_study.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/tool_use_qwen_0_5b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- first name Arumugam -> Anonymous: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/notebooks/tool_use_qwen_8b.ipynb
+
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### atropos/run_stats.py
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### atropos/slides_8th_call.md
+
+- ``PES University'' -> Anonymous Institution: 1
+
+### capstone-literature-survey/README.md
+
+- ``PES University'' -> Anonymous Institution: 1
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Arumugam Chetty K -> Anonymous: 1
+- first name Arvind -> Anonymous: 1
+- first name Dhruva -> Anonymous: 1
+
+### capstone-literature-survey/chapter2_foundation.tex
+
+- ``PES University'' -> Anonymous Institution: 3
+
+### capstone-literature-survey/foundation_chapter.tex
+
+- ``PES University'' -> Anonymous Institution: 3
+
+### experiments/10x_structural_ceiling/RESULTS.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+
+### experiments/10x_structural_ceiling/analyze_results.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+
+### experiments/10x_structural_ceiling/run_round2.sh
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 2
+
+### experiments/10x_structural_ceiling/run_round2_resume.sh
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+
+### experiments/README.md
+
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
+- ``PES LLM Research'' -> Anonymous: 1
+
+### experiments/aggregate_results.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 3
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 4
+- GH handle madhukumara1993 -> anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- first name Sandhya -> Anonymous: 2
+- first name Madhu -> Anonymous: 2
+- first name Arumugam -> Anonymous: 1
+- lowercase arumugam (slug/id) -> anonymous: 1
+
+### experiments/collab-results/fine_tune_tool_calls_Qwen0_5B.ipynb
+
+- notebook metadata.colab removed: 1
+
+### experiments/collab-results/llm_finetune_multiturn_tool_call_grpo.ipynb
+
+- notebook metadata.colab removed: 1
+
+### experiments/collab-results/llm_finetune_tool_Qwen1_5b_results.ipynb
+
+- notebook metadata.colab removed: 1
+
+### experiments/create_presentation.py
+
+- GH org pes-llm-research -> anonymous-org: 2
+- ``PES LLM Research'' -> Anonymous: 1
+
+### experiments/experiment_summary.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- name Mohammad Rafi -> Anonymous: 1
+- first name Sandhya -> Anonymous: 1
+- first name Madhu -> Anonymous: 1
+- first name Arumugam -> Anonymous: 1
+
+### experiments/implementations/collab/Qwen2.5-0.5B_tool_call_finetune.py
+
+- GH handle arvindcr4 -> anonymous: 1
+
+### experiments/master_results.csv
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 5
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 5
+- GH handle madhukumara1993 -> anonymous: 1
+- GH handle arvindcr4 -> anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- first name Sandhya -> Anonymous: 1
+- first name Madhu -> Anonymous: 1
+- first name Arumugam -> Anonymous: 1
+- lowercase arumugam (slug/id) -> anonymous: 1
+
+### experiments/master_results.json
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 6
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 7
+- GH handle madhukumara1993 -> anonymous: 1
+- GH handle arvindcr4 -> anonymous: 4
+- name Mohammad Rafi -> Anonymous: 1
+- first name Sandhya -> Anonymous: 1
+- first name Madhu -> Anonymous: 1
+- first name Arumugam -> Anonymous: 1
+- lowercase arumugam (slug/id) -> anonymous: 1
+
+### experiments/modal/modal_grpo_trl.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+- GH handle arvindcr4 -> anonymous: 3
+
+### experiments/modal/modal_new_experiments.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 6
+
+### experiments/modal/modal_parallel_runner.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 7
+- GH handle arvindcr4 -> anonymous: 4
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### experiments/modal/modal_ppo_campaign.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+
+### experiments/modal/modal_ppo_fix.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+- GH handle arvindcr4 -> anonymous: 3
+
+### experiments/modal/relaunch_kl.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- GH handle arvindcr4 -> anonymous: 1
+
+### experiments/modal/results/modal_parallel_results.json
+
+- GH handle arvindcr4 -> anonymous: 2
+
+### experiments/tinker-runs/campaign_v2.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+
+### experiments/tinker-runs/results/tinker_parallel_20260419_064834.json
+
+- GH handle arvindcr4 -> anonymous: 2
+
+### experiments/tinker-runs/scripts/tinker_parallel_runner.py
+
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+- GH handle arvindcr4 -> anonymous: 2
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 1
+- github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### huggingface/MODEL_CARD_TEMPLATE.md
+
+- GH org pes-llm-research -> anonymous-org: 2
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 2
+
+### huggingface/upload_to_hub.py
+
+- GH org pes-llm-research -> anonymous-org: 2
+
+### ppo_reinforce_baselines_colab.ipynb
+
+- notebook metadata.colab removed: 1
+- ``PES University'' -> Anonymous Institution: 1
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+
+### pyproject.toml
+
+- GH handle arvindcr4 -> anonymous: 1
+- GH org pes-llm-research -> anonymous-org: 4
+- ``PES LLM Research Team'' -> Anonymous Authors: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 4
+
+### reports/final/README.md
+
+- ``PES University'' -> Anonymous Institution: 1
+- name Sandhya Jeyaraj -> Anonymous: 1
+- name Madhu Kumara L -> Anonymous: 1
+- name Mohammad Rafi -> Anonymous: 1
+- name Dhruva N Murthy -> Anonymous: 1
+- name Arumugam Chetty K -> Anonymous: 1
+- name Arvind C R -> Anonymous: 1
+
+### reports/final/SUBMISSION_CHECKLIST.md
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+
+### run_coding.sh
+
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### run_one.sh
+
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### skyrl-tinker-colab.ipynb
+
+- notebook metadata.colab removed: 1
+
+### skyrl/configs/tinker_hosted.yaml
+
+- GH handle arvindcr4 -> anonymous: 1
+
+### skyrl/notebooks/skyrl_colab_training.ipynb
+
+- notebook metadata.colab removed: 1
+
+### skyrl/run_skyrl_tinker.py
+
+- GH handle arvindcr4 -> anonymous: 1
+
+### submission_colab.ipynb
+
+- notebook metadata.colab removed: 1
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 2
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+- ``PES University'' -> Anonymous Institution: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+
+### vast_run.sh
+
+- GH org pes-llm-research -> anonymous-org: 1
+- github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 1
+

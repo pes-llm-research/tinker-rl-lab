@@ -1,7 +1,11 @@
 """100-step GRPO on MATH problems — optimized for speed"""
+
 import os, json, re, warnings, random, math
+
 warnings.filterwarnings("ignore")
-assert os.environ.get("TINKER_API_KEY"), "Set TINKER_API_KEY in env (was hardcoded, removed 2026-04-11)"
+assert os.environ.get("TINKER_API_KEY"), (
+    "Set TINKER_API_KEY in env (was hardcoded, removed 2026-04-11)"
+)
 import torch, tinker, tinker.types as T
 from transformers import AutoTokenizer
 
@@ -56,18 +60,21 @@ MATH_PROBLEMS = [
     ("What is 50^2 - 49^2?", "99"),
 ]
 
+
 def make_prompt(q):
     return f"<|im_start|>system\n{SYSTEM_PROMPT}<|im_end|>\n<|im_start|>user\n{q}<|im_end|>\n<|im_start|>assistant\n"
+
 
 examples = [(make_prompt(q), a) for q, a in MATH_PROBLEMS] * 20
 random.shuffle(examples)
 print(f"[{EXP}] {len(examples)} examples, {len(MATH_PROBLEMS)} unique problems")
 
+
 def reward(response, answer):
     """Check if the answer appears in \\boxed{} or as the last number."""
     response = response.strip()
     # Check \boxed{answer}
-    boxed = re.findall(r'\\boxed\{([^}]+)\}', response)
+    boxed = re.findall(r"\\boxed\{([^}]+)\}", response)
     if boxed:
         for b in boxed:
             b_clean = b.strip().replace(",", "").replace(" ", "")
@@ -76,32 +83,39 @@ def reward(response, answer):
             try:
                 if abs(float(b_clean) - float(answer)) < 0.01:
                     return 1.0
-            except: pass
+            except:
+                pass
         return 0.3  # has boxed but wrong answer
 
     # Check if answer appears anywhere as a standalone number
-    nums = re.findall(r'\b' + re.escape(answer) + r'\b', response)
+    nums = re.findall(r"\b" + re.escape(answer) + r"\b", response)
     if nums:
         return 0.5  # correct answer but not in boxed format
 
     # Check last number in response
-    all_nums = re.findall(r'[-+]?\d*\.?\d+', response)
+    all_nums = re.findall(r"[-+]?\d*\.?\d+", response)
     if all_nums:
         last = all_nums[-1].replace(",", "")
         try:
             if abs(float(last) - float(answer)) < 0.01:
                 return 0.4
-        except: pass
+        except:
+            pass
 
     # At least attempted math
     if any(c in response for c in "+-*/="):
         return 0.1
     return 0.0
 
+
 _adv = []
+
+
 def loss_fn(data, lp):
-    losses = [(-_adv[i]*lp[i].sum()) for i in range(len(lp))]
-    loss = torch.stack(losses).mean(); return loss, {"loss": loss.item()}
+    losses = [(-_adv[i] * lp[i].sum()) for i in range(len(lp))]
+    loss = torch.stack(losses).mean()
+    return loss, {"loss": loss.item()}
+
 
 print(f"[{EXP}] Connecting...")
 svc = tinker.ServiceClient(base_url=None)
@@ -118,25 +132,48 @@ for step in range(STEPS):
     for pt, ans in batch:
         pid = tok.encode(pt, add_special_tokens=False)
         sp = T.SamplingParams(max_tokens=256, temperature=TEMP, top_p=0.95)
-        resp = sc.sample(T.ModelInput.from_ints(pid), num_samples=GROUP, sampling_params=sp).result()
-        rews = [reward(tok.decode(list(r.tokens), skip_special_tokens=True), ans) for r in resp.sequences]
-        mr = sum(rews)/len(rews); sr = (sum((r-mr)**2 for r in rews)/len(rews))**0.5+1e-8
-        advs = [(r-mr)/sr for r in rews]; batch_r.extend(rews)
+        resp = sc.sample(
+            T.ModelInput.from_ints(pid), num_samples=GROUP, sampling_params=sp
+        ).result()
+        rews = [
+            reward(tok.decode(list(r.tokens), skip_special_tokens=True), ans)
+            for r in resp.sequences
+        ]
+        mr = sum(rews) / len(rews)
+        sr = (sum((r - mr) ** 2 for r in rews) / len(rews)) ** 0.5 + 1e-8
+        advs = [(r - mr) / sr for r in rews]
+        batch_r.extend(rews)
         for r, a in zip(resp.sequences, advs):
-            rid = list(r.tokens); fid = pid+rid; tid = fid[1:]+[0]
-            all_data.append(T.Datum(model_input=T.ModelInput.from_ints(fid), loss_fn_inputs={"target_tokens": T.TensorData(data=tid, dtype="int64", shape=[len(tid)])}))
+            rid = list(r.tokens)
+            fid = pid + rid
+            tid = fid[1:] + [0]
+            all_data.append(
+                T.Datum(
+                    model_input=T.ModelInput.from_ints(fid),
+                    loss_fn_inputs={
+                        "target_tokens": T.TensorData(data=tid, dtype="int64", shape=[len(tid)])
+                    },
+                )
+            )
             all_advs.append(a)
-    if not all_data: continue
+    if not all_data:
+        continue
     _adv = all_advs
     result = tc.forward_backward_custom(data=all_data, loss_fn=loss_fn).result()
     tc.optim_step(T.AdamParams(learning_rate=LR, beta1=0.9, beta2=0.95, eps=1e-8)).result()
-    avg = sum(batch_r)/len(batch_r); step_rewards.append(avg)
-    print(f"[{EXP}] {step+1:3d}/{STEPS} | loss={result.metrics.get('loss',0):.4f} | reward={avg:.3f}")
-    if (step+1) % SAVE_EVERY == 0:
-        tc.save_state(name=f"s{step+1}"); ckpt = tc.save_weights_for_sampler(name=f"s{step+1}").result()
+    avg = sum(batch_r) / len(batch_r)
+    step_rewards.append(avg)
+    print(
+        f"[{EXP}] {step + 1:3d}/{STEPS} | loss={result.metrics.get('loss', 0):.4f} | reward={avg:.3f}"
+    )
+    if (step + 1) % SAVE_EVERY == 0:
+        tc.save_state(name=f"s{step + 1}")
+        ckpt = tc.save_weights_for_sampler(name=f"s{step + 1}").result()
         sc = tc.create_sampling_client(model_path=ckpt.path)
-        print(f"[{EXP}]   -> ckpt s{step+1}")
+        print(f"[{EXP}]   -> ckpt s{step + 1}")
 
-tc.save_state(name="final"); f = tc.save_weights_for_sampler(name="final").result()
-last10 = step_rewards[-10:]; avg10 = sum(last10)/len(last10) if last10 else 0
+tc.save_state(name="final")
+f = tc.save_weights_for_sampler(name="final").result()
+last10 = step_rewards[-10:]
+avg10 = sum(last10) / len(last10) if last10 else 0
 print(f"\n[{EXP}] DONE | last10={avg10:.3f} | run={tc.model_id} | path={f.path}")

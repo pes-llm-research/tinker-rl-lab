@@ -1,0 +1,7 @@
+METRIC caveat_issues=6
+ISSUE heldout_scope: Main paper should explicitly state that held-out GSM8K evaluation is still pending and math claims are not generalization claims.
+ISSUE tool_eval_protocol: Tool-calling section should clarify that the multi-turn scores are custom scenario/reward scores and that inter-rater reliability was not measured.
+ISSUE codegen_subset: Paper should clearly disclose that code generation used a 50-problem subset rather than the full standard HumanEval harness and avoid significance claims.
+ISSUE budget_and_splits: Paper/supplement should explicitly summarize compute budgets and data split limitations.
+ISSUE replication_release: Report should explicitly state what code/prompts/evaluation assets are or are not released for replication.
+ISSUE report.threshold_overclaim: Capstone report should avoid saying a single-seed 4B result confirms the capacity threshold.

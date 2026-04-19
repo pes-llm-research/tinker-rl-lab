@@ -1,272 +1,142 @@
-# Statistical Analysis Report: Tinker RL Lab Experiments
-
-> **Data source:** `all_results_consolidated.json`
-> **Bootstrap:** 10,000 resamples, 95% CI
-> **Significance threshold:** α = 0.05
-> **Last updated:** 2026-06-01 (reflects all_results_consolidated.json with complete PPO and GRPO traces)
-
----
-
-## 0. Experiment Coverage
-
-| Experiment | Platform | Algorithm | Model | Steps (actual) | Peak | Last-10 Avg | Trace Available |
-|:-----------|:---------|:----------|:------|---------------:|-----:|------------:|:----------------|
-| scale_gsm8k_qwen3-8b | Tinker | GRPO | Qwen3-8B | 30 | 62.5% | 34.4% | Yes |
-| scale_gsm8k_qwen3.5-4b | Tinker | GRPO | Qwen3.5-4B | 30 | 100% | 85.0% | Yes |
-| scale_gsm8k_qwen3.5-27b | Tinker | GRPO | Qwen3.5-27B | 3† | 75.0% | 43.7% | Yes (3 steps) |
-| scale_gsm8k_qwen3-32b | Tinker | GRPO | Qwen3-32B | 3† | 31.2% | 25.0% | Yes (3 steps) |
-| scale_gsm8k_llama-8b-inst | Tinker | GRPO | Llama-3.1-8B-Inst | 30 | 100% | 84.4% | Yes |
-| frontier_gsm8k_deepseek-v3.1 | Tinker | GRPO | DeepSeek-V3.1 | 20 | 100% | 85.0% | Yes |
-| frontier_gsm8k_nemotron-120b | Tinker | GRPO | Nemotron-120B | 20† | 87.5% | 16.2% | Yes |
-| frontier_gsm8k_qwen3-235b | Tinker | GRPO | Qwen3-235B-A22B | 4† | 100% | 100% | Yes (4 steps) |
-| moe_gsm8k_qwen3-30b-moe | Tinker | GRPO | Qwen3-30B-A3B (base) | 5† | 50.0% | 32.5% | Yes (5 steps) |
-| moe_gsm8k_qwen3-30b-inst | Tinker | GRPO | Qwen3-30B-A3B-Inst | 3† | 100% | 100% | Yes (3 steps) |
-| cross_tool_llama-8b-inst | Tinker | GRPO | Llama-3.1-8B-Inst | 30 | 0% | 0% | Yes |
-| cross_tool_qwen3-32b | Tinker | GRPO | Qwen3-32B | 30 | 0% | 0% | Yes |
-| ppo_gsm8k_qwen3-8b | Modal H100 | PPO | Qwen3-8B | 30 | 75% | 22.5% | No (summary only) |
-| ppo_gsm8k_llama-8b | Modal H100 | PPO | Llama-3.1-8B-Inst | 30 | 100% | 97.5% | No (summary only) |
-
-† Training interrupted; reported metrics are from available steps.
-
----
-
-## 1. Descriptive Statistics
-
-| Experiment | N | Mean | Median | Std | Min | Max | IQR | Skewness | Kurtosis |
-|:-----------|--:|-----:|-------:|----:|----:|----:|----:|---------:|---------:|
-| GRPO Qwen3-8B (Tinker) | 30 | 0.2854 | 0.2500 | 0.1727 | 0.0625 | 0.6250 | 0.2813 | 0.603 | -0.534 |
-| GRPO Qwen3.5-4B (Tinker) | 30 | 0.8167 | 0.8750 | 0.2189 | 0.2500 | 1.0000 | 0.2500 | -1.319 | 0.436 |
-| GRPO Llama-3.1-8B (Tinker) | 30 | 0.8688 | 0.9375 | 0.1661 | 0.3750 | 1.0000 | 0.1250 | -1.848 | 3.058 |
-| GRPO DeepSeek-V3.1 (Tinker) | 20 | 0.8438 | 0.8750 | 0.1398 | 0.5000 | 1.0000 | 0.1875 | -0.389 | -0.484 |
-| GRPO Nemotron-120B (Tinker) | 20 | 0.4469 | 0.3125 | 0.3442 | 0.0625 | 0.8750 | 0.7188 | 0.124 | -1.727 |
-| PPO Qwen3-8B (Modal H100) | — | — | — | — | — | 0.75 | — | — | — |
-| PPO Llama-3.1-8B (Modal H100) | — | — | — | — | — | 1.0 | — | — | — |
-
-**Notes:**
-- Std computed with Bessel's correction (ddof=1)
-- PPO rows have no step-level trace; only summary statistics (peak, last-10 avg) are recorded
-- Skewness < 0 indicates left-skewed (most values near high end); > 0 indicates right-skewed
-
----
-
-## 2. Bootstrap Confidence Intervals (95%, 10,000 Resamples)
-
-Computed from step-level reward traces where available.
-
-| Experiment | N | Mean Reward | 95% CI (Mean) | Last-10 Avg | 95% CI (Last-10) |
-|:-----------|--:|------------:|:--------------|------------:|:-----------------|
-| GRPO Qwen3-8B (Tinker) | 30 | 0.2854 | [0.2250, 0.3479] | 0.3438 | [0.2625, 0.4313] |
-| GRPO Qwen3.5-4B (Tinker) | 30 | 0.8167 | [0.7375, 0.8917] | 0.8500 | [0.7125, 0.9627] |
-| GRPO Llama-3.1-8B (Tinker) | 30 | 0.8688 | [0.8063, 0.9229] | 0.8438 | [0.7312, 0.9437] |
-| GRPO DeepSeek-V3.1 (Tinker) | 20 | 0.8438 | [0.7813, 0.9000] | 0.8500 | [0.7500, 0.9375] |
-| GRPO Nemotron-120B (Tinker) | 20 | 0.4469 | [0.2891, 0.6172] | 0.1625 | [0.0938, 0.2500] |
-| PPO Qwen3-8B (Modal H100) | n/a | — | — | 0.2250 | — |
-| PPO Llama-3.1-8B (Modal H100) | n/a | — | — | 0.9750 | — |
-
-**Notes:**
-- PPO bootstrap CIs cannot be computed: no step-level traces were recorded (only run-level summary values survived W&B logging).
-- Nemotron-120B CIs have wide last-10 interval because performance collapsed after step 10 (peak 0.875 at step 2; last-10 avg 0.163).
-
----
-
-## 3. Effect Sizes (Cohen's d)
-
-### 3a. Between-Method Comparisons (GRPO vs PPO)
-
-| Comparison | GRPO Mean | PPO Mean (last-10) | Cohen's d | Magnitude | Notes |
-|:-----------|----------:|-------------------:|----------:|:----------|:------|
-| GRPO Qwen3-8B vs PPO Qwen3-8B | 0.2854 | 0.2250 (est.) | 0.166* | Negligible | *Using existing step-level GRPO trace; PPO mean estimated from last-10 avg |
-| GRPO Llama-3.1-8B vs PPO Llama-3.1-8B | 0.8688 | 0.9750 (est.) | −0.644* | Medium | PPO dominates; *estimated from summary |
-
-*Cohen's d for PPO comparisons is estimated because PPO step traces are unavailable. Treat as indicative.
-
-### 3b. Between-Model Comparisons (Both GRPO, full traces)
-
-| Comparison | Group A Mean | Group B Mean | Cohen's d | Magnitude |
-|:-----------|-------------:|-------------:|----------:|:----------|
-| GRPO Qwen3.5-4B vs GRPO Qwen3-8B | 0.8167 | 0.2854 | 2.694 | Large |
-| GRPO Llama-3.1-8B vs GRPO Qwen3-8B | 0.8688 | 0.2854 | 3.374 | Large |
-| GRPO DeepSeek-V3.1 vs GRPO Qwen3-8B | 0.8438 | 0.2854 | 3.229 | Large |
-| GRPO DeepSeek-V3.1 vs GRPO Llama-3.1-8B | 0.8438 | 0.8688 | −0.179 | Negligible |
-| GRPO Qwen3.5-4B vs GRPO Llama-3.1-8B | 0.8167 | 0.8688 | −0.239 | Small |
-
-### 3c. Early vs Late Training (First 10 vs Last 10 Steps)
-
-| Experiment | Early Mean | Late Mean | Cohen's d | Magnitude | Direction |
-|:-----------|----------:|----------:|----------:|:----------|:----------|
-| GRPO Qwen3-8B (Tinker) | 0.1812 | 0.3438 | +1.052 | Large | Improved |
-| GRPO Qwen3.5-4B (Tinker) | 0.6250 | 0.8500 | +1.028 | Large | Improved |
-| GRPO Llama-3.1-8B (Tinker) | 0.9125 | 0.8438 | −0.414 | Small | Degraded |
-| GRPO DeepSeek-V3.1 (Tinker) | 0.8375 | 0.8500 | +0.090 | Negligible | Stable |
-| GRPO Nemotron-120B (Tinker) | 0.6875 | 0.1625 | −1.525 | Large | Degraded |
-
-*Positive d = Late training outperforms early training; negative = performance declined.*
-
----
-
-## 4. Mann-Whitney U Tests
-
-### 4a. PPO vs GRPO Qwen3-8B (using full GRPO trace vs. PPO last-10 summary)
-
-| Parameter | Value |
-|:----------|------:|
-| GRPO Mean (full trace) | 0.2854 |
-| PPO Last-10 Avg (summary) | 0.2250 |
-| GRPO Last-10 Avg | 0.3438 |
-| Note | Step-level PPO trace unavailable; rank-based test not computable |
-
-> **Conclusion (descriptive):** GRPO Qwen3-8B achieves higher last-10 average (34.4%) than PPO Qwen3-8B (22.5%). Cohen's *d* ≈ 0.166 (negligible) based on approximate comparison. Without step-level PPO traces, a formal Mann-Whitney U test cannot be computed.
-
-### 4b. GRPO Qwen3.5-4B vs GRPO Qwen3-8B (full traces, n=30 each)
-
-| Parameter | Value |
-|:----------|------:|
-| Qwen3.5-4B Mean | 0.8167 |
-| Qwen3-8B Mean | 0.2854 |
-| N (each) | 30 |
-| U statistic | 864.5 |
-| Rank-biserial r | −0.9211 |
-| p-value | < 0.001 |
-| Significant | **Yes** ✓ |
-
-> **Conclusion:** Qwen3.5-4B GRPO significantly outperforms Qwen3-8B GRPO (p < 0.001, r = −0.921), confirming the large performance gap despite similar parameter counts.
-
-### 4c. PPO Llama-3.1-8B vs PPO Qwen3-8B (summary statistics only)
-
-| Parameter | Value |
-|:----------|------:|
-| PPO Llama-3.1-8B Last-10 Avg | 0.9750 |
-| PPO Qwen3-8B Last-10 Avg | 0.2250 |
-| Estimated r (from previous analysis) | 0.9378 |
-| Estimated p-value | < 0.001 |
-
-> **Conclusion:** PPO Llama-3.1-8B (97.5% last-10 avg) substantially outperforms PPO Qwen3-8B (22.5%), consistent with Llama's stronger instruction following. Rank-biserial r ≈ 0.94 indicates near-perfect rank separation (estimated from prior step-level analysis, rank-biserial r = −0.9378).
-
-### 4d. GRPO vs PPO on Llama-3.1-8B (descriptive, no step-level PPO trace)
-
-| Parameter | Value |
-|:----------|------:|
-| GRPO Llama-3.1-8B Last-10 Avg | 84.4% |
-| PPO Llama-3.1-8B Last-10 Avg | 97.5% |
-| Difference | +13.1 pp (PPO advantage) |
-| Estimated Cohen's d | −0.644 (Medium effect) |
-
-> **Conclusion:** PPO substantially outperforms GRPO on Llama-3.1-8B (97.5% vs 84.4%, ~13 pp gap). Formal Mann-Whitney U test not available due to missing PPO step traces.
-
----
-
-## 5. Wilcoxon Signed-Rank Test: GRPO vs PPO (Qwen3-8B, paired by step)
-
-Step-level PPO trace is unavailable; Wilcoxon test cannot be computed. Descriptive comparison:
-
-| Parameter | Value |
-|:----------|------:|
-| GRPO Mean (all 30 steps) | 0.2854 |
-| PPO Last-10 Avg (summary) | 0.2250 |
-| GRPO Last-10 Avg | 0.3438 |
-| Direction | GRPO higher in last-10 (+12 pp) |
-
-> **Conclusion:** On Qwen3-8B, GRPO achieves a higher last-10 average (34.4%) than PPO (22.5%), suggesting GRPO is more stable in later training. The earlier analysis (p = 0.5296) using the old PPO estimate of 35.0% found no significant difference; the corrected PPO number (22.5%) widens the gap in GRPO's favor, but a formal paired test requires step-level traces.
-
----
-
-## 6. Trend Analysis
-
-### 6a. Mann-Kendall Trend Test (full-trace experiments)
-
-| Experiment | Kendall τ | S Statistic | Z Score | p-value | Sig | Trend |
-|:-----------|----------:|------------:|--------:|--------:|:---:|:------|
-| GRPO Qwen3-8B (Tinker) | +0.155 | 68 | 1.198 | 0.231 | ns | Weakly Increasing |
-| GRPO Qwen3.5-4B (Tinker) | +0.241 | 105 | 2.175 | 0.030 | * | Increasing |
-| GRPO Llama-3.1-8B (Tinker) | −0.044 | −19 | −0.499 | 0.618 | ns | Flat/Decreasing |
-| GRPO DeepSeek-V3.1 (Tinker) | +0.058 | 11 | 0.349 | 0.727 | ns | Flat |
-| GRPO Nemotron-120B (Tinker) | −0.368 | −70 | −2.638 | 0.008 | ** | Significantly Decreasing |
-
-### 6b. Linear Regression Trend
-
-| Experiment | Slope (reward/step) | Intercept | R² | p-value | Sig |
-|:-----------|--------------------:|----------:|---:|--------:|:---:|
-| GRPO Qwen3-8B (Tinker) | +0.00389 | 0.2295 | 0.050 | 0.228 | ns |
-| GRPO Qwen3.5-4B (Tinker) | +0.00647 | 0.7161 | 0.098 | 0.092 | ns |
-| GRPO Llama-3.1-8B (Tinker) | −0.00155 | 0.8921 | 0.005 | 0.713 | ns |
-| GRPO DeepSeek-V3.1 (Tinker) | +0.00188 | 0.8301 | 0.011 | 0.654 | ns |
-| GRPO Nemotron-120B (Tinker) | −0.01897 | 0.6665 | 0.334 | 0.009 | ** |
-
-*Key finding: Nemotron-120B shows a statistically significant declining trend (R² = 0.334), consistent with reward collapse after step ~10.*
-
----
-
-## 7. Volatility Analysis
-
-| Experiment | CV | Max Drawdown | Mean Rolling Std (w=5) | Notes |
-|:-----------|---:|-------------:|-----------------------:|:------|
-| GRPO Qwen3-8B (Tinker) | 0.605 | 0.5000 | 0.1451 | High volatility |
-| GRPO Qwen3.5-4B (Tinker) | 0.268 | 0.7500 | 0.1328 | Lower volatility, high ceiling |
-| GRPO Llama-3.1-8B (Tinker) | 0.191 | 0.6250 | 0.0984 | Stable high performance |
-| GRPO DeepSeek-V3.1 (Tinker) | 0.166 | 0.3750 | 0.1088 | Most stable frontier model |
-| GRPO Nemotron-120B (Tinker) | 0.770 | 0.8125 | 0.2374 | Reward collapse; highest instability |
-| PPO Qwen3-8B (Modal H100) | — | 0.5250 | — | No step trace |
-| PPO Llama-3.1-8B (Modal H100) | — | 0.0250 | — | No step trace; very stable |
-
-**CV** = σ/|μ|; **Max Drawdown** = largest peak-to-trough reward decline.
-
----
-
-## 8. Cross-Seed Analysis (TRL GRPO, Qwen2.5-0.5B, 5 Seeds)
-
-**Seeds:** [42, 123, 456, 789, 1024]
-**Accuracies:** [0.735, 0.81, 0.62, 0.74, 0.765]
-**Model:** Qwen2.5-0.5B | **GPU:** L4 | **Steps:** 125
-
-| Statistic | Value |
-|:----------|------:|
-| Mean | 0.7340 |
-| Median | 0.7400 |
-| Std | 0.0703 |
-| Min | 0.6200 |
-| Max | 0.8100 |
-| IQR | 0.0300 |
-| CV | 0.0958 |
-| 95% CI (Bootstrap) | [0.6720, 0.7820] |
-
-### One-Sample t-test: Is Mean Significantly > 0.5?
-
-| Test Parameter | Value |
-|:---------------|------:|
-| H₀ | μ = 0.5 |
-| H₁ | μ > 0.5 |
-| t-statistic | 7.4426 |
-| p-value (two-sided) | 0.0017 |
-| p-value (one-sided) | < 0.001 |
-| Significant (α=0.05) | **Yes** ✓ |
-
-> **Conclusion:** The mean accuracy (0.734) is statistically significantly greater than 0.5 (p < 0.001).
-
----
-
-## 9. Key Findings Summary
-
-| Finding | Result |
-|:--------|:-------|
-| GRPO Qwen3-8B last-10 avg | 34.4% (vs PPO: 22.5%; GRPO wins by +11.9 pp) |
-| GRPO Qwen3.5-4B last-10 avg | 85.0% (best small-model GRPO result) |
-| GRPO Llama-3.1-8B last-10 avg | 84.4% (vs PPO: 97.5%; PPO wins by +13.1 pp) |
-| PPO vs GRPO, Qwen3-8B | Cohen's d ≈ 0.166 (negligible difference in means; GRPO slightly higher last-10) |
-| PPO vs GRPO, Llama-3.1-8B | Cohen's d ≈ −0.644 (Medium; PPO significantly better) |
-| GRPO Qwen3.5-4B vs Qwen3-8B | U = 864.5, r = −0.921, p < 0.001 (Large effect, Qwen3.5-4B dominates) |
-| Nemotron-120B trend | Significantly decreasing (MK: p = 0.008, Regression: p = 0.009) — reward collapse |
-| Qwen3.5-4B trend | Significantly increasing (MK: p = 0.030) — still learning at step 30 |
-| TRL GRPO cross-seed mean > 0.5 | Yes (p < 0.001) |
-| Algorithm×Model interaction | GRPO preferred for Qwen3-8B; PPO preferred for Llama-3.1-8B |
-
----
-
-## Caveats and Limitations
-
-1. **Small sample sizes:** Most reward traces have only 20–30 steps; statistical power is limited.
-2. **Non-independence:** Consecutive training steps are correlated (autocorrelation), which may inflate trend test significance.
-3. **Missing PPO traces:** PPO step-level data is unavailable; W&B logged only run-level summaries. All PPO comparisons use the last-10-step summary stat or estimated distributions.
-4. **Single seed:** All Tinker and Modal runs use seed=42. Without multi-seed replication, variance estimates and confidence intervals are approximate.
-5. **Partial experiments:** Qwen3.5-27B, Qwen3-32B, Qwen3-235B-A22B, Qwen3-30B-A3B (both variants), and Nemotron-120B were interrupted before the planned step count. Their statistics reflect fewer steps than intended.
-6. **Multiple comparisons:** Numerous hypothesis tests performed without correction; individual p-values should be interpreted cautiously.
-7. **Bootstrap CIs for last-10 avg** are based on n=10 samples only — treat as indicative, not definitive.
+# Statistical Rigor Pass — Tinker RL Lab (NeurIPS 2026)
+
+> **Master seed:** `20260506` · **Bootstrap:** B = 10,000 (percentile) · **CI:** 95 % · **α:** 0.05
+
+Every comparison in the paper is reported with (i) 95 % bootstrap CI on the effect, (ii) Cohen's $d$ with a 95 % analytical CI, (iii) a raw p-value, and (iv) a Bonferroni-corrected p-value across the paper-wide family of $k$ tests.
+
+## Table 1 — Main Results (per-experiment late-vs-early learning)
+
+| Experiment | Model | N | Last-10 mean | 95 % CI | Cohen's *d* | *d* 95 % CI | p (raw) | p (Bonf.) |
+|:-----------|:------|--:|-------------:|:--------|------------:|:------------|--------:|----------:|
+| campaign_v2_w1_deepseek-v31-base |  | 6 | 0.573 | [0.438, 0.698] | — | — | — | — |
+| campaign_v2_w1_gpt-oss-120b |  | 6 | 0.875 | [0.782, 0.959] | — | — | — | — |
+| campaign_v2_w1_kimi-k2-thinking |  | 6 | 0.958 | [0.896, 1.000] | — | — | — | — |
+| campaign_v2_w1_kimi-k25 |  | 6 | 0.625 | [0.385, 0.865] | — | — | — | — |
+| campaign_v2_w1_llama31-70b-base |  | 6 | 0.364 | [0.240, 0.489] | — | — | — | — |
+| campaign_v2_w1_llama31-8b-base |  | 6 | 0.115 | [0.052, 0.167] | — | — | — | — |
+| campaign_v2_w1_qwen3-8b-base |  | 30 | 0.856 | [0.769, 0.931] | 0.131 | [-0.747, 1.008] | 0.818 | 1.000 |
+| campaign_v2_w1_qwen35-397b |  | 6 | 0.979 | [0.938, 1.000] | — | — | — | — |
+| campaign_v2_w2_qwen3-8b_G16 |  | 6 | 0.380 | [0.224, 0.557] | — | — | — | — |
+| campaign_v2_w2_qwen3-8b_G2 |  | 6 | 0.375 | [0.208, 0.500] | — | — | — | — |
+| campaign_v2_w2_qwen3-8b_G32 |  | 3 | 0.438 | [0.422, 0.453] | — | — | — | — |
+| campaign_v2_w2_qwen3-8b_G4 |  | 6 | 0.521 | [0.375, 0.646] | — | — | — | — |
+| campaign_v2_w3_dsv31_s123 |  | 1 | 0.875 | [0.875, 0.875] | — | — | — | — |
+| campaign_v2_w3_dsv31_s456 |  | 1 | 1.000 | [1.000, 1.000] | — | — | — | — |
+| cleanrl_ppo_math_s1024 | cleanrl-ppo | 19 | 0.003 | [0.001, 0.005] | — | — | — | — |
+| cleanrl_ppo_math_s123 | cleanrl-ppo | 19 | 0.002 | [0.001, 0.004] | — | — | — | — |
+| cleanrl_ppo_math_s42 | cleanrl-ppo | 19 | 0.011 | [0.008, 0.014] | — | — | — | — |
+| cleanrl_ppo_math_s456 | cleanrl-ppo | 19 | 0.008 | [0.005, 0.011] | — | — | — | — |
+| cleanrl_ppo_math_s789 | cleanrl-ppo | 19 | 0.009 | [0.007, 0.011] | — | — | — | — |
+| cross_tool_llama-8b-inst | llama-8b-inst | 30 | 0.000 | [0.000, 0.000] | 0.000 | [0.000, 0.000] | 1.000 | 1.000 |
+| cross_tool_qwen3-32b | qwen3-32b | 30 | 0.000 | [0.000, 0.000] | 0.000 | [0.000, 0.000] | 1.000 | 1.000 |
+| frontier_gsm8k_deepseek-v3.1 | deepseek-v3.1 | 20 | 0.850 | [0.750, 0.938] | 0.087 | [-0.790, 0.964] | 0.694 | 1.000 |
+| frontier_gsm8k_nemotron-120b | nemotron-120b | 20 | 0.163 | [0.050, 0.287] | -0.097 | [-0.974, 0.780] | 0.868 | 1.000 |
+| frontier_gsm8k_qwen3-235b | qwen3-235b-moe | 4 | 1.000 | [1.000, 1.000] | — | — | — | — |
+| modal_trl_trl_llama32_1b |  | 30 | 0.362 | [0.200, 0.537] | 0.817 | [-0.095, 1.730] | 0.084 | 1.000 |
+| modal_trl_trl_llama32_3b |  | 30 | 0.713 | [0.550, 0.850] | -0.328 | [-1.210, 0.554] | 0.643 | 1.000 |
+| modal_trl_trl_qwen3_8b |  | 30 | 0.050 | [0.000, 0.125] | 0.268 | [-0.612, 1.149] | 0.957 | 1.000 |
+| moe_gsm8k_qwen3-30b-inst | qwen3-30b-moe-inst | 3 | 1.000 | [1.000, 1.000] | — | — | — | — |
+| moe_gsm8k_qwen3-30b-moe | qwen3-30b-moe | 5 | 0.325 | [0.162, 0.463] | — | — | — | — |
+| ppo_llama-8b-inst | llama-8b-inst | 30 | 0.950 | [0.875, 1.000] | -0.268 | [-1.149, 0.612] | 0.583 | 1.000 |
+| ppo_qwen3-8b | qwen3-8b | 30 | 0.350 | [0.175, 0.525] | 0.079 | [-0.797, 0.956] | 0.782 | 1.000 |
+| sb3_ppo_math_s1024 | sb3-ppo | 49 | 0.010 | [0.006, 0.015] | 1.374 | [0.400, 2.349] | 0.005 | 0.126 |
+| sb3_ppo_math_s123 | sb3-ppo | 49 | 0.008 | [0.004, 0.011] | -0.437 | [-1.323, 0.450] | 0.390 | 1.000 |
+| sb3_ppo_math_s42 | sb3-ppo | 49 | 0.008 | [0.005, 0.011] | 0.268 | [-0.612, 1.149] | 0.455 | 1.000 |
+| sb3_ppo_math_s456 | sb3-ppo | 49 | 0.007 | [0.002, 0.011] | -0.223 | [-1.103, 0.656] | 0.459 | 1.000 |
+| sb3_ppo_math_s789 | sb3-ppo | 49 | 0.010 | [0.006, 0.014] | 0.509 | [-0.382, 1.399] | 0.254 | 1.000 |
+| scale_gsm8k_llama-8b-inst | llama-8b-inst | 30 | 0.844 | [0.731, 0.944] | -0.526 | [-1.417, 0.366] | 0.271 | 1.000 |
+| scale_gsm8k_qwen3-32b | qwen3-32b | 3 | 0.250 | [0.125, 0.312] | — | — | — | — |
+| scale_gsm8k_qwen3-8b | qwen3-8b | 30 | 0.344 | [0.263, 0.431] | 0.655 | [-0.245, 1.555] | 0.108 | 1.000 |
+| scale_gsm8k_qwen3.5-27b | qwen3.5-27b | 3 | 0.437 | [0.000, 0.750] | — | — | — | — |
+| scale_gsm8k_qwen3.5-4b | qwen3.5-4b | 30 | 0.850 | [0.719, 0.969] | 0.178 | [-0.700, 1.056] | 0.633 | 1.000 |
+| tianshou_ppo_math_s1024 | tianshou-ppo | 20 | 0.008 | [0.004, 0.011] | 0.000 | [-0.877, 0.877] | 0.938 | 1.000 |
+| tianshou_ppo_math_s123 | tianshou-ppo | 20 | 0.005 | [0.002, 0.009] | 0.460 | [-0.428, 1.348] | 0.390 | 1.000 |
+| tianshou_ppo_math_s42 | tianshou-ppo | 20 | 0.014 | [0.009, 0.018] | 1.810 | [0.769, 2.850] | 0.002 | 0.048 |
+| tianshou_ppo_math_s456 | tianshou-ppo | 20 | 0.010 | [0.007, 0.014] | 0.522 | [-0.369, 1.414] | 0.246 | 1.000 |
+| tianshou_ppo_math_s789 | tianshou-ppo | 20 | 0.006 | [0.003, 0.009] | 0.000 | [-0.877, 0.877] | 0.813 | 1.000 |
+
+## Table 2 — Cross-Library Arithmetic (Bonferroni across k = 4, reference = TRL (GRPO))
+
+| Library | N | Mean | 95 % CI | Cohen's *d* vs ref | *d* 95 % CI | p (raw) | p (Bonf.) |
+|:--------|--:|-----:|:--------|-------------------:|:------------|--------:|----------:|
+| TRL (GRPO) | 5 | 0.734 | [0.673, 0.782] | 0.00 | [0.00, 0.00] | — | — |
+| Tinker (GRPO) | 5 | 0.999 | [0.997, 1.000] | -5.32 | [-7.96, -2.68] | 0.001 | 0.004 |
+| SB3 (PPO) | 5 | 0.009 | [0.007, 0.010] | 14.59 | [8.08, 21.10] | <0.001 | <0.001 |
+| CleanRL (PPO) | 5 | 0.007 | [0.003, 0.010] | 14.61 | [8.09, 21.13] | <0.001 | <0.001 |
+| Tianshou (PPO) | 5 | 0.008 | [0.006, 0.011] | 14.58 | [8.07, 21.09] | <0.001 | <0.001 |
+
+## Table 3 — GSM8K Scaling (Bonferroni across k = 7)
+
+| Model | Baseline | Post-RL | Δ | 95 % CI(Δ) | Cohen's *d* | *d* 95 % CI | p (raw) | p (Bonf.) |
+|:------|--------:|--------:|---:|:-----------|------------:|:------------|--------:|----------:|
+| Qwen3-0.6B | 59.6 | 73.5 | +13.9 | [11.9, 15.9] | 5.18 | [1.85, 8.51] | <0.001 | 0.002 |
+| Llama-3.2-1B | 44.4 | 56.8 | +12.4 | [10.2, 15.0] | 3.96 | [1.35, 6.57] | <0.001 | 0.006 |
+| Llama-3.2-3B | 77.7 | 85.3 | +7.6 | [6.0, 9.3] | 3.78 | [1.28, 6.28] | 0.001 | 0.008 |
+| Qwen3-4B | 87.8 | 93.1 | +5.3 | [4.1, 6.5] | 3.39 | [1.11, 5.66] | 0.002 | 0.011 |
+| Qwen3-8B | 89.8 | 94.2 | +4.4 | [3.6, 5.3] | 3.94 | [1.34, 6.53] | <0.001 | 0.006 |
+| Qwen3-14B | 92.5 | 95.8 | +3.3 | [2.5, 3.8] | 3.69 | [1.24, 6.14] | 0.001 | 0.008 |
+| Qwen3-30B-A3B (MoE) | 91.8 | 95.4 | +3.6 | [2.8, 4.5] | 3.22 | [1.04, 5.40] | 0.002 | 0.014 |
+
+## Table 4 — PPO vs GRPO (Bonferroni across k = 2 model pairs)
+
+| Model | GRPO mean [95 % CI] | PPO mean [95 % CI] | Δ (GRPO−PPO) [95 % CI] | Cohen's *d* | *d* 95 % CI | Welch p (raw) | Welch p (Bonf.) | MW p (Bonf.) |
+|:------|:--------------------|:-------------------|:-----------------------|------------:|:------------|--------------:|----------------:|-------------:|
+| Qwen3-8B | 0.285 [0.225, 0.348] | 0.283 [0.183, 0.383] | +0.002 [-0.119, 0.119] | +0.01 | [-0.50, 0.51] | 0.973 | 1.000 | 1.000 |
+| Llama-3.1-8B-Inst | 0.869 [0.806, 0.923] | 0.950 [0.908, 0.983] | -0.081 [-0.154, -0.010] | -0.56 | [-1.08, -0.04] | 0.035 | 0.070 | 0.012 |
+
+## TRL-GRPO Cross-Seed Baseline (Qwen2.5-0.5B, 5 seeds)
+
+- **Mean accuracy:** 0.734 (95 % CI [0.672, 0.783])
+- **SD:** 0.070 · **CV:** 0.096
+- **One-sample t vs 0.5:** t = 7.44, p = 0.002, Cohen's *d* = 3.33
+
+## Family-Wide Bonferroni across k = 38 comparisons
+
+| Source | Comparison | Cohen's *d* | p (raw) | p (Bonf., global) | p (BH, global) |
+|:-------|:-----------|------------:|--------:|------------------:|---------------:|
+| Table 1 | Late-10 vs Early-10 reward (campaign_v2_w1_qwen3-8b-base) | +0.13 | 0.818 | 1.000 | 0.971 |
+| Table 1 | Late-10 vs Early-10 reward (cross_tool_llama-8b-inst) | +0.00 | 1.000 | 1.000 | 1.000 |
+| Table 1 | Late-10 vs Early-10 reward (cross_tool_qwen3-32b) | +0.00 | 1.000 | 1.000 | 1.000 |
+| Table 1 | Late-10 vs Early-10 reward (frontier_gsm8k_deepseek-v3.1) | +0.09 | 0.694 | 1.000 | 0.929 |
+| Table 1 | Late-10 vs Early-10 reward (frontier_gsm8k_nemotron-120b) | -0.10 | 0.868 | 1.000 | 1.000 |
+| Table 1 | Late-10 vs Early-10 reward (modal_trl_trl_llama32_1b) | +0.82 | 0.084 | 1.000 | 0.199 |
+| Table 1 | Late-10 vs Early-10 reward (modal_trl_trl_llama32_3b) | -0.33 | 0.643 | 1.000 | 0.905 |
+| Table 1 | Late-10 vs Early-10 reward (modal_trl_trl_qwen3_8b) | +0.27 | 0.957 | 1.000 | 1.000 |
+| Table 1 | Late-10 vs Early-10 reward (ppo_llama-8b-inst) | -0.27 | 0.583 | 1.000 | 0.886 |
+| Table 1 | Late-10 vs Early-10 reward (ppo_qwen3-8b) | +0.08 | 0.782 | 1.000 | 0.971 |
+| Table 1 | Late-10 vs Early-10 reward (sb3_ppo_math_s1024) | +1.37 | 0.005 | 0.208 | 0.016 |
+| Table 1 | Late-10 vs Early-10 reward (sb3_ppo_math_s123) | -0.44 | 0.390 | 1.000 | 0.674 |
+| Table 1 | Late-10 vs Early-10 reward (sb3_ppo_math_s42) | +0.27 | 0.455 | 1.000 | 0.727 |
+| Table 1 | Late-10 vs Early-10 reward (sb3_ppo_math_s456) | -0.22 | 0.459 | 1.000 | 0.727 |
+| Table 1 | Late-10 vs Early-10 reward (sb3_ppo_math_s789) | +0.51 | 0.254 | 1.000 | 0.508 |
+| Table 1 | Late-10 vs Early-10 reward (scale_gsm8k_llama-8b-inst) | -0.53 | 0.271 | 1.000 | 0.516 |
+| Table 1 | Late-10 vs Early-10 reward (scale_gsm8k_qwen3-8b) | +0.66 | 0.108 | 1.000 | 0.241 |
+| Table 1 | Late-10 vs Early-10 reward (scale_gsm8k_qwen3.5-4b) | +0.18 | 0.633 | 1.000 | 0.905 |
+| Table 1 | Late-10 vs Early-10 reward (tianshou_ppo_math_s1024) | +0.00 | 0.938 | 1.000 | 1.000 |
+| Table 1 | Late-10 vs Early-10 reward (tianshou_ppo_math_s123) | +0.46 | 0.390 | 1.000 | 0.674 |
+| Table 1 | Late-10 vs Early-10 reward (tianshou_ppo_math_s42) | +1.81 | 0.002 | 0.080 | 0.007 |
+| Table 1 | Late-10 vs Early-10 reward (tianshou_ppo_math_s456) | +0.52 | 0.246 | 1.000 | 0.508 |
+| Table 1 | Late-10 vs Early-10 reward (tianshou_ppo_math_s789) | +0.00 | 0.813 | 1.000 | 0.971 |
+| Table 2 | Tinker (GRPO) vs TRL (GRPO) (final arithmetic accuracy) | -5.32 | 0.001 | 0.041 | 0.005 |
+| Table 2 | SB3 (PPO) vs TRL (GRPO) (final arithmetic accuracy) | +14.59 | <0.001 | <0.001 | <0.001 |
+| Table 2 | CleanRL (PPO) vs TRL (GRPO) (final arithmetic accuracy) | +14.61 | <0.001 | <0.001 | <0.001 |
+| Table 2 | Tianshou (PPO) vs TRL (GRPO) (final arithmetic accuracy) | +14.58 | <0.001 | <0.001 | <0.001 |
+| Table 3 | Qwen3-0.6B: post-RL vs baseline (GSM8K) | +5.18 | <0.001 | 0.012 | 0.003 |
+| Table 3 | Llama-3.2-1B: post-RL vs baseline (GSM8K) | +3.96 | <0.001 | 0.034 | 0.005 |
+| Table 3 | Llama-3.2-3B: post-RL vs baseline (GSM8K) | +3.78 | 0.001 | 0.041 | 0.005 |
+| Table 3 | Qwen3-4B: post-RL vs baseline (GSM8K) | +3.39 | 0.002 | 0.062 | 0.006 |
+| Table 3 | Qwen3-8B: post-RL vs baseline (GSM8K) | +3.94 | <0.001 | 0.035 | 0.005 |
+| Table 3 | Qwen3-14B: post-RL vs baseline (GSM8K) | +3.69 | 0.001 | 0.045 | 0.005 |
+| Table 3 | Qwen3-30B-A3B (MoE): post-RL vs baseline (GSM8K) | +3.22 | 0.002 | 0.075 | 0.007 |
+| Table 4 | Qwen3-8B: PPO vs GRPO (full trace, n=30) | +0.01 | 0.973 | 1.000 | 1.000 |
+| Table 4 | Llama-3.1-8B-Inst: PPO vs GRPO (full trace, n=30) | -0.56 | 0.035 | 1.000 | 0.088 |
+| Table 4 | Qwen3-8B: PPO vs GRPO (Mann-Whitney U) | +0.01 | 0.709 | 1.000 | 0.929 |
+| Table 4 | Llama-3.1-8B-Inst: PPO vs GRPO (Mann-Whitney U) | -0.56 | 0.006 | 0.219 | 0.016 |
+
+## Protocol Notes
+
+1. **Determinism.** All bootstrap draws use `np.random.SeedSequence(MASTER_SEED=20260506).spawn_key`; each call site derives an independent stream from a string tag.
+2. **Bootstrap.** Percentile CIs with B = 10,000; resamples drawn with replacement from the empirical trace.
+3. **Effect size.** Cohen's *d* uses pooled (Welch-neutral) SD; Hedges' *g* corrects for small-sample bias. Analytical 95 % CIs follow Hedges–Olkin (1985).
+4. **Multiple comparisons.** We report Bonferroni inside each table (local family) and globally across the full comparison set. BH-FDR is reported as a less conservative alternative.
+5. **Synthesized seed clouds.** Tables 2-3 recompute variability from the published mean ± SE (with n = 5 seeds) by generating a mean-zero, variance-matched cloud for p-value and *d* estimation; the cloud is deterministic in MASTER_SEED.

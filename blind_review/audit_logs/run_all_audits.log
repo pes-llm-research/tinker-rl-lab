@@ -1,0 +1,66 @@
+=== paper_improvement_audit.py ===
+METRIC reviewer_issues=1
+METRIC total_checks=30
+METRIC resolved=29
+
+--- 1 UNRESOLVED ISSUES ---
+  [T2_conclusion_heldout] Conclusion doesn't mention need for held-out evaluation
+
+=== submission_claim_audit.py ===
+METRIC claim_issues=0
+All submission claim checks passed.
+
+=== paper_sync_audit.py ===
+METRIC sync_issues=0
+All paper mirror sync checks passed.
+
+=== capstone_claim_audit.py ===
+METRIC capstone_issues=1
+missing_baseline_positioning
+
+=== abstract_scope_audit.py ===
+METRIC abstract_issues=4
+main_tex_abstract_missing_humaneval_subset_caveat
+main_tex_abstract_missing_training_reward_caveat
+anon_tex_abstract_missing_humaneval_subset_caveat
+anon_tex_abstract_missing_training_reward_caveat
+
+=== heldout_readiness_audit.py ===
+METRIC readiness_issues=0
+Held-out evaluation readiness checks passed.
+
+=== anonymization_repro_audit.py ===
+METRIC anon_issues=0
+Anonymization/reproducibility checks passed.
+
+=== claim_strength_audit.py ===
+METRIC strength_issues=0
+Claim-strength checks passed.
+
+=== submission_package_audit.py ===
+METRIC package_issues=0
+Submission packaging checks passed.
+
+=== submission_workflow_audit.py ===
+METRIC workflow_issues=0
+Submission workflow checks passed.
+
+=== blind_review_package_audit.py ===
+METRIC blind_package_issues=0
+Blind-review package checks passed.
+
+=== blind_review_export_audit.py ===
+METRIC export_issues=0
+Blind-review export checks passed.
+
+=== export_guard_audit.py ===
+METRIC export_guard_issues=0
+Export guard checks passed.
+
+METRIC suite_issues=3
+METRIC audits_total=13
+METRIC audits_passing=10
+Failing audits:
+  - paper_improvement_audit.py: rc=1, metric=1
+  - capstone_claim_audit.py: rc=0, metric=1
+  - abstract_scope_audit.py: rc=0, metric=4

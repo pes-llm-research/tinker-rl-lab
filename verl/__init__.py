@@ -16,7 +16,7 @@ Features:
 
 __version__ = "0.5.0"
 
-from .trainer import VERLTrainer
+from .trainer import VERLTrainer, run_verl_training, run
 from .config import VERLConfig
 
-__all__ = ["VERLTrainer", "VERLConfig"]
+__all__ = ["VERLTrainer", "VERLConfig", "run_verl_training", "run"]

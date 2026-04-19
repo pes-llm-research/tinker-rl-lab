@@ -1,0 +1,11 @@
+{
+  "_doc": "Headline numbers copied from paper/main.tex Table 2 (Atropos GSM8K, Tinker, GRPO block + Group-Size ablation block). Consumed by utils/verify_results.py.",
+  "gsm8k_qwen3_8b":      {"last10": 0.344, "peak": 0.625},
+  "gsm8k_qwen3_8b_base": {"last10": 0.844, "peak": 1.000},
+  "gsm8k_qwen3_5_4b":    {"last10": 0.850, "peak": 1.000},
+  "gsm8k_qwen3_5_27b":   {"last10": 0.437, "peak": 0.750},
+  "gsm8k_qwen3_8b_g2":   {"last10": 0.375, "peak": 0.500},
+  "gsm8k_qwen3_8b_g4":   {"last10": 0.521, "peak": 0.750},
+  "gsm8k_qwen3_8b_g8":   {"last10": 0.844, "peak": 1.000},
+  "gsm8k_qwen3_8b_g16":  {"last10": 0.380, "peak": 0.719}
+}

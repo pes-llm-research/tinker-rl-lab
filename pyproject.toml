@@ -1,13 +1,13 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinkerrl"
 version = "0.1.0"
 description = "TinkerRL: A Reproducible Multi-Library Reinforcement Learning Benchmark Suite"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 requires-python = ">=3.9"
 authors = [
     {name = "PES LLM Research Team", email = "arvindcr4@gmail.com"},
@@ -22,7 +22,7 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -66,6 +66,12 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.0",
     "pre-commit>=3.0",
+    # Required so `utils.stats` can be imported by the test-core job
+    # (utils/stats.py uses pandas / matplotlib / seaborn for the
+    # per-experiment analysis tooling).
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.13",
 ]
 
 [project.urls]
@@ -75,15 +81,80 @@ Repository = "https://github.com/pes-llm-research/tinker-rl-lab"
 Issues = "https://github.com/pes-llm-research/tinker-rl-lab/issues"
 
 [tool.setuptools.packages.find]
-include = ["tinkerrl*", "utils*", "experiments*", "scripts*"]
+# First-party Python packages only. Vendored / integration subtrees
+# (atropos, verl, openrlhf, skyrl, trl_integrations, unified,
+# agentic-rl-finetuning, ai-scientist-template, research_loop) are kept
+# out of the `tinkerrl` wheel on purpose — they ship as source-only
+# references from upstream projects and have their own packaging.
+include = ["tinkerrl*", "utils*"]
+exclude = [
+    "atropos*", "verl*", "openrlhf*", "skyrl*", "trl_integrations*",
+    "unified*", "agentic-rl-finetuning*", "ai-scientist-template*",
+    "research_loop*", "capstone-literature-survey*", "huggingface*",
+    "tests*", "paper*", "reports*", "experiments*", "scripts*",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py39"
+extend-exclude = [
+    # Vendored / upstream integrations — not authored by this project.
+    "atropos",
+    "verl",
+    "openrlhf",
+    "skyrl",
+    "trl_integrations",
+    "unified",
+    "agentic-rl-finetuning",
+    "ai-scientist-template",
+    "research_loop",
+    "capstone-literature-survey",
+    "huggingface",
+    # Generated / archived notebooks & result files.
+    "*.ipynb",
+    "paper/tikz",
+    "experiments/collab-results",
+    "experiments/modal",
+    "experiments/tinker-runs",
+    "experiments/10x_structural_ceiling",
+    "experiments/notebooks",
+    "reports/final",
+    "grpo_ablation_results",
+]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
-ignore = ["E501"]
+# Keep the bug-finding checks (F401 unused import, F811 redefinition,
+# F821 undefined name) enabled globally so they continue to flag real
+# issues in first-party code (``utils/``, ``tests/``, top-level modules).
+# Noisy exploratory-code paths (``scripts/**``, ``experiments/**``) scope
+# those same rules via ``per-file-ignores`` below; vendored trees are
+# excluded entirely via ``extend-exclude`` above.
+select = ["F", "W", "I", "UP031"]
+ignore = [
+    "E501",   # line length — handled by formatter if at all
+    "F541",   # f-string without placeholders — used for multi-line format strings
+    "F841",   # unused local (research scripts set aside intermediates)
+    "W291",   # trailing whitespace (autofixable; CI should not block on it)
+    "W293",   # blank line with whitespace
+    "I001",   # unsorted imports (let contributors organize imports their way)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Scope the noisy notebook/script-style false positives to exploratory code
+# paths instead of disabling bug-finding checks for the whole repository.
+# First-party code (``utils/``, ``tests/``, library modules) still gets
+# F401 / F811 / F821 enforcement.
+"scripts/**/*.py"      = ["F401", "F811", "F821"]
+"experiments/**/*.py"  = ["F401", "F811", "F821"]
+"paper/figures/**/*.py" = ["F401", "F811", "F821"]
+# Top-level GRPO research drivers (one-shot scripts, not reusable library
+# code; they keep exploratory imports deliberately).
+"grpo_*.py"            = ["F401", "F811", "F821"]
+
+[tool.ruff.format]
+# Only format what we lint; keep research scripts as the author wrote them
+# unless they clearly opt-in via `ruff format`.
+exclude = ["experiments/**", "scripts/**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,4 @@
+METRIC config_issues=3
+autoresearch_md_missing_suite_metric
+autoresearch_md_missing_unified_suite_reference
+autoresearch_md_missing_primary_reviewer_metric_context

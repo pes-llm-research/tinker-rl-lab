@@ -4,7 +4,9 @@ Model: Qwen/Qwen3-8B, LoRA rank 32
 Task:  single-turn structured tool calling (5 tools)
 Loss:  forward_backward_custom with GRPO advantage normalization
 """
+
 import os, json, re, warnings, random, time
+
 warnings.filterwarnings("ignore")
 if "TINKER_API_KEY" not in os.environ:
     raise RuntimeError("Set TINKER_API_KEY env var (already in ~/.zshrc)")
@@ -15,11 +17,11 @@ import tinker.types as T
 from transformers import AutoTokenizer
 
 # ── Config ───────────────────────────────────────────────────────────────
-MODEL      = "Qwen/Qwen3-8B"
-LORA_RANK  = 32
+MODEL = "Qwen/Qwen3-8B"
+LORA_RANK = 32
 GROUP_SIZE = 8
-STEPS      = 50
-LR         = 3e-5
+STEPS = 50
+LR = 3e-5
 SAVE_EVERY = 10
 
 SYSTEM_PROMPT = (
@@ -30,34 +32,47 @@ SYSTEM_PROMPT = (
 
 # ── Synthetic dataset ─────────────────────────────────────────────────────
 TOOLS = [
-    {"name":"calculator",   "description":"Arithmetic", "parameters":{"expression":"string"}},
-    {"name":"get_weather",  "description":"Weather for a city", "parameters":{"city":"string","units":"string"}},
-    {"name":"web_search",   "description":"Web search", "parameters":{"query":"string"}},
-    {"name":"get_time",     "description":"Time in timezone", "parameters":{"timezone":"string"}},
-    {"name":"set_reminder", "description":"Set a reminder", "parameters":{"task":"string","time":"string"}},
+    {"name": "calculator", "description": "Arithmetic", "parameters": {"expression": "string"}},
+    {
+        "name": "get_weather",
+        "description": "Weather for a city",
+        "parameters": {"city": "string", "units": "string"},
+    },
+    {"name": "web_search", "description": "Web search", "parameters": {"query": "string"}},
+    {"name": "get_time", "description": "Time in timezone", "parameters": {"timezone": "string"}},
+    {
+        "name": "set_reminder",
+        "description": "Set a reminder",
+        "parameters": {"task": "string", "time": "string"},
+    },
 ]
 TOOL_SCHEMA = json.dumps(TOOLS)
 
 RAW = [
-    ("What is 245 * 37?",                   "calculator",   {"expression":"245 * 37"}),
-    ("Calculate sqrt(144)",                  "calculator",   {"expression":"sqrt(144)"}),
-    ("15% of 980?",                          "calculator",   {"expression":"0.15 * 980"}),
-    ("Divide 1024 by 32",                    "calculator",   {"expression":"1024 / 32"}),
-    ("2 to the power of 10",                 "calculator",   {"expression":"2 ** 10"}),
-    ("Weather in Tokyo?",                    "get_weather",  {"city":"Tokyo","units":"metric"}),
-    ("Is it raining in London?",             "get_weather",  {"city":"London","units":"metric"}),
-    ("Temperature in New York",              "get_weather",  {"city":"New York","units":"imperial"}),
-    ("How hot is Dubai right now?",          "get_weather",  {"city":"Dubai","units":"metric"}),
-    ("Search for GPT-5 news",                "web_search",   {"query":"GPT-5 news"}),
-    ("Capital of Australia?",                "web_search",   {"query":"capital of Australia"}),
-    ("Find Python asyncio tutorial",         "web_search",   {"query":"Python asyncio tutorial"}),
-    ("What time is it in Singapore?",        "get_time",     {"timezone":"Asia/Singapore"}),
-    ("Current time in Los Angeles?",         "get_time",     {"timezone":"America/Los_Angeles"}),
-    ("Time in Berlin?",                      "get_time",     {"timezone":"Europe/Berlin"}),
-    ("Remind me to call mom at 6pm",         "set_reminder", {"task":"call mom","time":"6pm"}),
-    ("Set a reminder for team meeting 10am", "set_reminder", {"task":"team meeting","time":"10am"}),
-    ("Remind me to take medicine at 8pm",    "set_reminder", {"task":"take medicine","time":"8pm"}),
+    ("What is 245 * 37?", "calculator", {"expression": "245 * 37"}),
+    ("Calculate sqrt(144)", "calculator", {"expression": "sqrt(144)"}),
+    ("15% of 980?", "calculator", {"expression": "0.15 * 980"}),
+    ("Divide 1024 by 32", "calculator", {"expression": "1024 / 32"}),
+    ("2 to the power of 10", "calculator", {"expression": "2 ** 10"}),
+    ("Weather in Tokyo?", "get_weather", {"city": "Tokyo", "units": "metric"}),
+    ("Is it raining in London?", "get_weather", {"city": "London", "units": "metric"}),
+    ("Temperature in New York", "get_weather", {"city": "New York", "units": "imperial"}),
+    ("How hot is Dubai right now?", "get_weather", {"city": "Dubai", "units": "metric"}),
+    ("Search for GPT-5 news", "web_search", {"query": "GPT-5 news"}),
+    ("Capital of Australia?", "web_search", {"query": "capital of Australia"}),
+    ("Find Python asyncio tutorial", "web_search", {"query": "Python asyncio tutorial"}),
+    ("What time is it in Singapore?", "get_time", {"timezone": "Asia/Singapore"}),
+    ("Current time in Los Angeles?", "get_time", {"timezone": "America/Los_Angeles"}),
+    ("Time in Berlin?", "get_time", {"timezone": "Europe/Berlin"}),
+    ("Remind me to call mom at 6pm", "set_reminder", {"task": "call mom", "time": "6pm"}),
+    (
+        "Set a reminder for team meeting 10am",
+        "set_reminder",
+        {"task": "team meeting", "time": "10am"},
+    ),
+    ("Remind me to take medicine at 8pm", "set_reminder", {"task": "take medicine", "time": "8pm"}),
 ]
+
 
 def make_prompt(query):
     return (
@@ -66,13 +81,15 @@ def make_prompt(query):
         f"<|im_start|>assistant\n"
     )
 
+
 examples = [(make_prompt(q), t, a) for q, t, a in RAW] * 28
 random.shuffle(examples)
-print(f"Dataset: {len(examples)} examples, {len(set(t for _,t,_ in RAW))} tools")
+print(f"Dataset: {len(examples)} examples, {len(set(t for _, t, _ in RAW))} tools")
+
 
 # ── Reward function ───────────────────────────────────────────────────────
 def reward(response: str, tool_name: str, arguments: dict) -> float:
-    m = re.search(r'\{.*\}', response.strip(), re.DOTALL)
+    m = re.search(r"\{.*\}", response.strip(), re.DOTALL)
     if not m:
         return 0.0
     try:
@@ -87,10 +104,12 @@ def reward(response: str, tool_name: str, arguments: dict) -> float:
         score += 0.3 * sum(1 for k in arguments if k in pred_args) / len(arguments)
     return min(score, 1.0)
 
+
 # ── GRPO loss using forward_backward_custom ───────────────────────────────
 # Store advantages in a side-channel since Tinker only allows
 # target_tokens + weights in loss_fn_inputs.
 _advantages = []
+
 
 def grpo_loss_fn(data, logprobs_list):
     """Compute GRPO policy gradient loss from per-token logprobs."""
@@ -102,10 +121,11 @@ def grpo_loss_fn(data, logprobs_list):
     loss = torch.stack(losses).mean()
     return loss, {"grpo_loss": loss.item()}
 
+
 # ── Tinker setup ─────────────────────────────────────────────────────────
 print("Connecting to Tinker...")
 svc = tinker.ServiceClient(base_url=None)
-tc  = svc.create_lora_training_client(base_model=MODEL, rank=LORA_RANK)
+tc = svc.create_lora_training_client(base_model=MODEL, rank=LORA_RANK)
 print(f"Run ID: {tc.model_id}")
 
 print("Loading tokenizer...")
@@ -124,13 +144,13 @@ step_rewards = []
 for step in range(STEPS):
     batch = random.sample(examples, 4)  # 4 prompts per step
 
-    all_data      = []
-    all_advs      = []
+    all_data = []
+    all_advs = []
     batch_rewards = []
 
     for prompt_text, tool_name, args in batch:
         prompt_ids = tok.encode(prompt_text, add_special_tokens=False)
-        prompt_mi  = T.ModelInput.from_ints(prompt_ids)
+        prompt_mi = T.ModelInput.from_ints(prompt_ids)
 
         # Sample GROUP_SIZE completions
         sp = T.SamplingParams(max_tokens=192, temperature=0.8, top_p=0.95)
@@ -145,8 +165,8 @@ for step in range(STEPS):
 
         # Group-relative advantages
         mean_r = sum(rewards) / len(rewards)
-        std_r  = (sum((r - mean_r)**2 for r in rewards) / len(rewards))**0.5 + 1e-8
-        advs   = [(r - mean_r) / std_r for r in rewards]
+        std_r = (sum((r - mean_r) ** 2 for r in rewards) / len(rewards)) ** 0.5 + 1e-8
+        advs = [(r - mean_r) / std_r for r in rewards]
         batch_rewards.extend(rewards)
 
         for resp, adv in zip(responses.sequences, advs):
@@ -161,7 +181,7 @@ for step in range(STEPS):
                     "target_tokens": T.TensorData(
                         data=target_ids, dtype="int64", shape=[len(target_ids)]
                     ),
-                }
+                },
             )
             all_data.append(datum)
             all_advs.append(adv)
@@ -183,19 +203,19 @@ for step in range(STEPS):
     avg_r = sum(batch_rewards) / len(batch_rewards)
     step_rewards.append(avg_r)
     grpo_loss_val = result.metrics.get("grpo_loss", float("nan"))
-    print(f"Step {step+1:3d}/{STEPS} | loss={grpo_loss_val:.4f} | reward={avg_r:.3f}")
+    print(f"Step {step + 1:3d}/{STEPS} | loss={grpo_loss_val:.4f} | reward={avg_r:.3f}")
 
     if (step + 1) % SAVE_EVERY == 0:
-        state = tc.save_state(name=f"state_{step+1}")
-        ckpt  = tc.save_weights_for_sampler(name=f"step_{step+1}").result()
-        sc    = tc.create_sampling_client(model_path=ckpt.path)
-        print(f"  → Saved: {state} | Sampler: step_{step+1}")
+        state = tc.save_state(name=f"state_{step + 1}")
+        ckpt = tc.save_weights_for_sampler(name=f"step_{step + 1}").result()
+        sc = tc.create_sampling_client(model_path=ckpt.path)
+        print(f"  → Saved: {state} | Sampler: step_{step + 1}")
 
 # ── Final save ────────────────────────────────────────────────────────────
 final_state = tc.save_state(name="final")
-final_ckpt  = tc.save_weights_for_sampler(name="final").result()
+final_ckpt = tc.save_weights_for_sampler(name="final").result()
 print(f"\nFinal checkpoint: {final_state}")
 print(f"Sampler weights:  {final_ckpt.path}")
-print(f"Avg reward last 10: {sum(step_rewards[-10:])/max(len(step_rewards[-10:]),1):.3f}")
+print(f"Avg reward last 10: {sum(step_rewards[-10:]) / max(len(step_rewards[-10:]), 1):.3f}")
 print(f"Run ID: {tc.model_id}")
 print("Done.")

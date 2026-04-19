@@ -13,7 +13,7 @@ Features:
 
 __version__ = "0.9.0"
 
-from .trainer import OpenRLHFTrainer
+from .trainer import OpenRLHFTrainer, run_openrlhf_training, run
 from .config import OpenRLHFConfig
 
-__all__ = ["OpenRLHFTrainer", "OpenRLHFConfig"]
+__all__ = ["OpenRLHFTrainer", "OpenRLHFConfig", "run_openrlhf_training", "run"]
