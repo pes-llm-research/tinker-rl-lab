@@ -35,6 +35,13 @@ If results show >40% accuracy on held-out test, update Section 4.3.3 with actual
 ### Capstone Report
 - `capstone_final_report.md` - Full capstone report (honest about limitations)
 - `capstone_final_report.docx` - Word version
+- `group6_final_report.pdf` - Canonical integrated final report with paper findings distributed across chapters
+- `group6_final_report.tex` - LaTeX export of the canonical integrated final report
+- `group6_final_report.docx` - Word export of the canonical integrated final report
+- `build_group6_final_report.sh` - Rebuilds the integrated PDF, TeX, and DOCX from `capstone_final_report.md`
+
+### Legacy Wrapper
+- `group6_final_report_with_appended_paper.tex` - Legacy wrapper that embeds `group6.pdf` and `paper/main.pdf`; kept for traceability, not the recommended final submission artifact
 
 ### Conference Paper (NeurIPS/ICML Format)
 - `grpo_agentic_llm_paper.tex` - LaTeX source
