@@ -1,6 +1,24 @@
+% Standalone wrapper that renders ethics_statement.tex as a submission bundle
+% artefact. Must resolve the same macros/packages as main.tex so citations,
+% booktabs, and the \ours command work outside the NeurIPS shell.
 \documentclass[10pt]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[numbers]{natbib}
+\newcommand{\ours}{\textsc{TinkerRL Lab}\xspace}
+\usepackage{xspace}
+\title{Ethics, Limitations, and Broader Impact Statement\\\textsc{TinkerRL Lab}}
+\author{}
+\date{}
 \begin{document}
+\maketitle
 \input{ethics_statement}
+\bibliographystyle{plainnat}
+\bibliography{references}
 \end{document}

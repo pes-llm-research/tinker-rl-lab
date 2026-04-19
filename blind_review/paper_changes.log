@@ -21,7 +21,7 @@
 - wandb project name (bare) -> tinker-rl-bench: 0 replacement(s)
 - ``Team Model Checkpoints'' block replaced with anonymous stub: 1 replacement(s)
 - \begin{ack}..\end{ack} environment anonymised: 1 replacement(s)
-- \section*{Acknowledgments} block anonymised: 1 replacement(s)
+- \section*{Acknowledgments} block anonymised: 0 replacement(s)
 - ``PES University's LLM Research Group'' redacted: 1 replacement(s)
 - ``PES University/Great Learning'' redacted: 0 replacement(s)
 - ``Great Learning / PES University'' redacted: 0 replacement(s)

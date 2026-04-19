@@ -1,14 +1,14 @@
 # Code anonymisation change log
 
 Tarball: blind_review/tinker-rl-lab-anon.tar.gz
-Tarball SHA-256: f1272b57a5dbd98a72dff0d589188db0713131ebdaa245dd77baf0c63f3ae87b
-Tarball size: 101086047 bytes
+Tarball SHA-256: de8008c881b63bee1b8b2c33bfaee7445dfda63cf70d5dd43ac718502b9d91aa
+Tarball size: 101471909 bytes
 
 ## Totals by rule
 
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 104
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 80
 - GH handle arvindcr4 -> anonymous: 78
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 76
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 53
 - GH org pes-llm-research -> anonymous-org: 44
 - ``PES University'' -> Anonymous Institution: 43
 - github.com/anonymous-org/tinker-rl-lab -> anonymous.4open.science: 27
@@ -54,6 +54,7 @@ Tarball size: 101086047 bytes
 - paper/main.bbl
 - paper/main.blg
 - paper/main.out
+- paper/main.pdf
 - paper/main.tex
 - paper/neurips_checklist_update.tex
 - reports/final/CONSOLIDATED_REVIEW_IMPROVEMENTS.md
@@ -387,8 +388,8 @@ Tarball size: 101086047 bytes
 
 ### experiments/master_results.csv
 
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 9
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 9
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 21
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 21
 - GH handle madhukumara1993 -> anonymous: 1
 - GH handle arvindcr4 -> anonymous: 1
 - name Mohammad Rafi -> Anonymous: 1
@@ -399,8 +400,8 @@ Tarball size: 101086047 bytes
 
 ### experiments/master_results.json
 
-- wandb entity arvindcr4-pes-university -> anonymous-entity: 14
-- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 15
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 26
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 27
 - GH handle madhukumara1993 -> anonymous: 1
 - GH handle arvindcr4 -> anonymous: 4
 - name Mohammad Rafi -> Anonymous: 1
@@ -480,6 +481,11 @@ Tarball size: 101086047 bytes
 
 - GH handle arvindcr4 -> anonymous: 2
 
+### experiments/tinker-runs/results/wave6_ablations.json
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
+
 ### experiments/tinker-runs/scripts/tinker_parallel_runner.py
 
 - wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
@@ -491,6 +497,16 @@ Tarball size: 101086047 bytes
 - name Arumugam K -> Anonymous: 1
 - name Arvind C R -> Anonymous: 1
 - github.com/anonymous/tinker-rl-lab -> anonymous.4open.science: 1
+
+### experiments/tinker-runs/wave6_ablations.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 2
+
+### experiments/tinker-runs/wave6_resume.py
+
+- wandb entity arvindcr4-pes-university -> anonymous-entity: 1
+- wandb project tinker-rl-lab-world-class -> tinker-rl-bench: 1
 
 ### huggingface/MODEL_CARD_TEMPLATE.md
 

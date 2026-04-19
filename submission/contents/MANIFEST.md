@@ -5,12 +5,12 @@ checksum list lives in the companion file `checksums.sha256`, which is the
 authoritative input to `sha256sum -c`.
 
 ```
-0204147bcfc9cad6d0110e923fbe365308734482a0a3ba82f8cd3a61dc3bb67b  ethics_statement.pdf
-15b71c30762400ee9b1ca042f231437494cfe64b34321de345c8ba363a8cffa7  paper.pdf
-c5ab440c9d3795b9c994135d75dcdb1b663b2a831856d9dfbaea864e3b254f06  paper_anon.pdf
-5082ce24906b60f3c878b986e1fc36639524d30606bad4a998cc606768b1c976  code.tar.gz
-3553adadcc314a40de5c5a2496fddf15485e46ea844162b77358ebdca7317ffe  REVIEWER_README.md
-8493dd928d8ff349b905729b1c47f3894252ad959c9f9069f5ebfbac747f9c90  data_statement.md
+7316e38125fffb3ffd3f9df9a97f725b6d6b9885931378c8aef6d24d76ee6451  ethics_statement.pdf
+bc41f80541af4a838e279e45af7ee8c52744ca756a194a7d5a0aa23bd48be8a8  paper.pdf
+aeb4bdcfef725a1c951846f0a617b5bb21d508b4ca458abb644b1726016de993  paper_anon.pdf
+de8008c881b63bee1b8b2c33bfaee7445dfda63cf70d5dd43ac718502b9d91aa  code.tar.gz
+69326c6276ec871b84eb3131bebeb920708a1781c14305c816f4358ce9154199  REVIEWER_README.md
+0236e8f4547d3399e9ce66aeb4556a20a00b6d05c42a9306b3aaf496ad5c87d3  data_statement.md
 ```
 
 Verify with:
@@ -19,3 +19,5 @@ Verify with:
 unzip neurips2026_tinker_rl_lab.zip
 sha256sum -c checksums.sha256
 ```
+
+Bundle composition: 7 files (6 data files + `checksums.sha256` / `MANIFEST.md`).
