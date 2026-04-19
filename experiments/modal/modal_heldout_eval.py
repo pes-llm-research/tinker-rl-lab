@@ -28,13 +28,11 @@ Env:
 from __future__ import annotations
 
 import argparse
-import glob
 import json
 import math
 import os
 import random
 import re
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, asdict
@@ -514,9 +512,13 @@ def run(
     results: list[dict] = []
     t0 = time.time()
     if remote_fn is not None:
-        # Modal: map across checkpoints in parallel containers
+        # Modal: map across checkpoints in parallel containers.
+        # ``eval_one(record, problems)`` takes two positional args; Modal's
+        # ``.map`` expects one iterable per function argument (it does not
+        # auto-unpack tuples). We broadcast the shared ``problems`` list once
+        # per checkpoint so each remote call gets ``(record, problems)``.
         print("[heldout] dispatching to Modal…")
-        for res in remote_fn([(rec, problems) for rec in records]):
+        for res in remote_fn(records, [problems] * len(records)):
             results.append(res)
     else:
         # Local: run checkpoints in parallel threads. Sampling is I/O-bound
@@ -550,13 +552,30 @@ def run(
             for fut in as_completed(futs):
                 results.append(fut.result())
 
-    results.sort(key=lambda r: r.get("heldout_accuracy", 0.0), reverse=True)
+    # Preserve the training ``last10_avg`` ranking used for selection (docs
+    # and paper refer to this as the "top-k by last-10" order). We attach a
+    # secondary ``heldout_rank`` field per record so downstream consumers can
+    # still obtain the held-out-accuracy ordering without mutating the JSON
+    # order.
+    heldout_rank = {
+        id(r): i + 1
+        for i, r in enumerate(
+            sorted(results, key=lambda r: r.get("heldout_accuracy", 0.0), reverse=True)
+        )
+    }
+    for r in results:
+        r["heldout_rank"] = heldout_rank.get(id(r))
 
-    # Aggregate summary
+    # Aggregate summary. ``heldout_n`` reports the actual number of held-out
+    # problems evaluated (``len(problems)``) rather than the requested ``n``
+    # so the metadata stays consistent with per-checkpoint ``heldout_n`` when
+    # ``load_heldout_gsm8k`` skips rows or ``n`` exceeds the available split.
     valid = [r for r in results if r.get("heldout_n")]
+    actual_n = len(problems)
     summary = {
         "n_checkpoints": len(results),
-        "heldout_n": n,
+        "heldout_n": actual_n,
+        "heldout_n_requested": n,
         "heldout_seed": seed,
         "mean_heldout_accuracy": (
             sum(r["heldout_accuracy"] for r in valid) / len(valid) if valid else 0.0
@@ -575,7 +594,8 @@ def run(
                 "(ranked by training last10_avg)."
             ),
             "heldout_split": "openai/gsm8k[test]",
-            "heldout_n": n,
+            "heldout_n": actual_n,
+            "heldout_n_requested": n,
             "heldout_seed": seed,
             "system_prompt": SYSTEM_PROMPT,
             "question_suffix": QUESTION_SUFFIX,
