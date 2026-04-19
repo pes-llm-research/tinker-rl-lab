@@ -96,6 +96,27 @@ if [ -f "$LOCAL_TRL_TEMPLATE" ]; then
 fi
 MAX_SCORE=$((MAX_SCORE + 5))
 
+# --- Data freshness: critical result files exist and are non-empty (10 points) ---
+DATA_FRESH=0
+DATA_FILES=(
+    "/Users/arvind/paper/tinker-rl-lab/experiments/results/base_instruct_paired.tsv"
+    "/Users/arvind/paper/tinker-rl-lab/experiments/results/group_size_token_normalized.tsv"
+    "/Users/arvind/paper/tinker-rl-lab/experiments/results/variance_mitigation.tsv"
+)
+DATA_OK=0
+for f in "${DATA_FILES[@]}"; do
+    if [ -s "$f" ]; then
+        DATA_OK=$((DATA_OK + 1))
+    else
+        echo "DATA_MISSING_OR_EMPTY=$f"
+    fi
+done
+if [ "$DATA_OK" -eq "${#DATA_FILES[@]}" ]; then
+    DATA_FRESH=1
+    SCORE=$((SCORE + 10))
+fi
+MAX_SCORE=$((MAX_SCORE + 10))
+
 echo "METRIC acceptance_score=$SCORE"
 echo "METRIC max_acceptance_score=$MAX_SCORE"
 echo "METRIC weaknesses_addressed=$ADDRESSED"
@@ -103,3 +124,4 @@ echo "METRIC weakness_total=$WEAKNESS_COUNT"
 echo "METRIC script_bonus=$BONUS"
 echo "METRIC ai_scientist_runs=$AI_SCIENTIST_RUNS"
 echo "METRIC local_trl_template=$LOCAL_TRL"
+echo "METRIC data_fresh=$DATA_FRESH"
