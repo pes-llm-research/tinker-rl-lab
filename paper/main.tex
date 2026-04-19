@@ -114,7 +114,7 @@
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.85\textwidth]{tikz/taxonomy.pdf}
-\caption{Taxonomy of RL libraries in \ours{}. The benchmark spans LLM-native RL
+\caption{Taxonomy of of RL libraries in \ours{}. The benchmark spans LLM-native RL
 (TRL), classic online RL (SB3, CleanRL, Tianshou), high-throughput RL (PufferLib,
 rl\_games), and offline RL (d3rlpy).}
 \label{fig:taxonomy}
@@ -456,7 +456,7 @@ $\dagger$~Training interrupted; reported metrics are from available steps.}
 \toprule
 \textbf{Algo} & \textbf{Plat.} & \textbf{Model} & \textbf{Size} & \textbf{Steps} & \textbf{Peak} & \textbf{Last-10} \\
 \midrule
-\multicolumn{7}{l}{\textit{GRPO on Tinker API (GSM8K)}} \\
+\multicolumn{7}{l}{\textit{GRPO on Tinker API (GSM8K training reward)}} \\
 \midrule
 GRPO & Tinker & Qwen3-8B & 8B & 30 & 62.5\% & 34.4\% \\
 GRPO & Tinker & Qwen3.5-4B & 4B & 30 & 100\% & 85.0\% \\
@@ -506,7 +506,7 @@ GRPO & OpenRLHF (Modal-H100) & Qwen3-8B & 8B & 30 & see Fig.~\ref{fig:framework_
 PPO & Modal & Qwen3-8B & 8B & 30 & 75.0\% & 22.5\% \\
 PPO & Modal & Llama-3.1-8B-Inst & 8B & 30 & 100\% & 97.5\% \\
 \midrule
-\multicolumn{7}{l}{\textit{Cross-task (Tool-Use), GRPO on Tinker}} \\
+\multicolumn{7}{l}{\textit{Cross-task (Tool-Use), GRPO on Tinker API}} \\
 \midrule
 GRPO & Tinker & Qwen3-32B & 32B & 30 & 0\% & 0\% \\
 GRPO & Tinker & Llama-3.1-8B-Inst & 8B & 30 & 0\% & 0\% \\
@@ -533,7 +533,11 @@ four-bar last-10-reward chart (Figure~\ref{fig:framework_gap}).
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.8\columnwidth]{figures/v2/framework_comparison.pdf}
+\IfFileExists{figures/v2/framework_comparison.pdf}{%
+\includegraphics[width=0.8\columnwidth]{figures/v2/framework_comparison.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: framework_comparison.pdf pending regeneration. See \texttt{paper/sections/framework_gap.tex}.]}\vspace{1em}}}%
+}
 \caption{Task~4 framework-gap deep-dive. Identical GRPO config
 (Qwen3-8B, $G{=}8$, lr${=}10^{-5}$, GSM8K-500, 30 steps, seed~42) run through
 four launchers (\texttt{verl/}, \texttt{openrlhf/}, \texttt{trl\_integrations/}
@@ -567,7 +571,11 @@ Tianshou (PPO) & 0.006 $\pm$ 0.002 & [0.003, 0.009] & N/A \\
 % Figure 5: Learning curves
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/v2/learning_curves.pdf}
+\IfFileExists{figures/v2/learning_curves.pdf}{%
+\includegraphics[width=0.95\linewidth]{figures/v2/learning_curves.pdf}%
+}{%
+\fbox{\parbox{0.95\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: learning_curves.pdf pending regeneration. See \texttt{paper/sections/learning_curves.tex}.]}\vspace{1em}}}%
+}
 \caption{Learning curves for the arithmetic task across RL libraries. Shaded regions
 indicate $\pm 1$ standard deviation across 5 seeds. All curves use real experimental
 data from Modal GPU runs (NVIDIA L4/T4).}
@@ -577,7 +585,11 @@ data from Modal GPU runs (NVIDIA L4/T4).}
 % Figure 6: Performance profiles
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/performance_profiles.pdf}
+\IfFileExists{figures/v2/performance_profiles.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/performance_profiles.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: performance\_profiles.pdf pending regeneration. See \texttt{scripts/make\_paper\_figures.py::fig\_performance\_profiles}.]}\vspace{1em}}}%
+}
 \caption{Performance profiles showing the fraction of runs above a given normalized
 score threshold, following the methodology of Agarwal et al.~\cite{agarwal2021deep}.}
 \label{fig:performance_profiles}
@@ -694,7 +706,11 @@ and this entry will be backfilled before the camera-ready.
 % Figure 7: Scaling plot
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/scaling.pdf}
+\IfFileExists{figures/v2/scaling.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/scaling.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: scaling.pdf pending regeneration. See \texttt{paper/sections/scaling.tex}.]}\vspace{1em}}}%
+}
 \caption{Scaling analysis: GSM8K accuracy as a function of model size (log scale x-axis).
 Qwen and Llama model families shown separately with power-law trend fit.}
 \label{fig:scaling}
@@ -743,7 +759,11 @@ requiring fewer steps to converge.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/scaling_law_figure}
+\IfFileExists{figures/v2/scaling_law_figure.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/scaling_law_figure.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: scaling\_law\_figure.pdf pending regeneration. See \texttt{paper/sections/scaling.tex}.]}\vspace{1em}}}%
+}
 \caption{Exponential saturation fits to reward traces across model families.
 Each curve shows the fitted $R(t)$ with observed data points overlaid.
 DeepSeek and Qwen3-MoE show the strongest saturation behavior.}
@@ -752,7 +772,11 @@ DeepSeek and Qwen3-MoE show the strongest saturation behavior.}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/scaling_params_figure}
+\IfFileExists{figures/v2/scaling_params_figure.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/scaling_params_figure.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: scaling\_params\_figure.pdf pending regeneration. See \texttt{paper/sections/scaling.tex}.]}\vspace{1em}}}%
+}
 \caption{Fitted scaling parameters ($R_{\max}$ and $k$) as a function of model
 size (log scale). Pearson correlations shown; both are statistically significant
 at $p < 0.05$.}
@@ -764,7 +788,11 @@ at $p < 0.05$.}
 % Figure 8: Model x task reward grid
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/sensitivity_heatmap.pdf}
+\IfFileExists{figures/v2/sensitivity_heatmap.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/sensitivity_heatmap.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: sensitivity\_heatmap.pdf pending regeneration. See \texttt{paper/sections/sensitivity.tex}.]}\vspace{1em}}}%
+}
 \caption{Final reward by model $\times$ task under Tinker GRPO
 (maximum over runs). Rows are models and columns group the task
 families (GSM8K, math reasoning, tool use, code generation); empty
@@ -786,7 +814,11 @@ the figure script is \texttt{paper/figures/wave6\_sensitivity.py}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\linewidth]{figures/wave6_sensitivity.pdf}
+\IfFileExists{figures/wave6_sensitivity.pdf}{%
+\includegraphics[width=\linewidth]{figures/wave6_sensitivity.pdf}%
+}{%
+\fbox{\parbox{0.95\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: wave6\_sensitivity.pdf pending regeneration. See \texttt{paper/figures/wave6\_sensitivity.py}.]}\vspace{1em}}}%
+}
 \caption{Wave~6 Qwen3-8B / GSM8K sensitivity ablations. \textbf{Left:}
 sampling temperature $T\in\{0.2,0.4,0.6,0.8,1.0\}$. \textbf{Middle:}
 LoRA rank $r\in\{4,8,16,32,64\}$. \textbf{Right:} per-step batch size
@@ -1039,7 +1071,11 @@ PPO (Modal H100) & Llama-3.1-8B-Instruct & 30 & 100\% & \textbf{97.5\%} \\
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/v2/ppo_vs_grpo.pdf}
+\IfFileExists{figures/v2/ppo_vs_grpo.pdf}{%
+\includegraphics[width=0.95\linewidth]{figures/v2/ppo_vs_grpo.pdf}%
+}{%
+\fbox{\parbox{0.95\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: ppo\_vs\_grpo.pdf pending regeneration. See \texttt{paper/sections/ppo\_vs\_grpo.tex}.]}\vspace{1em}}}%
+}
 \caption{Step-level reward comparison between GRPO (Tinker) and PPO (Modal H100) on Qwen3-8B GSM8K. Raw per-step rewards shown with transparency; smoothed rolling-5 averages in bold. The shaded region marks the last-10 evaluation window. GRPO achieves a higher last-10 average (34.4\%) vs.~PPO (22.5\%) despite PPO reaching a higher peak (75\% vs.~62.5\%). PPO exhibits substantially higher volatility (std 0.284 vs.~0.147).}
 \label{fig:ppo_vs_grpo}
 \end{figure}
@@ -1087,7 +1123,11 @@ Tinker vs TRL (LLM-native) & $20$ & $5$ & $1.17$ & $[0.13, 2.21]$ & 0.016$^\dag$
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/effect_sizes_forest}
+\IfFileExists{figures/v2/effect_sizes_forest.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/effect_sizes_forest.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: effect\_sizes\_forest.pdf pending regeneration. See \texttt{paper/sections/effect\_sizes.tex}.]}\vspace{1em}}}%
+}
 \caption{Forest plot of effect sizes (Cohen's $d$) for all five planned pairwise
 comparisons. Error bars show 95\% confidence intervals. The LLM-native vs.\ Classic RL
 comparison is the largest effect by two orders of magnitude.}
@@ -1147,7 +1187,8 @@ trajectories rather than meaningful learning.
 \paragraph{Algorithm Stability Comparison.}
 GRPO experiments show significantly lower instability than classic-RL PPO:
 mean SI of $0.162 \pm 0.157$ vs.\ $0.814 \pm 0.370$
-(Mann--Whitney $U = 1.0$, $p = 0.005$); mean PTD of $0.212 \pm 0.205$
+(Mann--Whitney $U = 1.0$, $p = 0.005$);
+mean PTD of $0.212 \pm 0.205$
 vs.\ $0.619 \pm 0.139$ ($p = 0.018$).
 This stability advantage is consistent with GRPO's reference-free
 objective: by computing advantages relative to group baselines rather
@@ -1168,13 +1209,17 @@ neighborhood of the reference initialization throughout training.
 \paragraph{Honest Limitation.}
 These proxy metrics capture \emph{symptoms} of policy drift (reward
 instability) rather than \emph{direct measurements} of distributional
-divergence. The corrected KL tracking implementation is included in
+divergence. The corrected KL measurement is included in
 the released code; future work will validate the proxy--KL
 correspondence and quantify per-token divergence trajectories.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/v2/kl_proxy.pdf}
+\IfFileExists{figures/v2/kl_proxy.pdf}{%
+\includegraphics[width=\textwidth]{figures/v2/kl_proxy.pdf}%
+}{%
+\fbox{\parbox{\textwidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: kl\_proxy.pdf pending regeneration. See \texttt{paper/sections/kl.tex}.]}\vspace{1em}}}%
+}
 \caption{\textbf{Policy drift proxies from step-level telemetry.}
 (Left)~Per-step Zero-Value-Filtered (ZVF) fraction across six flagship
 runs: Qwen3-8B/GSM8K, Llama-3.1-8B/GSM8K, Qwen3.5-4B/GSM8K,
@@ -1209,8 +1254,8 @@ ZVF exhibits a strong negative correlation with final performance:
   \rho_{\text{Spearman}} = -0.784 \;(p = 0.0005).
 \]
 Task type is the dominant driver: tool-use experiments reach $\mathrm{ZVF} = 100\%$
-(mean $\mathrm{GU} = 0\%$), while GSM8K experiments average $\mathrm{ZVF} = 8.5\%$
-(mean $\mathrm{GU} = 91.5\%$). Model scale does not uniformly reduce ZVF
+(mean $\mathrm{GU} = 0\%$), while GSM8K experiments average $\mathrm{ZVF} = 8.5\%$.
+Model scale does not uniformly reduce ZVF
 ($r_\text{Pearson} = -0.257$), indicating that task--reward alignment is more
 critical than parameter count for maintaining gradient flow. A one-way ANOVA
 across model families yields $F(4,10) = 0.949$, $p = 0.476$: after accounting
@@ -1223,7 +1268,11 @@ for more than 10 consecutive steps~\cite{zhang2026aero,zhang2026greso}.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/v2/zvf_heatmap}
+\IfFileExists{figures/v2/zvf_heatmap.pdf}{%
+\includegraphics[width=\textwidth]{figures/v2/zvf_heatmap.pdf}%
+}{%
+\fbox{\parbox{\textwidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: zvf\_heatmap.pdf pending regeneration. See \texttt{paper/sections/zvf.tex}.]}\vspace{1em}}}%
+}
 \caption{Per-step ZVF heatmap. Red: ZVF$=1$ (zero gradient); blue: ZVF$=0$ (gradient
 flows); grey: no data. Experiments sorted by aggregate ZVF (descending).}
 \label{fig:zvf-heatmap}
@@ -1231,7 +1280,11 @@ flows); grey: no data. Experiments sorted by aggregate ZVF (descending).}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{figures/v2/zvf_correlation}
+\IfFileExists{figures/v2/zvf_correlation.pdf}{%
+\includegraphics[width=\textwidth]{figures/v2/zvf_correlation.pdf}%
+}{%
+\fbox{\parbox{\textwidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: zvf\_correlation.pdf pending regeneration. See \texttt{paper/sections/zvf.tex}.]}\vspace{1em}}}%
+}
 \caption{\textbf{Left:} ZVF vs.\ final performance scatter ($r = -0.769$,
 $p = 0.0008$). \textbf{Right:} Mean ZVF by model family. Llama's high mean
 ZVF is driven entirely by tool-use experiments.}
@@ -1256,7 +1309,7 @@ For binary-outcome tasks with per-prompt accuracy $p$:
   \mathrm{GU}(p, G) = 1 - p^G - (1-p)^G.
 \]
 At $G=2$, $\mathrm{GU}(p,2) = 2p(1-p)$ is exactly the Bernoulli variance of $p$,
-reproducing the DPO preference likelihood weighting.
+reproducing the DPO preference weighting.
 Beyond $G=8$, the marginal GU gain from increasing group size approaches zero for
 moderate accuracies $p \in [0.2, 0.8]$; the gain from $G=16 \to G=32$ is less
 than 0.3\% at $p=0.5$.
@@ -1267,13 +1320,21 @@ High-accuracy frontier models ($p > 0.8$) show \emph{negative} residuals
 (observed ZVF $<$ theoretical), consistent with adaptive difficulty sampling.
 Moderate-accuracy experiments ($p \approx 0.3$--$0.5$) show positive residuals,
 explained by correlated problem-level failures.
-For our G=8 DeepSeek-V3.1 run ($p=0.85$), 27\% of steps were zero-gradient;
-switching to $G=2$ would reduce rollouts by 75\% while preserving all
-informative contrastive signal.
+For our G=8 DeepSeek-V3.1 run ($p \approx 0.85$), 27\% of steps were
+zero-gradient; switching to $G = 2$ would preserve all informative contrastive
+signal while reducing rollout overhead by 75\%.
+However, the DPO equivalence also predicts that very high-accuracy models
+($p > 0.9$) will have low gradient utilization regardless of $G$, suggesting
+that the relevant intervention at high accuracy is not group-size reduction
+but prompt re-sampling from harder sub-distributions.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/group_size_ablation.pdf}
+\IfFileExists{figures/v2/group_size_ablation.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/group_size_ablation.pdf}%
+}{%
+\fbox{\parbox{\textwidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: group\_size\_ablation.pdf pending regeneration. See \texttt{paper/sections/group\_size.tex}.]}\vspace{1em}}}%
+}
 \caption{\textbf{Empirical GRPO group-size ablation} on Qwen3-8B /
 GSM8K (30 training steps, $G \in \{2, 4, 8, 16, 32\}$). Blue bars show
 peak reward during training; vermillion bars show last-10 average
@@ -1313,7 +1374,7 @@ difficult for the model).}
 \midrule
 Qwen3 & Qwen3-8B & 52\% & 70--71\% & 97\%$\to$100\% \\
 Qwen3.5 & Qwen3.5-4B & \multicolumn{3}{c}{\textit{Not evaluated (training interrupted)}} \\
-Llama-3.x & Llama-3.1-8B-Instruct & N/A & 0\% & 0\% \\
+Llama-3.x & Llama-3.1-8B-Instruct & \multicolumn{3}{c}{\textit{Not evaluated (training interrupted)}} \\
 DeepSeek & DeepSeek-V3.1 & \multicolumn{3}{c}{\textit{Not evaluated (training interrupted)}} \\
 \midrule
 \textit{Reference (prior work)} & Qwen2-0.5B & N/A & Functional & $\sim$100\% \\
@@ -1469,8 +1530,8 @@ calling \texttt{wandb.log(\{..., "step": step\})} at each training step,
 causing W\&B to record a single aggregate point instead of a time series.
 As a result, learning curves presented in Appendix~\ref{app:results} are
 reconstructed from local CSV checkpoints rather than W\&B trajectories, and
-the published W\&B runs should \emph{not} be used to infer convergence speed.
-The corrected logging code is included in the repository.
+the published W\&B runs should \emph{not} be used to infer convergence
+speed. The corrected logging code is included in the repository.
 
 % -----------------------------------------------------------------------
 \subsection{Methodological Limitations}
@@ -1568,7 +1629,11 @@ represented in the current experiment set and constitute a natural next ablation
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/reward_stability}
+\IfFileExists{figures/v2/reward_stability.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/reward_stability.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: reward\_stability.pdf pending regeneration. See \texttt{paper/sections/reward\_stability.tex}.]}\vspace{1em}}}%
+}
 \caption{Reward stability analysis across experiments. GRPO runs (blue) and PPO runs
 (orange) plotted by instability index vs.\ monotonicity score. Verbosity-trap
 experiments (flag=1) are marked with a star.}
@@ -1753,9 +1818,6 @@ Nemotron-120B's trajectory (87.5\% peak $\to$ 16.2\% last-10) is
 non-monotonic and cannot be fit by the exponential saturation model ---
 it is better characterized as a reward excursion followed by policy
 collapse, a regime the scaling law does not model.
-The exponential saturation model achieves mean $R^{2} = 0.210$ across all
-experiments (vs.\ $0.170$ for a power-law baseline), but this aggregate
-masks the qualitative failure on collapse trajectories.
 We recommend that practitioners verify monotonicity before applying early
 stopping rules derived from the saturation model.
 
@@ -1796,8 +1858,8 @@ Our policy drift analysis relies on three reward-trajectory proxies (SI, PTD,
 Rolling Variance) that correlate significantly with training outcomes
 ($r = -0.517$, $p = 0.005$ for PTD) but are not the same as direct KL
 divergence measurements.
-The proxies capture \emph{observable symptoms} of policy drift --- reward
-instability and peak-to-tail degradation --- but cannot distinguish between
+The proxies capture \emph{observable symptoms} of policy drift (reward
+instability and peak-to-tail degradation) but cannot distinguish between
 two importantly different causes: (a) the policy has genuinely drifted far from
 the reference in token-distribution space, or (b) the reward function is
 inherently noisy and the policy is stable but reward variance is high.
@@ -1805,16 +1867,9 @@ Nemotron-120B's collapse is almost certainly case (a), given that its reward
 decline is monotonic and persistent; but for models with moderate PTD (0.1--0.3),
 the two causes are indistinguishable from reward trajectories alone.
 
-Corrected KL tracking code is released in \texttt{src/grpo\_trainer.py} and
-should be validated on at least the two Modal runs (Qwen3-8B and
-Llama-3.1-8B) where GPU access is reproducible.
-Additionally, the per-token divergence framework of \citet{liu2025rlsubnetworks}
---- which measures which parameters actually update during RL fine-tuning ---
-could reveal whether the small subnetwork they identify has higher KL per
-parameter, explaining why moderate-sized models can catastrophically drift
-despite updating only 5--30\% of weights.
-Connecting our behavioral proxy metrics to this parameter-level analysis is a
-natural and important next step.
+Corrected KL measurement is included in
+the released code; future work will validate the proxy--KL
+correspondence and quantify per-token divergence trajectories.
 
 % Conclusion reframed around F1--F5 (see sections/conclusion.tex)
 \input{sections/conclusion}
@@ -1909,7 +1964,11 @@ GAE $\lambda$ & $\{0.8, 0.9, 0.95, 0.98, 1.0\}$ & 0.95 \\
 % Figure 9: Comparison bars
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/v2/comparison_bars.pdf}
+\IfFileExists{figures/v2/comparison_bars.pdf}{%
+\includegraphics[width=0.85\linewidth]{figures/v2/comparison_bars.pdf}%
+}{%
+\fbox{\parbox{0.80\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: comparison\_bars.pdf pending regeneration. See \texttt{paper/sections/comparison\_bars.tex}.]}\vspace{1em}}}%
+}
 \caption{Final reward by training family. Bars show mean
 $\pm 1$~standard deviation across the runs in each group; overlaid
 white dots are the individual seeds/models, and the $n$ annotation
@@ -1921,7 +1980,11 @@ PPO-REINFORCE = 4 runs; Tinker GRPO frontier = 9 runs; team members =
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.5\linewidth]{figures/v2/old_trl_seeds.pdf}
+\IfFileExists{figures/v2/old_trl_seeds.pdf}{%
+\includegraphics[width=0.5\linewidth]{figures/v2/old_trl_seeds.pdf}%
+}{%
+\fbox{\parbox{0.45\linewidth}{\centering\small\vspace{1em}\textit{[Figure placeholder: old\_trl\_seeds.pdf pending regeneration.]}\vspace{1em}}}%
+}
 \caption{Cross-seed reproducibility analysis for TRL GRPO on Qwen2.5-0.5B (GSM8K, 125 steps, NVIDIA L4). Five seeds show mean accuracy 73.4\% with CV = 0.096. Violin plot shows the distribution; individual seeds are labeled. The mean is significantly above 50\% ($t = 7.44$, $p < 0.001$), confirming that GRPO produces reliable learning signal even at 0.5B scale.}
 \label{fig:trl_seeds}
 \end{figure}
@@ -2119,7 +2182,7 @@ and \texttt{BENCHMARKS\_COMPARISON.md} for the full comparison table with existi
         \answerYes{This work involves no human subjects, no private or
         sensitive data, and no models trained on proprietary corpora.  All
         training datasets are publicly released research datasets (GSM8K,
-        HumanEval, synthetic tool-use data).  Broader societal impacts,
+        HumanEval, synthetic tool-use).  Broader societal impacts,
         including risks of reward hacking and alignment failure in RLHF
         systems, are discussed in the Broader Impact statement
         (Section~\ref{sec:impact} and \texttt{ethics\_statement.tex}).}

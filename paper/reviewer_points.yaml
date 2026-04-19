@@ -1,0 +1,185 @@
+# Reviewer Response Registry
+# Each weakness addressed in paper by inserting the exact marker string
+# as a LaTeX comment anywhere in paper/**/*.tex or paper/sections/**/*.tex.
+# Scorer greps for markers; count = weaknesses_addressed.
+# Format: %REVIEW-ADDR: <id> -- <one-line justification>
+#
+# Markers go near the text/table/figure that resolves the concern.
+# Removing a marker = un-addressing. Duplicate markers = 1 point (dedup by id).
+
+schema_version: 1
+source: NeurIPS 2026 reviewer feedback (received 2026-04-19)
+
+weaknesses:
+  # --- Technical limitations ---
+  - id: W1-zvf-tautology
+    category: technical
+    summary: ZVF risks tautological correlation with reward; no partial-correlation ablation vs entropy/KL/advantage-variance
+    rebuttal_targets: [paper/sections/zvf.tex, paper/sections/experiments.tex]
+    marker: "%REVIEW-ADDR: W1-zvf-tautology"
+    severity: critical
+
+  - id: W2-groupsize-contradiction
+    category: technical
+    summary: G=32 claim conflicts Table 6 where G=8 wins last-10; gradient utilization undefined
+    rebuttal_targets: [paper/sections/ablations.tex, paper/main.tex]
+    marker: "%REVIEW-ADDR: W2-groupsize-contradiction"
+    severity: critical
+
+  - id: W3-gradient-utilization-def
+    category: technical
+    summary: "\"Gradient utilization\" construct not rigorously defined or quantified"
+    rebuttal_targets: [paper/sections/metrics.tex, paper/sections/zvf.tex]
+    marker: "%REVIEW-ADDR: W3-gradient-utilization-def"
+    severity: critical
+
+  # --- Experimental gaps ---
+  - id: W4-single-seed-tinker
+    category: experimental
+    summary: Tinker API runs single-seed 20-30 steps with zero statistical power yet power headline claims
+    rebuttal_targets: [paper/sections/limitations.tex, paper/sections/experiments.tex]
+    marker: "%REVIEW-ADDR: W4-single-seed-tinker"
+    severity: high
+
+  - id: W5-bh-aggregates-singleseed
+    category: experimental
+    summary: BH-adjusted significance table aggregates single-seed data weakening inference
+    rebuttal_targets: [paper/sections/statistics.tex]
+    marker: "%REVIEW-ADDR: W5-bh-aggregates-singleseed"
+    severity: high
+
+  - id: W6-framework-gap-contradiction
+    category: experimental
+    summary: Framework claim "byte-identical" contradicts "managed offload/tuned rollout defaults"; need exact config dumps
+    rebuttal_targets: [paper/sections/framework_comparison.tex, paper/sections/appendix_configs.tex]
+    marker: "%REVIEW-ADDR: W6-framework-gap-contradiction"
+    severity: critical
+
+  - id: W7-math-only-depth
+    category: experimental
+    summary: Tool-use/code experiments sparse/zero-reward; depth restricted to GSM8K
+    rebuttal_targets: [paper/sections/tasks.tex, paper/sections/limitations.tex]
+    marker: "%REVIEW-ADDR: W7-math-only-depth"
+    severity: high
+
+  - id: W8-top10-selection-bias
+    category: experimental
+    summary: Top-10 held-out sampling introduces selection bias; need random/stratified
+    rebuttal_targets: [paper/sections/heldout_eval.tex]
+    marker: "%REVIEW-ADDR: W8-top10-selection-bias"
+    severity: high
+
+  # --- Clarity / presentation ---
+  - id: W9-base-vs-instruct-contradiction
+    category: clarity
+    summary: +0.922 GSM8K delta claim conflicts table showing base Qwen3-8B last-10 ≈ 84.4%
+    rebuttal_targets: [paper/sections/results.tex, paper/main.tex]
+    marker: "%REVIEW-ADDR: W9-base-vs-instruct-contradiction"
+    severity: critical
+
+  - id: W10-f5-brief-runs
+    category: clarity
+    summary: F5 "sustained ceiling" drawn from brief 20-30 step runs; clarify or retract scope
+    rebuttal_targets: [paper/sections/frontier_scale.tex, paper/sections/limitations.tex]
+    marker: "%REVIEW-ADDR: W10-f5-brief-runs"
+    severity: high
+
+  - id: W11-base-instruct-mixing
+    category: clarity
+    summary: Base vs instruct checkpoints mixed across text/tables without explicit control
+    rebuttal_targets: [paper/sections/methodology.tex, paper/sections/tables.tex]
+    marker: "%REVIEW-ADDR: W11-base-instruct-mixing"
+    severity: medium
+
+  - id: W12-placeholder-figures
+    category: clarity
+    summary: Some figures are placeholders/ASCII diagrams; replace with real rendered figures
+    rebuttal_targets: [paper/figures/, paper/main.tex]
+    marker: "%REVIEW-ADDR: W12-placeholder-figures"
+    severity: medium
+
+  - id: W13-zvf-pipeline-underspecified
+    category: clarity
+    summary: ZVF computation pipeline across frameworks underspecified
+    rebuttal_targets: [paper/sections/zvf.tex, paper/sections/appendix_zvf.tex]
+    marker: "%REVIEW-ADDR: W13-zvf-pipeline-underspecified"
+    severity: high
+
+  # --- Missing related work ---
+  - id: W14-aero-cppo-ngrpo-scafgrpo
+    category: related-work
+    summary: Missing comparison with AERO / CPPO / NGRPO / Scaf-GRPO variance-mitigation methods
+    rebuttal_targets: [paper/sections/related_work.tex, paper/references.bib, paper/sections/experiments.tex]
+    marker: "%REVIEW-ADDR: W14-aero-cppo-ngrpo-scafgrpo"
+    severity: high
+
+  - id: W15-tree-grpo-prm
+    category: related-work
+    summary: No PRM (process-reward) or Tree-GRPO tree-sampling evaluation; ZVF may behave differently
+    rebuttal_targets: [paper/sections/related_work.tex, paper/sections/discussion.tex]
+    marker: "%REVIEW-ADDR: W15-tree-grpo-prm"
+    severity: high
+
+  - id: W16-stppo-interaction
+    category: related-work
+    summary: ST-PPO diagnoses token-level IS/clipping bias; report ZVF interaction
+    rebuttal_targets: [paper/sections/related_work.tex, paper/sections/zvf.tex]
+    marker: "%REVIEW-ADDR: W16-stppo-interaction"
+    severity: medium
+
+  - id: W17-dar-hybrid-dualkl
+    category: related-work
+    summary: Hybrid/dual-KL alignment (DAR) offers alternative stability regimes; expose ZVF generality
+    rebuttal_targets: [paper/sections/related_work.tex, paper/sections/discussion.tex]
+    marker: "%REVIEW-ADDR: W17-dar-hybrid-dualkl"
+    severity: medium
+
+  # --- Author questions (explicit rebuttals) ---
+  - id: Q1-zvf-formalization
+    category: question
+    summary: Formalize ZVF cross-framework; partial-correlation vs batch-reward/entropy/advantage-var/KL
+    rebuttal_targets: [paper/sections/appendix_zvf.tex, scripts/partial_correlation_zvf.py]
+    marker: "%REVIEW-ADDR: Q1-zvf-formalization"
+    severity: critical
+
+  - id: Q2-groupsize-token-normalized
+    category: question
+    summary: Reconcile G=32 vs G=8 with token-budget-normalized sweeps; define gradient utilization
+    rebuttal_targets: [paper/sections/ablations.tex, experiments/group_size_token_normalized.py]
+    marker: "%REVIEW-ADDR: Q2-groupsize-token-normalized"
+    severity: critical
+
+  - id: Q3-framework-exact-configs
+    category: question
+    summary: Exact config dumps (LoRA ranks, tokens/step, masking, IS granularity, KL coef) per framework
+    rebuttal_targets: [paper/sections/appendix_configs.tex, experiments/framework_config_dumps/]
+    marker: "%REVIEW-ADDR: Q3-framework-exact-configs"
+    severity: critical
+
+  - id: Q4-base-instruct-identical-conditions
+    category: question
+    summary: Multi-seed held-out eval of base vs instruct pairs under strictly identical conditions
+    rebuttal_targets: [paper/sections/base_vs_instruct.tex, experiments/base_instruct_paired.py]
+    marker: "%REVIEW-ADDR: Q4-base-instruct-identical-conditions"
+    severity: high
+
+  - id: Q5-f1-f5-survival-5seed
+    category: question
+    summary: Restrict F1-F5 to 5-seed ≥100-step single-framework runs; which survive?
+    rebuttal_targets: [paper/sections/robustness.tex, experiments/survival_analysis.py]
+    marker: "%REVIEW-ADDR: Q5-f1-f5-survival-5seed"
+    severity: critical
+
+  - id: Q6-toolcode-reward-design
+    category: question
+    summary: Tool-use/code reward design, SFT warm-starts, ZVF behavior outside math
+    rebuttal_targets: [paper/sections/tool_use.tex, paper/sections/code_tasks.tex]
+    marker: "%REVIEW-ADDR: Q6-toolcode-reward-design"
+    severity: high
+
+  - id: Q7-integrate-aero-treegrpo
+    category: question
+    summary: Integrate AERO/CPPO/Scaf-GRPO + Tree-GRPO; test ZVF predictiveness + mitigation
+    rebuttal_targets: [paper/sections/extended_comparisons.tex, experiments/variance_mitigation_integration.py]
+    marker: "%REVIEW-ADDR: Q7-integrate-aero-treegrpo"
+    severity: critical
