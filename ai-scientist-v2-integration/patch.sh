@@ -12,9 +12,13 @@ if [ -f "$SRC/ai_scientist/treesearch/parallel_agent.py" ]; then
     echo "PATCHED parallel_agent.py"
 fi
 
-# Copy modified experiment template
+# Copy modified experiment templates
 cp "$SRC/ai_scientist/ideas/tinker_grpo_rl.py" "$DST/ai_scientist/ideas/tinker_grpo_rl.py"
 echo "PATCHED tinker_grpo_rl.py"
+
+# Copy local TRL template (no Tinker API needed)
+cp "$SRC/ai_scientist/ideas/trl_local_grpo.py" "$DST/ai_scientist/ideas/trl_local_grpo.py"
+echo "PATCHED trl_local_grpo.py"
 
 # Copy modified BFTS config
 cp "$SRC/bfts_config.yaml" "$DST/bfts_config.yaml"

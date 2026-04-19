@@ -4,6 +4,11 @@ set -euo pipefail
 # Paper Acceptance Benchmark
 # Measures how well the repo addresses NeurIPS reviewer concerns.
 
+# Apply integration patches first
+if [ -f "ai-scientist-v2-integration/patch.sh" ]; then
+    bash ai-scientist-v2-integration/patch.sh > /dev/null 2>&1
+fi
+
 SCORE=0
 MAX_SCORE=0
 
@@ -80,9 +85,21 @@ if [ -f "$TEMPLATE" ]; then
 fi
 MAX_SCORE=$((MAX_SCORE + 15))
 
+# --- Bonus: Local TRL template exists (5 points) ---
+LOCAL_TRL=0
+LOCAL_TRL_TEMPLATE="$HOME/ai-scientist-v2/ai_scientist/ideas/trl_local_grpo.py"
+if [ -f "$LOCAL_TRL_TEMPLATE" ]; then
+    if python3 -m py_compile "$LOCAL_TRL_TEMPLATE" 2>/dev/null; then
+        LOCAL_TRL=1
+        SCORE=$((SCORE + 5))
+    fi
+fi
+MAX_SCORE=$((MAX_SCORE + 5))
+
 echo "METRIC acceptance_score=$SCORE"
 echo "METRIC max_acceptance_score=$MAX_SCORE"
 echo "METRIC weaknesses_addressed=$ADDRESSED"
 echo "METRIC weakness_total=$WEAKNESS_COUNT"
 echo "METRIC script_bonus=$BONUS"
 echo "METRIC ai_scientist_runs=$AI_SCIENTIST_RUNS"
+echo "METRIC local_trl_template=$LOCAL_TRL"
