@@ -77,9 +77,9 @@ collapsed PRM runs}, and therefore \emph{loses discriminative power in the
 dense-reward regime}. We flag this as a known failure mode of ZVF and
 recommend, under PRM training, replacing the zero-variance-fraction indicator
 with either (i) the \emph{per-step reward-variance} statistic averaged over
-group members, or (ii) the effective rank fraction (ERF) surrogate described
-in the appendix (cross-reference: Appendix~\ref{sec:appendix-zvf-formalization}
-in \texttt{appendix\_zvf\_formalization.tex}). Both surrogates remain
+group members, or (ii) the effective-rank / effective-rollout surrogates
+discussed in Appendix~\ref{sec:appendix:zvf-formalization} and
+Appendix~\ref{sec:appendix:tool-code-depth}. Both surrogates remain
 sensitive to within-group collapse in the presence of dense shaping.
 
 % -----------------------------------------------------------------------------

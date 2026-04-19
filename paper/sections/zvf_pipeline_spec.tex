@@ -54,37 +54,48 @@ that range before thresholding.
 
 \subsection{Cross-Framework Consistency Check}
 
-For a matched (Qwen3-8B, GSM8K, seed 0, $G=8$, 100-step) run replicated
-on TRL and on OpenRLHF using identical model weights, LoRA config, LR
-schedule, and sampling settings, we verify that ZVF trajectories agree
-pointwise. Maximum per-step absolute discrepancy was $0.019$
-(mean $0.006$), dominated by minor differences in rollout tokenization
-(trailing whitespace handling) that affect binary reward at a small
-fraction of prompts. This gives us confidence that ZVF is a
-framework-portable diagnostic.
+The current anonymous artifact ships the parser contract, the
+cross-framework summary in
+\texttt{experiments/results/framework\_comparison.json}, and the measured
+Tinker/TRL reward traces used elsewhere in the paper. It does
+\emph{not} bundle the raw per-group rollout JSONL files for every framework,
+so we do not claim a fresh four-way pointwise ZVF overlay here. The
+portability claim made in the revised paper is therefore the narrower,
+implementation-level one: when a framework exposes per-rollout rewards and
+group boundaries through the fields in Table~\ref{tab:zvf-parser-fields},
+the same normalizer produces the canonical $[|B_t|, K]$ reward matrix and
+the same ZVF definition in Eq.~(\ref{eq:zvf}) applies without
+framework-specific reinterpretation.
 
 \subsection{Reproducibility Recipe}
 
 To recompute ZVF from raw logs end-to-end:
 \begin{verbatim}
+# Replace <raw-log> with the framework's emitted per-rollout trace.
+# The anonymous bundle ships the parser and summary outputs; the full
+# raw logs remain in the experiment workspace used to generate them.
+
 # TRL
 python3 scripts/zvf_compute_cross_framework.py \
-    --framework trl --log-path experiments/results/trl_grpo_qwen3_8b.jsonl \
+    --framework trl --log-path <raw-log> \
     --out experiments/results/zvf_trl_qwen3_8b.jsonl
 
 # TINKER
 python3 scripts/zvf_compute_cross_framework.py \
-    --framework tinker --log-path experiments/results/tinker_qwen3_8b.jsonl
+    --framework tinker --log-path <raw-log> \
+    --out experiments/results/zvf_tinker_qwen3_8b.jsonl
 
 # OpenRLHF
 python3 scripts/zvf_compute_cross_framework.py \
-    --framework openrlhf --log-path experiments/results/openrlhf_qwen3_8b.jsonl
+    --framework openrlhf --log-path <raw-log> \
+    --out experiments/results/zvf_openrlhf_qwen3_8b.jsonl
 
 # veRL
 python3 scripts/zvf_compute_cross_framework.py \
-    --framework verl --log-path experiments/results/verl_qwen3_8b.jsonl
+    --framework verl --log-path <raw-log> \
+    --out experiments/results/zvf_verl_qwen3_8b.jsonl
 \end{verbatim}
 Each invocation emits a time-series JSONL of
 \texttt{\{step, zvf, batch\_reward\_mean, n\_groups, K\}} using the
 canonical pseudocode above. This unifies the diagnostic across every
-framework we benchmark.
+framework once the raw rollout trace is available.
