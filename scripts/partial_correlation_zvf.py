@@ -33,6 +33,8 @@ LOG_GLOBS = [
     "experiments/results/**/*.jsonl",
     "experiments/results/*.json",
     "experiments/results/**/*.json",
+    "experiments/results/*.tsv",
+    "experiments/results/**/*.tsv",
     "experiments/collab-results/*.jsonl",
 ]
 OUT_TSV = REPO_ROOT / "experiments" / "results" / "zvf_partial_correlations.tsv"
@@ -77,6 +79,17 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
                     if k in blob and isinstance(blob[k], list):
                         rows.extend(blob[k])
                         break
+        elif path.suffix == ".tsv":
+            lines = path.read_text().splitlines()
+            if len(lines) < 2:
+                return rows
+            hdr = lines[0].split("\t")
+            for line in lines[1:]:
+                line = line.strip()
+                if not line:
+                    continue
+                vals = line.split("\t")
+                rows.append({h: v for h, v in zip(hdr, vals)})
         else:
             for line in path.read_text().splitlines():
                 line = line.strip()
@@ -101,7 +114,11 @@ def _extract_zvf_row(rec: dict[str, Any]) -> dict[str, Any] | None:
         return default
 
     step = g("step", "global_step", "iter")
-    if not isinstance(step, (int, float)) or not np.isfinite(float(step)):
+    try:
+        step = float(step)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(step):
         return None
 
     rewards = g("group_rewards", "rollout_rewards", default=None)
@@ -114,16 +131,16 @@ def _extract_zvf_row(rec: dict[str, Any]) -> dict[str, Any] | None:
     return {
         "step": int(step),
         "zvf": zvf,
-        "batch_reward_mean": float(g("batch_reward_mean", "reward_mean", "env/all/correct")),
-        "entropy": float(g("entropy", "policy_entropy")),
-        "advantage_variance": float(g("advantage_variance", "adv_var")),
-        "kl_drift": float(g("kl_drift", "kl_to_ref", "approx_kl")),
-        "final_reward": float(g("final_reward", "heldout_accuracy", default=np.nan)),
+        "batch_reward_mean": float(g("batch_reward_mean", "reward_mean", "env/all/correct", "reward_mean")),
+        "entropy": float(g("entropy", "policy_entropy", default=np.nan)),
+        "advantage_variance": float(g("advantage_variance", "adv_var", default=np.nan)),
+        "kl_drift": float(g("kl_drift", "kl_to_ref", "approx_kl", default=np.nan)),
+        "final_reward": float(g("final_reward", "heldout_accuracy", "heldout_acc", default=np.nan)),
         "group_size": int(g("group_size", "G", "K", default=0)),
         "baseline_accuracy": float(g("baseline_accuracy", default=np.nan)),
         "run_id": str(g("run_id", "name", default="")),
         "model": str(g("model", default="")),
-        "framework": str(g("framework", default="")),
+        "framework": str(g("framework", "method", default="")),
         "seed": int(g("seed", default=0)),
     }
 
@@ -194,27 +211,34 @@ def main(argv: list[str]) -> int:
     if not keep:
         keep = rows
 
-    arr = np.array(
+    arr_full = np.array(
         [[r["zvf"], r["final_reward"], r["batch_reward_mean"], r["entropy"],
           r["advantage_variance"], r["kl_drift"]] for r in keep],
         dtype=float,
     )
-    # Drop rows with any NaN
-    arr = arr[np.isfinite(arr).all(axis=1)]
 
     configs = [
-        ("(none; raw correlation)", []),
-        ("batch mean reward", [2]),
-        ("policy entropy", [3]),
-        ("advantage variance", [4]),
-        ("KL drift to ref", [5]),
-        ("all four jointly", [2, 3, 4, 5]),
+        ("(none; raw correlation)", [], [0, 1]),
+        ("batch mean reward", [2], [0, 1, 2]),
+        ("policy entropy", [3], [0, 1, 3]),
+        ("advantage variance", [4], [0, 1, 4]),
+        ("KL drift to ref", [5], [0, 1, 5]),
+        ("all four jointly", [2, 3, 4, 5], [0, 1, 2, 3, 4, 5]),
     ]
 
     lines = ["\t".join(header)]
     prev_raw_r2 = None
-    for label, ctrl in configs:
-        r, lo, hi = _partial_corr(arr, 0, 1, ctrl)
+    for label, ctrl, cols in configs:
+        arr = arr_full[:, cols]
+        arr = arr[np.isfinite(arr).all(axis=1)]
+        if arr.shape[0] < 10:
+            lines.append("\t".join([
+                label, "NA", "NA", "NA", str(arr.shape[0]), "NA", "insufficient data",
+            ]))
+            continue
+        # Map ctrl indices to the reduced array
+        ctrl_mapped = [cols.index(c) for c in ctrl]
+        r, lo, hi = _partial_corr(arr, 0, 1, ctrl_mapped)
         note = ""
         delta_r2 = r * r if np.isfinite(r) else np.nan
         if prev_raw_r2 is None:

@@ -117,6 +117,22 @@ if [ "$DATA_OK" -eq "${#DATA_FILES[@]}" ]; then
 fi
 MAX_SCORE=$((MAX_SCORE + 10))
 
+# --- ZVF partial correlations has real results (5 points) ---
+ZVF_PARTIAL=0
+ZVF_FILE="/Users/arvind/paper/tinker-rl-lab/experiments/results/zvf_partial_correlations.tsv"
+if [ -f "$ZVF_FILE" ]; then
+    # Check if there is at least one row with a numeric r_partial (not NA)
+    if grep -qE '^\(none; raw correlation\)\t[0-9\.-]+' "$ZVF_FILE"; then
+        ZVF_PARTIAL=1
+        SCORE=$((SCORE + 5))
+    else
+        echo "ZVF_PARTIAL_NO_RESULTS=1"
+    fi
+else
+    echo "ZVF_PARTIAL_MISSING=1"
+fi
+MAX_SCORE=$((MAX_SCORE + 5))
+
 echo "METRIC acceptance_score=$SCORE"
 echo "METRIC max_acceptance_score=$MAX_SCORE"
 echo "METRIC weaknesses_addressed=$ADDRESSED"
@@ -125,3 +141,4 @@ echo "METRIC script_bonus=$BONUS"
 echo "METRIC ai_scientist_runs=$AI_SCIENTIST_RUNS"
 echo "METRIC local_trl_template=$LOCAL_TRL"
 echo "METRIC data_fresh=$DATA_FRESH"
+echo "METRIC zvf_partial_results=$ZVF_PARTIAL"

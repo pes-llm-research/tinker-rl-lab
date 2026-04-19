@@ -1,1 +1,7 @@
 controlling_for	r_partial	ci_low	ci_high	n_obs	delta_r2_estimate	note
+(none; raw correlation)	0.298	0.215	0.376	480	0.089	
+batch mean reward	0.236	0.147	0.319	480	0.056	
+policy entropy	NA	NA	NA	0	NA	insufficient data
+advantage variance	NA	NA	NA	0	NA	insufficient data
+KL drift to ref	NA	NA	NA	0	NA	insufficient data
+all four jointly	NA	NA	NA	0	NA	insufficient data
