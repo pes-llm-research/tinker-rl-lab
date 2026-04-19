@@ -224,7 +224,20 @@ This repository consolidates all PES LLM Research projects:
 
 ## Authors
 
-PES LLM Research Team
+**PES LLM Research Team**
+
+- Arvind C R (PES University) &mdash; equal contribution
+- Sandhya Jeyaraj (PES University) &mdash; equal contribution
+- Madhu Kumara L (PES University)
+- Mohammad Rafi (PES University)
+- Dhruva N Murthy (PES University)
+- Arumugam K (PES University)
+- Anwesh Reddy Paduri (Great Learning / PES University) &mdash; project guide
+- Narayana Darapaneni (Northwestern University / Great Learning) &mdash; project guide
+
+Corresponding author: Arvind C R &lt;arvindcr4@gmail.com&gt;. Equal contribution denotes equal
+technical and writing contribution; author order among the student team is alphabetical by given name after the two equal-contribution leads.
+See [`CITATION.cff`](CITATION.cff) for the canonical BibTeX record.
 
 ## License
 

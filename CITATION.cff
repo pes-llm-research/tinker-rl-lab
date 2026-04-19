@@ -1,0 +1,73 @@
+# Canonical citation record for the tinker-rl-lab project.
+# Validated against https://citation-file-format.github.io/ (schema 1.2.0).
+cff-version: 1.2.0
+message: "If you use tinker-rl-lab in academic work, please cite both the software and the accompanying NeurIPS 2026 paper."
+title: "tinker-rl-lab: A Controlled Study of GRPO, PPO, and DPO Across Seven RL Libraries and Five Model Families"
+version: "3.0.0"
+date-released: "2026-04-19"
+license: "Apache-2.0"
+repository-code: "https://github.com/pes-llm-research/tinker-rl-lab"
+url: "https://github.com/pes-llm-research/tinker-rl-lab"
+keywords:
+  - reinforcement-learning-from-human-feedback
+  - GRPO
+  - PPO
+  - DPO
+  - large-language-models
+  - zero-variance-fraction
+  - group-relative-policy-optimization
+  - tinker
+  - gsm8k
+  - math500
+  - humaneval
+
+authors:
+  - family-names: "C R"
+    given-names: "Arvind"
+    email: "arvindcr4@gmail.com"
+    affiliation: "PES University"
+    orcid: ""
+  - family-names: "Jeyaraj"
+    given-names: "Sandhya"
+    affiliation: "PES University"
+  - family-names: "Kumara L"
+    given-names: "Madhu"
+    affiliation: "PES University"
+  - family-names: "Rafi"
+    given-names: "Mohammad"
+    affiliation: "PES University"
+  - family-names: "N Murthy"
+    given-names: "Dhruva"
+    affiliation: "PES University"
+  - family-names: "K"
+    given-names: "Arumugam"
+    affiliation: "PES University"
+  - family-names: "Paduri"
+    given-names: "Anwesh Reddy"
+    affiliation: "Great Learning / PES University"
+  - family-names: "Darapaneni"
+    given-names: "Narayana"
+    affiliation: "Northwestern University / Great Learning"
+
+preferred-citation:
+  type: conference-paper
+  title: "tinker-rl-lab: A Controlled Study of GRPO, PPO, and DPO Across Seven RL Libraries and Five Model Families"
+  year: 2026
+  collection-title: "Advances in Neural Information Processing Systems 39 (NeurIPS 2026)"
+  authors:
+    - family-names: "C R"
+      given-names: "Arvind"
+    - family-names: "Jeyaraj"
+      given-names: "Sandhya"
+    - family-names: "Kumara L"
+      given-names: "Madhu"
+    - family-names: "Rafi"
+      given-names: "Mohammad"
+    - family-names: "N Murthy"
+      given-names: "Dhruva"
+    - family-names: "K"
+      given-names: "Arumugam"
+    - family-names: "Paduri"
+      given-names: "Anwesh Reddy"
+    - family-names: "Darapaneni"
+      given-names: "Narayana"
