@@ -290,7 +290,7 @@ cd /root/SkyRL
 source .venv/bin/activate
 
 # Run training
-{bash -c '{training_script}'}
+bash -c '{training_script}'
 '''
 
         try:

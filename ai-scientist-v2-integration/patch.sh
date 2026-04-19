@@ -18,7 +18,8 @@ echo "PATCHED tinker_grpo_rl.py"
 
 # Copy local TRL template (no Tinker API needed)
 cp "$SRC/ai_scientist/ideas/trl_local_grpo.py" "$DST/ai_scientist/ideas/trl_local_grpo.py"
-echo "PATCHED trl_local_grpo.py"
+cp "$SRC/ai_scientist/ideas/trl_local_grpo.json" "$DST/ai_scientist/ideas/trl_local_grpo.json"
+echo "PATCHED trl_local_grpo.py + trl_local_grpo.json"
 
 # Copy modified BFTS config
 cp "$SRC/bfts_config.yaml" "$DST/bfts_config.yaml"

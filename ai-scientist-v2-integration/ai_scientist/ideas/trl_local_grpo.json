@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "local_trl_grpo_baseline",
+    "Title": "Local GRPO Baseline on GSM8K using HuggingFace TRL",
+    "Short Hypothesis": "Running GRPO with HuggingFace TRL locally on small models (0.5B–1.5B) provides a fast, reproducible baseline for reward-shaping and curriculum experiments without managed-training API dependencies.",
+    "Related Work": "TRL (von Werra et al., 2020) provides a unified RL framework for transformers. GRPO (Shao et al., 2024) eliminates the need for a separate value network by normalizing rewards within groups. Local execution enables rapid iteration on hyperparameters and reward designs before scaling to managed infrastructure.",
+    "Abstract": "Managed-training platforms like Tinker offer convenient GPU clusters but introduce API latency, queueing variability, and cost constraints that complicate reproducible research. We propose a local TRL-based GRPO pipeline that runs on consumer GPUs (or CPU) with small instruct models (0.5B–1.5B parameters). The pipeline uses LoRA adapters, binary exact-match rewards on GSM8K, and reports first_5_accuracy, last_10_accuracy, peak_accuracy, and training_loss across NUM_SEEDS seeds. We use this local baseline to validate reward-shaping hypotheses before committing to larger managed runs.",
+    "Experiments": [
+      "Baseline run: Use the default reward_fn (binary exact match on \\boxed{}) with MODEL='Qwen/Qwen2.5-0.5B-Instruct', LORA_RANK=16, GROUP_SIZE=4, STEPS=30, LR=5e-6, NUM_SEEDS=3. Record first_5_accuracy, last_10_accuracy, peak_accuracy, training_loss, duration_seconds.",
+      "Reward-shaping ablation: Modify reward_fn to give partial credit for formatted answers, intermediate numerical overlap, or conciseness. Compare against binary baseline on the same local hardware.",
+      "Curriculum ablation: Modify curriculum() to sort GSM8K problems by difficulty (operator count) and expose easiest 30% first, then 60%, then 100%. Compare against uniform random sampling.",
+      "Group-size sweep: Run GROUP_SIZE in {2, 4, 8, 16} at fixed STEPS=30 to observe the variance–compute trade-off locally before scaling to managed infrastructure."
+    ],
+    "Risk Factors and Limitations": [
+      "Small model size (0.5B) limits reasoning capacity; effects may not generalize to 8B+ models.",
+      "Local training is slower per step than managed clusters for large batch sizes, but faster for debugging and hyperparameter search.",
+      "CPU-only execution is very slow; GPU is strongly recommended even for 0.5B models.",
+      "The simplified policy-gradient loss in the template is not identical to TRL's GRPOTrainer implementation; numerical differences are expected.",
+      "GSM8K is the only task in the local template; tool-use and code tasks require additional environment setup."
+    ]
+  }
+]

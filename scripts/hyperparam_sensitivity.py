@@ -319,9 +319,7 @@ def main():
     parser.add_argument("--dry-run",    action="store_true",                          help="Skip training, use random results")
     args = parser.parse_args()
 
-    if args.dry_run and HAS_TORCH:
-        global HAS_TORCH
-        HAS_TORCH = False
+    if args.dry_run:
         print("Dry-run mode enabled: skipping actual training.")
 
     set_global_seed(args.seed)
