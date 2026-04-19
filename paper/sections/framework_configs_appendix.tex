@@ -36,11 +36,11 @@ protocol described below.
   \item Rollout batch micro-partitioning and KV-cache reuse across
         rollouts of the same prompt.
   \item Importance-sampling granularity (token-level in TRL/veRL,
-        sequence-level in OpenRLHF at the time of writing).
+        sequence-level in OpenRLHF at the time of writing; Tinker's
+        internal setting is managed and not surfaced).
   \item KL-coefficient default: TRL and veRL use $\beta=0.04$,
-        OpenRLHF $\beta=0.02$, Tinker $\beta$ is managed (we set the
-        surfaced value to $0.04$ but the internal schedule is
-        proprietary).
+        OpenRLHF $\beta=0.02$, and Tinker's effective KL schedule is
+        managed internally rather than surfaced as a user-controlled field.
   \item Numerical precision of the reward-broadcast step (fp32 vs
         bf16 in some paths).
 \end{itemize}
@@ -85,7 +85,7 @@ rollouts per group $K$         & 1    & 1    & 1    & 1    \\
 max new tokens                 & 384  & 384  & 384  & 384  \\
 sampling temperature           & 0.7  & 0.7  & 0.7  & 0.7  \\
 KL $\beta$ (surfaced)          & 0.04 & \emph{managed} & 0.02 & 0.04 \\
-IS granularity                 & token & token & seq  & token \\
+IS granularity                 & token & \emph{managed} & seq  & token \\
 $\pi_\text{ref}$ placement      & on-dev & \emph{managed} & separate & sharded \\
 AdamW lr                       & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ & $1\!\times\!10^{-5}$ \\
 tokens/optimizer step          & 3072 & \emph{managed} & 3072 & 3072 \\

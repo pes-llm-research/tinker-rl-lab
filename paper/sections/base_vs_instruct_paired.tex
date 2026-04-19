@@ -12,215 +12,83 @@
 \label{sec:base-instruct-paired}
 
 \paragraph{What the reviewer flagged.}
-A prior draft reported a large positive GSM8K delta ($+0.922$, read by the
-reviewer as $+92.2$~pp held-out accuracy, or equivalently a peak training
-reward of $0.922$) while Table~\ref{tab:main_results} showed a
-\emph{base}-Qwen3-8B GSM8K last-10 training reward of $84.4\%$. The tension
-is real but is an accounting error across two different checkpoint states
-and two different metrics, not a substantive contradiction. This section
-disambiguates the two numbers, enumerates the full
-$\{\text{model}\}\times\{\text{base, instruct}\}\times\{\text{pre-RL},
-\text{post-RL}\}$ grid at the condition granularity the reviewer asked for,
-and retracts any main-text phrasing that implicitly pooled base and
-instruct rows.
+An earlier draft juxtaposed a large positive GSM8K figure from a
+\emph{base} checkpoint with a different training-reward number from an
+\emph{instruction-tuned} checkpoint, making it appear that the paper was
+pooling base and instruct states on one axis. The reviewer is right that
+this is unacceptable. The revised paper therefore separates checkpoint
+state explicitly and reports only condition-matched comparisons.
 
-\paragraph{Which number belongs to which checkpoint.}
-The $+0.922$ figure was the training-reward \emph{peak} of the
-\texttt{campaign\_v2\_w1\_qwen3-8b-base} run (\texttt{Qwen/Qwen3-8B-Base},
-GRPO, $G{=}8$, $\eta{=}1\mathrm{e}{-}5$, seed 42, 30 steps), where
-peak was $1.00$ and last-10 mean was $0.856$ on the \emph{training}
-reward stream.\footnote{The $+0.922$ figure also appears in the abstract
-of an earlier draft, where it denoted the training-reward last-10 mean for
-one seed; it was never a held-out accuracy delta.} The $84.4\%$ figure in
-Table~\ref{tab:main_results} is the training-reward last-10 mean of the
-\emph{instruct} run (\texttt{scale\_gsm8k\_qwen3-8b}, single seed,
-$\eta{=}3\mathrm{e}{-}5$) expressed as a percentage, \emph{not} a held-out
-accuracy. The two numbers are not comparable: they refer to different
-checkpoints, different learning rates, and different quantities (peak vs.\
-last-10). Table~\ref{tab:paired-bi} recomputes everything on one axis.
+\paragraph{Which number belonged to which checkpoint.}
+The previously highlighted ``$0.922$''-style figure was a
+training-time reward statistic from a \texttt{Qwen/Qwen3-8B-Base} GRPO run;
+it was \emph{not} a held-out GSM8K gain. By contrast, the ``84.4\%''
+number that appeared near it was an instruct-checkpoint training reward,
+again not a held-out accuracy. These quantities differ in both checkpoint
+state and metric, so the apparent contradiction vanishes once the rows are
+made explicit.
 
-\paragraph{Notation (applies to the rest of the paper).}
-All main-text numerics hereafter refer to the \emph{instruct} checkpoint of
-each model unless the suffix ``(base)'' appears next to the model name.
-Rows drawn from base pretrained checkpoints are labelled
-\texttt{Base}; rows drawn from instruction-tuned checkpoints are labelled
-\texttt{Inst}. The state columns are \texttt{pre-RL} (checkpoint before
-any GRPO update, evaluated greedily) and \texttt{post-RL} (the same
-checkpoint after the GRPO run specified in the adjacent cell).
-
-\paragraph{Retraction of implicitly-mixed claims.}
-We retract the following phrasings from earlier drafts as they conflated
-base and instruct rows: (i) ``Qwen3-8B improves GSM8K by $+0.922$''
-(peak training reward on the \emph{base} checkpoint, not held-out); (ii)
-any reading of the $84.4\%$ last-10 cell in Table~\ref{tab:main_results}
-as an accuracy figure comparable to the $91.0\%$ held-out cell in
-Table~\ref{tab:heldout_gsm8k}; (iii) any pooling of instruct runs with
-base runs in a single summary mean without the \texttt{Base}/\texttt{Inst}
-annotation. The corrected numerics are those in
-Table~\ref{tab:paired-bi} and the narrative summary in
-Table~\ref{tab:paired-bi-summary}.
-
-\paragraph{Paired comparison under strictly identical conditions.}
-For each model family where both a base and an instruction-tuned
-checkpoint exist in our repository, Table~\ref{tab:paired-bi} reports
-four quantities under an identical rollout regime (GSM8K training split,
-$G{=}8$, $\eta{=}1\mathrm{e}{-}5$, 30-step budget, greedy held-out eval
-at $T{=}0$, $N{=}500$ held-out problems): training last-10 mean reward,
-held-out GSM8K-500 accuracy, the \emph{step-100 extrapolation} of the
-zero-variance fraction ZVF@100 (\emph{extrapolated} via the last-5
-rolling mean of ZVF$_t$ because all Tinker API runs in this revision
-were capped at 30 gradient steps; flagged explicitly in the table),
-and the number of available seeds. Rows with fewer than five
-independent seeds are tagged ``descriptive only'' and their 95\%~CIs
-are suppressed.
+\paragraph{Condition-matched audit.}
+Table~\ref{tab:paired-bi} mirrors the actually released TSV artifact
+\texttt{experiments/results/base\_instruct\_paired.tsv}. Every row uses the
+same evaluation harness and the same held-out GSM8K-500 slice where those
+numbers are available. Rows with $n_{\text{seeds}}<5$ are descriptive only.
 
 \begin{table*}[t]
 \centering
-\caption{\textbf{Paired base-vs-instruct comparison under strictly
-identical conditions (W9, W11, Q4).} Same prompt template, same scorer,
-same optimiser (Adam, $\eta{=}1\mathrm{e}{-}5$), same group size
-($G{=}8$), same step budget (30), same held-out slice
-(\texttt{openai/gsm8k[test]}, $N{=}500$, seed 0, greedy). Columns:
-pre-RL / post-RL training last-10 reward, pre-RL / post-RL held-out
-accuracy, and ZVF at step 100 (extrapolated, see footnote~\ref{fn:zvf100}).
-Bootstrap 95\%~CIs ($B{=}10{,}000$, percentile) where $n_{\text{seeds}}\geq 5$;
-otherwise rows are ``descriptive only'' (d.o.) and CIs are suppressed.
-Missing cells (---) indicate the condition was not run in this revision.}
+\caption{\textbf{Base-vs.-instruct audit under condition-matched reporting.}
+Pre-RL and post-RL columns are taken directly from the released paired-audit
+artifact. Held-out values use greedy evaluation on a fixed 500-problem GSM8K
+slice when available. ``d.o.'' = descriptive only (insufficient seeds for
+inference).}
 \label{tab:paired-bi}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\sisetup{
-  detect-weight = true,
-  table-format  = 1.3,
-  round-mode    = places,
-  round-precision = 3
-}
-\begin{tabular}{@{}l l l
-  S[table-format=1.3] S[table-format=1.3]
-  S[table-format=1.3] S[table-format=1.3]
-  S[table-format=1.2] c@{}}
+\small
+\begin{tabular}{@{}l l l c c c c c c@{}}
 \toprule
- & & &
-\multicolumn{2}{c}{\textbf{Train last-10 reward}} &
-\multicolumn{2}{c}{\textbf{Held-out GSM8K-500 acc.}} &
-& \\
-\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-\textbf{Model} & \textbf{Ckpt} & \textbf{Tag} &
-{pre-RL} & {post-RL} &
-{pre-RL} & {post-RL} &
-{\textbf{ZVF@100}} & {\textbf{$n_{\text{seeds}}$}} \\
+\textbf{Family} & \textbf{Ckpt} & \textbf{Model ID} &
+\textbf{Train pre-RL} & \textbf{Train post-RL} &
+\textbf{Held-out pre-RL} & \textbf{Held-out post-RL} &
+\textbf{$\Delta_{\mathrm{heldout}}$} & \textbf{$n_{\text{seeds}}$} \\
 \midrule
-\multirow{2}{*}{Qwen3-8B}
- & Base & d.o. & 0.688 & 0.856 & 0.820 & 0.910 & 0.30 & 1 \\
- & Inst & CI    & 0.740 & 0.833 & 0.820 & 0.833 & 0.15 & 5 \\
-\addlinespace
-\multirow{2}{*}{Llama-3.1-8B}
- & Base & d.o. & 0.125 & 0.115 & {---} & {---} & 0.95 & 1 \\
- & Inst & d.o. & 0.844 & 0.844 & {---} & {---} & 0.20 & 1 \\
+Qwen3-8B     & Base & \texttt{Qwen/Qwen3-8B-Base}      & 0.8250 & 0.8562 & 0.8200 & 0.9090 & +0.0890 & 1 (d.o.) \\
+Qwen3-8B     & Inst & \texttt{Qwen/Qwen3-8B}           & 0.2925 & 0.3105 & 0.8200 & 0.8330 & +0.0130 & 5 \\
+Llama-3.1-8B & Base & \texttt{meta-llama/Llama-3.1-8B} & 0.1252 & 0.1147 & ---    & ---    & ---     & 1 (d.o.) \\
+Llama-3.1-8B & Inst & \texttt{meta-llama/Llama-3.1-8B-Instruct} & 0.9500 & 0.9625 & --- & --- & --- & 1 (d.o.) \\
 \bottomrule
 \end{tabular}
-
-\vspace{0.35em}
-\raggedright\footnotesize
-\textit{Availability note.} Qwen3-1.7B and Qwen3-0.6B are absent from
-this revision's compute allocation and therefore omitted from the table;
-they are flagged in the reproducibility checklist
-(Appendix~\ref{sec:checklist}) as the single remaining gap for the
-paired audit.
-\par
-\textit{ZVF@100 footnote.}\label{fn:zvf100} No run in this revision was
-trained past step~30. ZVF@100 is an extrapolation obtained by fitting
-the linear trend of the final five ZVF$_t$ values ($t \in \{26,\ldots,30\}$)
-and projecting to $t{=}100$, clipped to $[0,1]$. It is reported solely
-to preserve column symmetry with the paper's main ZVF analysis; the
-point estimate should be read as ``qualitative trend'' rather than
-measured value.
 \end{table*}
 
-\paragraph{Paired differences (condition-by-condition).}
-Table~\ref{tab:paired-bi-summary} reports the three scalar deltas the
-reviewer asked for: (i) post-RL minus pre-RL on training last-10,
-(ii) post-RL minus pre-RL on held-out GSM8K-500, and (iii) base-vs-instruct
-difference of (ii) (i.e., whether initialisation state changes the held-out
-gain). A paired $t$-test is computed across the 5 matched seeds of the
-Qwen3-8B instruct row (the only $n{\geq}5$ cell); all other deltas are
-descriptive only. Benjamini--Hochberg correction is applied across the
-four tests in this table.
+\paragraph{What survives the matched comparison.}
+\begin{enumerate}
+  \item \textbf{The ``base vs.\ instruct'' contradiction was a reporting bug,
+        not an empirical one.} Once base and instruct rows are separated,
+        there is no single number that both means ``held-out accuracy'' and
+        ``training reward'' at once.
+  \item \textbf{The only inferential row in the released artifact is
+        Qwen3-8B instruct.} Its held-out GSM8K gain is
+        $+0.0130$ across 5 seeds with paired $t=1.3234$ and
+        $p=0.1857$ (BH-adjusted $p=0.1857$), i.e.\ directionally positive
+        but not statistically significant at conventional thresholds.
+  \item \textbf{The Qwen3-8B base row remains descriptive only.} Its
+        held-out gain of $+0.0890$ is larger in magnitude than the instruct
+        row, but with $n=1$ it cannot support a claim that base reliably
+        outperforms instruct.
+  \item \textbf{Other families remain incomplete.} Qwen3-1.7B and Qwen3-0.6B
+        are marked \texttt{source-missing} in the paired-audit TSV and are
+        therefore excluded from the revised narrative rather than filled with
+        placeholders.
+\end{enumerate}
 
-\begin{table}[t]
-\centering
-\caption{\textbf{Paired deltas for Table~\ref{tab:paired-bi}.} Deltas
-where $n_{\text{seeds}}{\geq}5$ carry a paired $t$-test $p$-value and
-a BH-adjusted $p$-value; descriptive rows report the point estimate only.
-$\Delta_{\mathrm{HO}}$ is the post-RL minus pre-RL held-out accuracy.}
-\label{tab:paired-bi-summary}
-\small
-\begin{tabular}{@{}l l S[table-format=+1.3] S[table-format=+1.3] c c@{}}
-\toprule
-\textbf{Model} & \textbf{Ckpt} &
-{\textbf{$\Delta_{\mathrm{train-last10}}$}} &
-{\textbf{$\Delta_{\mathrm{HO}}$}} &
-\textbf{paired $p$ (raw)} &
-\textbf{$p$ (BH)} \\
-\midrule
-Qwen3-8B   & Base & +0.168 & +0.090 & \text{d.o.} & \text{d.o.} \\
-Qwen3-8B   & Inst & +0.093 & +0.013 & 0.26 & 0.52 \\
-Llama-3.1-8B & Base & -0.010 & \text{---} & \text{d.o.} & \text{d.o.} \\
-Llama-3.1-8B & Inst & +0.000 & \text{---} & \text{d.o.} & \text{d.o.} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{What the paired audit says.}
-Three findings survive the condition matching.
-
-\emph{Finding~1 (the reviewer's core concern).}
-The ``$+0.922$'' figure was a peak training reward of the
-\emph{base} Qwen3-8B checkpoint, not a held-out accuracy gain. On the
-one metric where it would be meaningful --- held-out GSM8K-500 accuracy
-with matched inputs, scorer, and decoding --- the base Qwen3-8B row
-\emph{does} move ($0.820 \to 0.910$ at $n{=}1$, descriptive) but the
-corresponding instruct row moves far less
-($0.820 \to 0.833$ across 5 seeds, paired $t$-test $p{=}0.26$,
-$p_{\mathrm{BH}}{=}0.52$, not significant). The two numbers are
-complementary, not contradictory.
-
-\emph{Finding~2 (W11, the mixing risk).}
-The base-vs-instruct held-out gap is nearly identical \emph{before}
-RL ($0.820$ in both rows, same 200-problem greedy sweep from the
-base control reported in~\S\ref{sec:results}). After 30 steps of
-GRPO, the base checkpoint shows a larger descriptive lift ($+0.090$
-at $n{=}1$) than the instruct checkpoint ($+0.013$ at $n{=}5$,
-not significant). This is consistent with the bitter-lesson campaign
-story (more headroom on a non-aligned checkpoint), but the $n{=}1$
-caveat on the base row is severe and we do not treat the $+0.090$
-point estimate as established.
-
-\emph{Finding~3 (Q4, identical conditions).}
-Under the identical-conditions column of Table~\ref{tab:paired-bi},
-all four columns (train last-10, held-out pre-RL, held-out post-RL,
-ZVF) can be read without state confusion: the base row dominates on
-peak training reward, the instruct row dominates on ZVF suppression,
-and on held-out accuracy neither dominates with statistical
-significance at $n{=}5$. This reframes the earlier bitter-lesson claim
-from ``base beats instruct on GSM8K after RL'' to the narrower
-and supportable ``base has more headroom on the training-reward
-peak metric; held-out evaluation under matched decoding does not
-confirm a reliable gain of base over instruct at our seed budget.''
+\paragraph{Revised claim.}
+The paper now makes the narrower statement that base checkpoints may have
+more headroom on the training-reward metric, but the released matched
+held-out evidence does not establish a reliable base$>$instruct advantage on
+GSM8K. Any summary that mixes base and instruct rows without annotation is
+withdrawn.
 
 \paragraph{Reproducibility.}
-The matched-conditions grid is generated by
-\texttt{experiments/base\_instruct\_paired.py}, which enumerates every
-$\{\text{model}\} \times \{\text{base, inst}\} \times
-\{\text{pre-RL, post-RL}\}$ tuple available in
-\texttt{experiments/master\_results.json},
-\texttt{experiments/results/heldout\_gsm8k.json}, and
-\texttt{reports/final/gsm8k\_*\{base\_control,heldout\_seed*\}*.json},
-computes per-tuple train-acc, held-out-acc, ZVF@100 extrapolation, and
-seed count, runs the paired $t$-test with Benjamini--Hochberg
-correction, writes the merged matrix to
-\texttt{experiments/results/base\_instruct\_paired.tsv}, and prints the
-\LaTeX{} body of Table~\ref{tab:paired-bi} verbatim so this section
-can be regenerated from one command. Degrades gracefully when an input
-file is missing (emits a ``source-missing'' TSV row rather than
-crashing), and exits non-zero only if no inputs resolve.
+The paired audit is generated by
+\texttt{experiments/base\_instruct\_paired.py}, which writes
+\texttt{experiments/results/base\_instruct\_paired.tsv}. The script emits
+\texttt{source-missing} rows rather than inventing values when an expected
+artifact is absent, and the revised appendix follows that contract directly.

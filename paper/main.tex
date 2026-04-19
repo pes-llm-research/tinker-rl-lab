@@ -606,8 +606,10 @@ Tables~\ref{tab:results_gsm8k} and~\ref{tab:heldout_gsm8k} report GSM8K
 performance from two complementary angles: (i) training-time accuracy across
 model scales (5-seed means), and (ii) a held-out test-set evaluation of the
 ten Tinker checkpoints whose training \emph{last-10} reward was highest.
-The held-out evaluation eliminates the concern that \emph{last-10} overstates
-generalisation because it shares problems with the training batches.
+Because the held-out table is conditioned on training performance and lacks
+matched base-model controls for most checkpoints, it should be read as a
+check on ranking stability among strong runs rather than as an unbiased
+estimate of generalisation.
 
 \begin{table}[htbp]
 \centering
@@ -629,14 +631,14 @@ Qwen3-30B-A3B (MoE) & 91.8 & 95.4 $\pm$ 0.5 & +3.6 \\
 \end{table}
 
 \paragraph{Held-out GSM8K evaluation of the top-10 checkpoints.}
-To separate optimisation from generalisation we selected the ten Tinker
-checkpoints with the highest training \emph{last-10} mean reward across our
-campaign (\S\ref{sec:main_results}) and re-evaluated every checkpoint on a
-deterministic, held-out slice of $N=500$ problems drawn from the GSM8K
-\texttt{test} split --- strictly disjoint from every training batch
-(\texttt{train} split only). Decoding is greedy ($T{=}0$, \texttt{max\_tokens}
-$=512$) and we score with the same boxed-answer reward used during training,
-so held-out accuracy is directly comparable to \emph{last-10}.
+To assess whether checkpoints selected by high training \emph{last-10} reward
+preserve their relative ranking on a disjoint GSM8K slice, we re-evaluated
+ten post-hoc selected Tinker checkpoints on a fixed GSM8K test slice
+($N=500$), strictly disjoint from training batches. The held-out runs use
+greedy decoding ($T{=}0$, \texttt{max\_tokens}$=512$), whereas
+\emph{last-10} is computed from stochastic training rollouts. The two
+metrics therefore share the same boxed-answer scorer but are not directly
+comparable.
 The evaluator and the raw per-problem trace are included in the artifact
 bundle.
 
@@ -678,22 +680,18 @@ in a follow-up run.}
 
 \noindent Held-out accuracy sits in a narrow 87.8--91.0\% band across the
 eight fully-evaluated checkpoints (mean $89.8\%$, mean absolute deviation
-from \emph{last-10} of $3.6$ pp, mean signed gap $+0.4$ pp). Two interpretive
-takeaways follow. \emph{First}, the aggregate training-reward signal
-generalises: held-out accuracy exceeds training \emph{last-10} on five of the
-eight checkpoints, and is within a single CI95 of it on all eight --- i.e.
-we see no systematic optimism in \emph{last-10}.
-\emph{Second}, ranking checkpoints by \emph{last-10} within this band is
-unreliable: the Spearman rank correlation between \emph{last-10} and
-held-out accuracy is $\rho = -0.02$ ($n=8$), reflecting the fact that
-Monte-Carlo noise on a 16-sample-per-step run is comparable to the true
-spread between strong 30-step fine-tunes. The clearest example is the two
-Qwen3-8B-Base runs (both $s=42$, distinguished by run id in Table~\ref{tab:heldout_gsm8k}):
-their training \emph{last-10} values of 98.8\% and 85.6\%
-both land on held-out $\approx$ 91\%, showing that the 98.8\% figure was
-inflated by late-batch variance rather than by genuinely better
-generalisation. No held-out number exceeds 91.0\%, which we read as the
-capacity ceiling of our 30-step GRPO recipe on GSM8K.
+from \emph{last-10} of $3.6$ pp, mean signed gap $+0.4$ pp). We interpret
+this only as evidence that \emph{last-10} is a noisy selector among already
+strong 30-step runs: the Spearman rank correlation between \emph{last-10} and
+held-out accuracy is $\rho = -0.02$ ($n=8$), and the two Qwen3-8B-Base runs
+(both $s=42$, distinguished by run id in Table~\ref{tab:heldout_gsm8k})
+both land near 91\% held-out accuracy despite training \emph{last-10} values
+of 98.8\% and 85.6\%. Because the table is a post-hoc top-10 selection, it
+does not establish generalisation, absence of optimism, or a capacity
+ceiling. Consistent with that caution, a separate five-seed Qwen3-8B
+(non-Base) post-GRPO control run shows only a small, non-significant
+held-out advantage over the corresponding Qwen3-8B-Base arm
+(83.3\% vs.~82.0\%, $t = 1.32$, $p = 0.26$).
 
 We note two caveats inherited from this run. Qwen3.5-397B-A17B's run was
 truncated at problem 263 of 500 by a Tinker billing interruption; its

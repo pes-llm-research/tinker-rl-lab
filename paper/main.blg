@@ -3,9 +3,6 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
 The style file: plainnat.bst
 Database file #1: references.bib
-Warning--I didn't find a database entry for "benjaminihochberg1995"
-Warning--I didn't find a database entry for "Clark2016"
-Warning--I didn't find a database entry for "Casper2023"
 Warning--empty journal in azar2024ipo
 Warning--empty journal in havrilla2023trlx
 Warning--can't use both volume and number fields in henderson2018deep
@@ -16,7 +13,7 @@ Warning--empty booktitle in yao2023deepspeedchat
 Warning--empty journal in zhang2025verifybench
 You've used 165 entries,
             2773 wiz_defined-function locations,
-            1364 strings with 40929 characters,
+            1359 strings with 40870 characters,
 and the built_in function-call counts, 94092 in all, are:
 = -- 7549
 > -- 8826
@@ -55,4 +52,4 @@ warning$ -- 8
 while$ -- 518
 width$ -- 0
 write$ -- 2400
-(There were 11 warnings)
+(There were 8 warnings)
