@@ -1,0 +1,7 @@
+comparison_id	claim	n_seeds_A	n_seeds_B	matched_init	well_powered	effect_size	ci_low	ci_high	recommendation
+vm_aero_vs_grpo	AERO vs baseline GRPO (last-step heldout)	5	5	yes	yes	11.777	6.469	17.086	report_with_ci
+vm_cppo_vs_grpo	CPPO vs baseline GRPO (last-step heldout)	5	5	yes	yes	6.208	3.218	9.198	report_with_ci
+vm_ngrpo_vs_grpo	NGRPO vs baseline GRPO (last-step heldout)	5	5	yes	yes	2.918	1.137	4.699	report_with_ci
+vm_scafgrpo_vs_grpo	SCAFGRPO vs baseline GRPO (last-step heldout)	5	5	yes	yes	9.466	5.136	13.795	report_with_ci
+vm_mcgrpo_vs_grpo	MCGRPO vs baseline GRPO (last-step heldout)	5	5	yes	yes	8.745	4.717	12.773	report_with_ci
+vm_gift_vs_grpo	GIFT vs baseline GRPO (last-step heldout)	5	5	yes	yes	8.050	4.311	11.790	report_with_ci

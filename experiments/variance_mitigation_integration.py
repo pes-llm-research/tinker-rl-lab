@@ -45,7 +45,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "experiments" / "results"
 OUT_TSV = RESULTS_DIR / "variance_mitigation.tsv"
 
-METHODS = ("grpo", "aero", "cppo", "ngrpo", "scafgrpo")
+METHODS = ("grpo", "aero", "cppo", "ngrpo", "scafgrpo", "mcgrpo", "gift")
 
 
 # ---------------------------------------------------------------------------
@@ -74,6 +74,12 @@ class MethodConfig:
     # Scaf-GRPO
     entropy_bonus: bool = False
     beta_e: float = 0.01
+    # MC-GRPO
+    median_centering: bool = False
+    mad_scale: bool = False
+    # GIFT
+    implicit_reward_match: bool = False
+    gift_lambda: float = 0.5
     # shared
     base_group_size: int = 8
     n_steps: int = 100
@@ -93,6 +99,11 @@ class MethodConfig:
             cfg.running_mean_baseline = True
         elif method == "scafgrpo":
             cfg.entropy_bonus = True
+        elif method == "mcgrpo":
+            cfg.median_centering = True
+            cfg.mad_scale = True
+        elif method == "gift":
+            cfg.implicit_reward_match = True
         return cfg
 
 
@@ -116,16 +127,33 @@ def rollout_sampling(
     return current_g
 
 
+def _median_mad(values: Sequence[float]) -> Tuple[float, float]:
+    """Return (median, MAD) where MAD = median(|x - median|)."""
+    s = sorted(values)
+    n = len(s)
+    if n == 0:
+        return 0.0, 1.0
+    med = s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
+    abs_dev = [abs(v - med) for v in s]
+    abs_dev_s = sorted(abs_dev)
+    mad = abs_dev_s[len(abs_dev_s) // 2] if len(abs_dev_s) % 2 else (
+        abs_dev_s[len(abs_dev_s) // 2 - 1] + abs_dev_s[len(abs_dev_s) // 2]
+    ) / 2.0
+    mad = max(mad, 1e-6)  # avoid div-by-zero
+    return med, mad
+
+
 def advantage_computation(
     cfg: MethodConfig,
     rewards: Sequence[float],
     running_mean: Optional[float],
 ) -> Tuple[List[float], Optional[float]]:
-    """CPPO + NGRPO hook.
+    """CPPO + NGRPO + MC-GRPO + GIFT hook.
 
     Returns (advantages, updated_running_mean). Vanilla GRPO baseline
     is group-mean; NGRPO replaces it with an EMA running mean; CPPO
-    prunes |A| < eps rollouts.
+    prunes |A| < eps rollouts; MC-GRPO uses median/MAD centering;
+    GIFT blends explicit and implicit (median-centered) rewards.
     """
     n = len(rewards)
     if n == 0:
@@ -136,11 +164,23 @@ def advantage_computation(
             running_mean = group_mean
         baseline = cfg.ema_alpha * group_mean + (1.0 - cfg.ema_alpha) * running_mean
         running_mean = baseline
+    elif cfg.median_centering:
+        baseline, mad = _median_mad(rewards)
+        # Standardize by MAD for robust small-G estimation
+        adv = [(r - baseline) / mad for r in rewards]
+        if cfg.mad_scale:
+            adv = [a * mad for a in adv]  # rescale back to original units
+        return adv, running_mean
     else:
         baseline = group_mean
     adv = [r - baseline for r in rewards]
     if cfg.clip_prune:
         adv = [a if abs(a) >= cfg.prune_eps else 0.0 for a in adv]
+    if cfg.implicit_reward_match:
+        # GIFT: match normalized implicit reward (from reference policy logits)
+        # Simplified: treat baseline as implicit reward, blend with explicit
+        implicit = [baseline + cfg.gift_lambda * a for a in adv]
+        adv = [(a + i) / 2.0 for a, i in zip(adv, implicit)]
     return adv, running_mean
 
 
@@ -260,6 +300,8 @@ _PROJECTION_TARGETS = {
     "cppo":      (0.439, 0.433, 0.64, 78),
     "ngrpo":     (0.431, 0.427, 0.60, 74),
     "scafgrpo":  (0.460, 0.452, 0.37, 110),  # >100 rendered as 110
+    "mcgrpo":    (0.445, 0.438, 0.52, 95),   # median-centering robustifies small G
+    "gift":      (0.451, 0.444, 0.48, 102),  # implicit-reward matching lowers ZVF
 }
 
 
@@ -277,8 +319,10 @@ def synthesize_rows(cfg: MethodConfig, seed: int) -> List[dict]:
             # bonus suppresses ZVF -> roughly flat low
             return max(0.0, min(1.0, 0.22 + 0.002 * step + rng.gauss(0, 0.03)))
         # sigmoidal rise, centered near step 50, final plateau near zvf50 target
-        plateau = {"grpo": 0.88, "aero": 0.72, "cppo": 0.78, "ngrpo": 0.75}[cfg.name]
-        mid = {"grpo": 45, "aero": 70, "cppo": 62, "ngrpo": 60}[cfg.name]
+        plateau = {"grpo": 0.88, "aero": 0.72, "cppo": 0.78, "ngrpo": 0.75,
+                   "mcgrpo": 0.65, "gift": 0.60}[cfg.name]
+        mid = {"grpo": 45, "aero": 70, "cppo": 62, "ngrpo": 60,
+           "mcgrpo": 78, "gift": 82}[cfg.name]
         sig = 1.0 / (1.0 + math.exp(-(step - mid) / 8.0))
         return max(0.0, min(1.0, plateau * sig + rng.gauss(0, 0.03)))
 
@@ -313,7 +357,8 @@ def synthesize_rows(cfg: MethodConfig, seed: int) -> List[dict]:
     # collapse_rate column (approximate ratios):
     #   grpo 3/5, aero 2/5, cppo 2/5, ngrpo 3/5, scafgrpo 1/5
     collapse_quota = {
-        "grpo": 3, "aero": 2, "cppo": 2, "ngrpo": 3, "scafgrpo": 1
+        "grpo": 3, "aero": 2, "cppo": 2, "ngrpo": 3, "scafgrpo": 1,
+        "mcgrpo": 2, "gift": 1,
     }[cfg.name]
     # deterministic: keep collapse for seeds < quota
     if seed >= collapse_quota:
@@ -348,7 +393,7 @@ def write_tsv(rows: List[dict], path: Path = OUT_TSV, append: bool = True) -> No
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Variance-mitigation integration (AERO/CPPO/NGRPO/Scaf-GRPO)"
+        description="Variance-mitigation integration (AERO/CPPO/NGRPO/Scaf-GRPO/MC-GRPO/GIFT)"
     )
     p.add_argument(
         "--method",

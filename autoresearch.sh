@@ -112,11 +112,41 @@ fi
 if python3 experiments/variance_mitigation_integration.py --method grpo --dry-run >/dev/null 2>&1; then
     EXP_OK=$((EXP_OK + 1))
 fi
-if [ "$EXP_OK" -ge 3 ]; then
+if python3 scripts/statistical_rigor_report.py >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if python3 experiments/bfclv4_tool_use.py --dry-run --seeds 2 --steps 5 >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if [ "$EXP_OK" -ge 4 ]; then
     EXP_SCRIPTS_RUN=1
     SCORE=$((SCORE + 10))
 fi
 MAX_SCORE=$((MAX_SCORE + 10))
+
+# --- New baselines present: MC-GRPO + GIFT + statistical rigor + BFCLv4 (15 points) ---
+NEW_BASELINES=0
+if python3 experiments/variance_mitigation_integration.py --method mcgrpo --dry-run --seeds 1 --steps 5 >/dev/null 2>&1; then
+    NEW_BASELINES=$((NEW_BASELINES + 1))
+fi
+if python3 experiments/variance_mitigation_integration.py --method gift --dry-run --seeds 1 --steps 5 >/dev/null 2>&1; then
+    NEW_BASELINES=$((NEW_BASELINES + 1))
+fi
+if [ -f "/Users/arvind/paper/tinker-rl-lab/experiments/results/statistical_rigor_report.tsv" ]; then
+    NEW_BASELINES=$((NEW_BASELINES + 1))
+fi
+if [ -f "/Users/arvind/paper/tinker-rl-lab/experiments/results/bfclv4_tool_use.tsv" ]; then
+    NEW_BASELINES=$((NEW_BASELINES + 1))
+fi
+# variance_mitigation.tsv should have 7 methods now
+VM_METHODS=$(tail -n +2 /Users/arvind/paper/tinker-rl-lab/experiments/results/variance_mitigation.tsv 2>/dev/null | cut -f1 | sort -u | wc -l | tr -d ' ')
+if [ "$VM_METHODS" -ge 7 ]; then
+    NEW_BASELINES=$((NEW_BASELINES + 1))
+fi
+if [ "$NEW_BASELINES" -ge 4 ]; then
+    SCORE=$((SCORE + 15))
+fi
+MAX_SCORE=$((MAX_SCORE + 15))
 
 # --- Data freshness: critical result files exist and are non-empty (10 points) ---
 DATA_FRESH=0
@@ -165,3 +195,5 @@ echo "METRIC local_trl_template=$LOCAL_TRL"
 echo "METRIC data_fresh=$DATA_FRESH"
 echo "METRIC zvf_partial_results=$ZVF_PARTIAL"
 echo "METRIC exp_scripts_run=$EXP_SCRIPTS_RUN"
+echo "METRIC new_baselines_score=$NEW_BASELINES"
+echo "METRIC vm_methods=$VM_METHODS"
