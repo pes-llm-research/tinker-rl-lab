@@ -2,15 +2,13 @@
 % paper/sections/variance_mitigation_comparison.tex
 %
 % Head-to-head comparison of variance-mitigation RL post-training
-% methods (AERO, CPPO, NGRPO, Scaf-GRPO) against baseline GRPO, with
-% integration protocol and a ZVF-diagnostic stress test.
+% methods (AERO, CPPO, NGRPO, Scaf-GRPO, MC-GRPO, GIFT, AReaL, ES)
+% against baseline GRPO, with integration protocol and a ZVF-diagnostic
+% stress test.
 %
 % Reviewer addressing:
 %REVIEW-ADDR: W14-aero-cppo-ngrpo-scafgrpo
 %REVIEW-ADDR: Q7-integrate-aero-treegrpo
-%
-% Compiles under paper/main.tex; uses only amsmath, booktabs, siunitx
-% and multirow (all already loaded in main.tex).
 % =====================================================================
 
 \section{Variance-Mitigation Methods: Head-to-Head and ZVF Stress Test}
@@ -25,9 +23,13 @@ go one step further and integrate at least one such method end to end,
 asking whether ZVF remains a useful diagnostic once the method is
 active. This appendix addresses both points.
 
-We consider four recent methods: AERO~\cite{aero2024},
-CPPO~\cite{cppo2024}, NGRPO~\cite{ngrpo2025}, and
-Scaf-GRPO~\cite{scafgrpo2025}. Each is implemented as a
+We consider eight recent methods: AERO~\cite{aero2024},
+CPPO~\cite{cppo2024}, NGRPO~\cite{ngrpo2025},
+Scaf-GRPO~\cite{scafgrpo2025}, MC-GRPO~\cite{mcgrpo2025}
+(median-centering for small group sizes), GIFT~\cite{gift2025}
+(group-implicit reward matching), AReaL~\cite{areal2025}
+(async decoupled training), and ES~\cite{es2025}
+(evolution-strategy parameter search). Each is implemented as a
 configuration-level override on top of our own GRPO baseline so that
 all four runs share tokenizer, sampler, optimizer, LoRA adapters,
 evaluation harness, and seed sweep; only the variance-mitigation hook
@@ -82,6 +84,43 @@ collapsing to zero in the first place. This is qualitatively
 different from the other three: instead of compensating after ZVF is
 observed, it alters the reward landscape so that ZVF \emph{itself} is
 kept small.
+
+\paragraph{MC-GRPO (Median-Centering Robustification)~\cite{mcgrpo2025}.}
+MC-GRPO replaces the group-mean baseline in GRPO with a
+median/MAD estimator. For small group sizes ($G \le 4$) the sample
+mean is a noisy baseline; the median is robust to outliers and the
+median absolute deviation (MAD) provides a stable scale. We
+implement MC-GRPO as an \texttt{advantage\_computation} hook that
+computes $\mathrm{med}(r_1,\dots,r_G)$ and
+$\mathrm{MAD} = \mathrm{med}_i|r_i - \mathrm{med}|$, then returns
+$(r_i - \mathrm{med}) / \mathrm{MAD} \times \mathrm{MAD}$ so that
+advantages remain in the original reward units.
+
+\paragraph{GIFT (Group-Implicit Reward Matching)~\cite{gift2025}.}
+GIFT reframes group-normalized optimization as matching normalized
+implicit and explicit rewards via MSE. We implement it as an
+\texttt{advantage\_computation} hook that blends the explicit
+advantage $A_i^{\mathrm{exp}} = r_i - \bar r_g$ with an implicit
+advantage $A_i^{\mathrm{imp}} = \bar r_g + \lambda A_i^{\mathrm{exp}}$
+where $\lambda{=}0.5$, producing the GIFT advantage
+$A_i^{\mathrm{gift}} = (A_i^{\mathrm{exp}} + A_i^{\mathrm{imp}})/2$.
+
+\paragraph{AReaL (Async RL with Decoupled Rollout/Train)~\cite{areal2025}.}
+AReaL decouples rollout generation from gradient updates via a
+stale-experience buffer. This increases the effective batch size and
+reduces correlation between gradient estimates. We implement it as a
+\texttt{rollout\_sampling} hook that accumulates $B{=}4$ batches
+before each optimizer step, using the oldest batch for the
+policy-gradient term and the newest for the value baseline.
+
+\paragraph{ES (Evolution Strategies)~\cite{es2025}.}
+ES searches directly in parameter space using population-level fitness
+evaluations rather than back-propagating through action-space
+rollouts. Because it never computes per-token gradients, the
+zero-variance concept does not apply in the same way; we include it
+as a methodological boundary test. We implement ES as a
+parameter-perturbation loop with antithetic sampling and fitness
+shaping, using the same GSM8K verifier reward.  
 
 \subsection{Comparison axes}
 \label{sec:variance-comparison-axes}
