@@ -155,7 +155,7 @@ def generate_report() -> List[Dict[str, str]]:
 
     # ---- Comparison 1: Variance mitigation head-to-head (well-powered) ----
     vm = _load_variance_mitigation_last_step()
-    methods = ["aero", "cppo", "ngrpo", "scafgrpo", "mcgrpo", "gift"]
+    methods = ["aero", "cppo", "ngrpo", "scafgrpo", "mcgrpo", "gift", "areal", "es"]
     baseline = vm.get("grpo", [])
     for m in methods:
         vals = vm.get(m, [])

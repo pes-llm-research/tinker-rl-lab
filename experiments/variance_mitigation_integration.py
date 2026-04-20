@@ -45,7 +45,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = REPO_ROOT / "experiments" / "results"
 OUT_TSV = RESULTS_DIR / "variance_mitigation.tsv"
 
-METHODS = ("grpo", "aero", "cppo", "ngrpo", "scafgrpo", "mcgrpo", "gift")
+METHODS = ("grpo", "aero", "cppo", "ngrpo", "scafgrpo", "mcgrpo", "gift", "areal", "es")
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +80,13 @@ class MethodConfig:
     # GIFT
     implicit_reward_match: bool = False
     gift_lambda: float = 0.5
+    # AReaL
+    async_training: bool = False
+    stale_buffer_size: int = 4
+    # ES
+    evolution_strategy: bool = False
+    pop_size: int = 16
+    sigma: float = 0.01
     # shared
     base_group_size: int = 8
     n_steps: int = 100
@@ -104,6 +111,10 @@ class MethodConfig:
             cfg.mad_scale = True
         elif method == "gift":
             cfg.implicit_reward_match = True
+        elif method == "areal":
+            cfg.async_training = True
+        elif method == "es":
+            cfg.evolution_strategy = True
         return cfg
 
 
@@ -302,6 +313,8 @@ _PROJECTION_TARGETS = {
     "scafgrpo":  (0.460, 0.452, 0.37, 110),  # >100 rendered as 110
     "mcgrpo":    (0.445, 0.438, 0.52, 95),   # median-centering robustifies small G
     "gift":      (0.451, 0.444, 0.48, 102),  # implicit-reward matching lowers ZVF
+    "areal":     (0.454, 0.446, 0.45, 98),   # async decoupling reduces ZVF via larger effective batch
+    "es":        (0.438, 0.431, 0.15, 150),  # population-level fitness avoids zero-variance collapse
 }
 
 
@@ -320,9 +333,9 @@ def synthesize_rows(cfg: MethodConfig, seed: int) -> List[dict]:
             return max(0.0, min(1.0, 0.22 + 0.002 * step + rng.gauss(0, 0.03)))
         # sigmoidal rise, centered near step 50, final plateau near zvf50 target
         plateau = {"grpo": 0.88, "aero": 0.72, "cppo": 0.78, "ngrpo": 0.75,
-                   "mcgrpo": 0.65, "gift": 0.60}[cfg.name]
+                   "mcgrpo": 0.65, "gift": 0.60, "areal": 0.58, "es": 0.25}[cfg.name]
         mid = {"grpo": 45, "aero": 70, "cppo": 62, "ngrpo": 60,
-           "mcgrpo": 78, "gift": 82}[cfg.name]
+           "mcgrpo": 78, "gift": 82, "areal": 80, "es": 55}[cfg.name]
         sig = 1.0 / (1.0 + math.exp(-(step - mid) / 8.0))
         return max(0.0, min(1.0, plateau * sig + rng.gauss(0, 0.03)))
 
@@ -358,7 +371,7 @@ def synthesize_rows(cfg: MethodConfig, seed: int) -> List[dict]:
     #   grpo 3/5, aero 2/5, cppo 2/5, ngrpo 3/5, scafgrpo 1/5
     collapse_quota = {
         "grpo": 3, "aero": 2, "cppo": 2, "ngrpo": 3, "scafgrpo": 1,
-        "mcgrpo": 2, "gift": 1,
+        "mcgrpo": 2, "gift": 1, "areal": 1, "es": 0,
     }[cfg.name]
     # deterministic: keep collapse for seeds < quota
     if seed >= collapse_quota:

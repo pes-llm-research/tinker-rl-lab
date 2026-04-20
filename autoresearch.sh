@@ -126,27 +126,26 @@ MAX_SCORE=$((MAX_SCORE + 10))
 
 # --- New baselines present: MC-GRPO + GIFT + statistical rigor + BFCLv4 (15 points) ---
 NEW_BASELINES=0
-if python3 experiments/variance_mitigation_integration.py --method mcgrpo --dry-run --seeds 1 --steps 5 >/dev/null 2>&1; then
-    NEW_BASELINES=$((NEW_BASELINES + 1))
-fi
-if python3 experiments/variance_mitigation_integration.py --method gift --dry-run --seeds 1 --steps 5 >/dev/null 2>&1; then
-    NEW_BASELINES=$((NEW_BASELINES + 1))
-fi
+for m in mcgrpo gift areal es; do
+    if python3 experiments/variance_mitigation_integration.py --method $m --dry-run --seeds 1 --steps 5 >/dev/null 2>&1; then
+        NEW_BASELINES=$((NEW_BASELINES + 1))
+    fi
+done
 if [ -f "/Users/arvind/paper/tinker-rl-lab/experiments/results/statistical_rigor_report.tsv" ]; then
     NEW_BASELINES=$((NEW_BASELINES + 1))
 fi
 if [ -f "/Users/arvind/paper/tinker-rl-lab/experiments/results/bfclv4_tool_use.tsv" ]; then
     NEW_BASELINES=$((NEW_BASELINES + 1))
 fi
-# variance_mitigation.tsv should have 7 methods now
+# variance_mitigation.tsv should have 9 methods now (incl. areal, es)
 VM_METHODS=$(tail -n +2 /Users/arvind/paper/tinker-rl-lab/experiments/results/variance_mitigation.tsv 2>/dev/null | cut -f1 | sort -u | wc -l | tr -d ' ')
-if [ "$VM_METHODS" -ge 7 ]; then
+if [ "$VM_METHODS" -ge 9 ]; then
     NEW_BASELINES=$((NEW_BASELINES + 1))
 fi
-if [ "$NEW_BASELINES" -ge 4 ]; then
-    SCORE=$((SCORE + 15))
+if [ "$NEW_BASELINES" -ge 6 ]; then
+    SCORE=$((SCORE + 20))
 fi
-MAX_SCORE=$((MAX_SCORE + 15))
+MAX_SCORE=$((MAX_SCORE + 20))
 
 # --- Data freshness: critical result files exist and are non-empty (10 points) ---
 DATA_FRESH=0

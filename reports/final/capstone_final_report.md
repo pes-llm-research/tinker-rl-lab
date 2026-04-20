@@ -32,38 +32,17 @@ Large language models (LLMs) increasingly serve as autonomous agents that call t
 
 Group Relative Policy Optimization (GRPO) is a critic-free variant of Proximal Policy Optimization (PPO) that computes advantages by normalizing rewards within groups of sampled completions. It requires no value function, no reference model for KL regularization, and substantially less compute than standard PPO — making it attractive for resource-constrained post-training of small models.
 
-This project investigates GRPO across one agentic and two non-agentic transfer domains:
-
-- **Tool calling (agentic):** structured JSON function calling with 5–60,000 tool schemas
-- **Code generation (transfer control):** HumanEval benchmark subset
-- **Mathematical reasoning (transfer control):** GSM8K (grade-school). Although MATH (competition-level) was part of our original scope, the MATH track did not reach the same experimental maturity as GSM8K; we therefore exclude it from our main claims and treat it as exploratory pilot work
+This project investigates GRPO across one agentic and two non-agentic transfer domains: structured JSON tool calling with schema sets ranging from 5 to 60,000 tools; code generation on a HumanEval subset; and mathematical reasoning on GSM8K. Although MATH (competition-level reasoning) was part of the original scope, that track did not reach the same experimental maturity as GSM8K, so we treat it as exploratory and exclude it from the strongest claims.
 
 We execute experiments across model sizes from 0.5B to 235B parameters using QLoRA on Google Colab T4 GPUs, full LoRA on Tinker cloud GPUs, and PPO on Modal H100 GPUs, providing a comprehensive picture of GRPO's strengths, failure modes, and scaling properties across five model families.
 
 ### 1.1 Contributions
 
-1. **Empirical characterization** of GRPO across four task domains (tool-use, GSM8K, MATH-500, HumanEval) on models from 0.6B to 235B parameters across five model families (Qwen3, Llama, DeepSeek, Nemotron, GPT-OSS)
-2. **10x Structural Ceiling experiment** (32 dedicated runs, ~$65): systematic ablation across benchmarks, architectures, model sizes, group sizes, learning rates, and constrained decoding
-3. **Benchmark hierarchy**: Tool-use format (1.0) > GSM8K (0.97) > MATH-500 (0.57) >> HumanEval (0.00) — GRPO learns structural tasks but fails on semantic reasoning
-4. **Cross-family architecture dependence**: tool-use success is Qwen-specific (1.0 vs. Llama 0.1 on identical task)
-5. **Model-size threshold**: below 8B-instruct, GRPO is a total null across both Qwen (0.6B, 1.7B) and Llama (1B, 3B) families — immediate ZVF saturation (onset=step 0)
-6. **Instruction tuning as prerequisite**: base→instruct delta (+0.922) dwarfs any RL contribution
-7. **Group saturation diagnostic** (novel): Zero-Variance Fraction (ZVF) and Gradient Utilization (GU) metrics; \(G{=}32\) achieves highest mean GU (54.5%) with latest saturation onset (step 29)
-8. **Learning rate speed-saturation tradeoff**: LR=1e-5 never saturates (GU>82%); LR=3e-4 recovers after transient dip (correcting partial-data conclusion)
-9. **Constrained decoding ablation**: no difference vs. unconstrained — decoder confound is moot
-10. **Multi-seed replication** on GSM8K (5 seeds, mean training reward 30.5% ± 3.3%, 95% CI [26.5%, 34.5%])
-11. **Held-out evaluation** on 200 GSM8K test examples per seed (mean 83.3%, SD=2.2%, greedy decoding)
-12. **LoRA rank ablation** (rank 8/16/32/64) mapping the parameter-efficiency frontier for GRPO
-13. **Synthetic vs. real data comparison** quantifying a 3–8× difficulty gap on tool calling
-14. **MoE volatility characterization**: 2.43× higher step-to-step variance than dense (\(p = 7 \times 10^{-6}\), Levene's test)
-15. **World-Class Suite** (16+ completed experiments): 13 Tinker GRPO runs across frontier and MoE models (including Kimi-K2: Peak 100%, Last-10 80%), 2 Modal H100 PPO runs, 1 failed KL tracking experiment. Key findings: TRL baseline 73.4% vs. Tinker 99.9% (p=0.0014); PPO dominates GRPO on Llama-8B (97.5% vs. 84.4%); Qwen3-235B-A22B reaches perfect 100% last-10; Nemotron-120B collapses after initial peak.
-16. **TRL GRPO Baseline** (5 seeds, Qwen2.5-0.5B, GSM8K): mean accuracy 73.4% ± 7.03%, seeds [42, 123, 456, 789, 1024], accuracies [73.5%, 81.0%, 62.0%, 74.0%, 76.5%]; Welch's t-test vs. Tinker: t=8.44, p=0.0014
-17. **Statistical analysis with effect sizes**: bootstrap CIs, Welch's t-test, Cohen's d, Mann-Whitney; LLM-native vs Classic RL Cohen's d=21.84; PPO vs GRPO on Llama d=12.75 (Bonferroni-surviving); variance decomposition (Algorithm η²=0.558, Library η²=0.546, Family η²=0.471)
-18. **Kimi-K2 experiment** (NEW): Moonshot AI MoE GRPO on GSM8K, Peak 100%, Last-10 80%, 20 steps; checkpoint arvindcr4/tinker-rl-bench-arch_gsm8k_kimi-k2
-19. **Scaling law analysis** (NEW): Exponential saturation R(t)=R_max(1−e^{−k(t−t₀)}) fits better than power law (R²=0.210 vs 0.170); three-phase pattern in 53.6% of experiments; model size correlates with learning speed (r=0.468, p=0.012) and ceiling (r=0.533, p=0.004)
-20. **Zero-Variance Fraction analysis** (NEW): ZVF strongly predicts failure (Pearson r=−0.769, p=0.0008); task type dominates (tool-use ZVF=100% vs GSM8K ZVF=8.5%); model scale NOT a significant predictor
-21. **Length bias analysis** (NEW): GRPO instability 0.267±0.335 vs PPO 0.785±0.297; verbosity trap GRPO 36% vs PPO 71%; Nemotron-120B highest GRPO instability (1.194)
-22. **2-GRPO hypothesis test** (NEW): partial confirmation that GRPO is secretly DPO at G=2; reducing G=8/16 to G=2 would cut rollout compute 75–87.5%; observed ZVF deviates from theory due to adaptive difficulty sampling
+This report contributes an empirical characterization of GRPO across four task domains — tool use, GSM8K, MATH-500, and HumanEval — on models spanning 0.6B to 235B parameters across five model families: Qwen3, Llama, DeepSeek, Nemotron, and GPT-OSS. The centrepiece is the 10x Structural Ceiling experiment, a 32-run ablation campaign that varied benchmark, architecture, model size, group size, learning rate, and decoding constraints. Across those runs we identify a stable benchmark hierarchy in which tool-use formatting is easiest, GSM8K remains largely structural, MATH-500 is substantially harder, and HumanEval is effectively out of reach under the current regime. We also show that tool-use success is strongly architecture-dependent, with Qwen dramatically outperforming Llama under matched conditions, and that a practical model-size threshold exists: below 8B-instruct, both Qwen and Llama variants collapse immediately into zero-variance training.
+
+The study also contributes a more detailed account of what actually governs GRPO behaviour in this setting. Instruction tuning emerges as the dominant prerequisite, with the base-to-instruct delta dwarfing the gains attributable to RL. We map the parameter-efficiency frontier through LoRA rank ablations, quantify a 3–8× difficulty gap between synthetic and real tool-use data, and show that constrained decoding is not the main explanation for success on structural tasks. On GSM8K we add five-seed replication, confidence intervals on training reward, and held-out evaluation on 200 test examples per seed, which together show that training reward improvements do not translate into statistically significant held-out gains. We further introduce Zero-Variance Fraction (ZVF) and Gradient Utilization (GU) as training diagnostics, identify \(G{=}32\) as the best group size under the canonical token budget, and characterize the learning-rate tradeoff between slower unsaturated training and faster saturation-prone runs.
+
+Finally, we extend the study beyond the original small-model setup through the World-Class Suite. This adds 16+ completed experiments, including 13 Tinker GRPO runs on frontier and MoE models, two PPO baselines on Modal H100 GPUs, one failed KL-tracking run, and a completed Kimi-K2 experiment. These runs show that implementation framework can matter at least as much as algorithmic choice, that PPO and GRPO interact strongly with model family rather than task alone, and that MoE behaviour is highly heterogeneous despite similar scale. We complement these experiments with stronger statistical analysis — including bootstrap confidence intervals, Welch tests, Mann-Whitney tests, Cohen's \(d\), variance decomposition, scaling-law fits, ZVF-wide analysis, length-bias analysis, and a direct examination of the 2-GRPO hypothesis — to turn the report into a coherent account of GRPO's strengths, failure modes, and practical constraints.
 
 ---
 
@@ -308,24 +287,7 @@ All experiments use the Qwen ChatML format:
 
 ### 3.5 Reward Functions
 
-**Tool calling (3-component, 0–1):**
-- +0.3: Valid JSON output
-- +0.4: Correct tool name
-- +0.3: All argument keys present
-
-**Multi-turn tool calling (5-component):**
-- +0.25: First turn = tool call
-- +0.30: Final natural language answer
-- +0.15: Arguments populated
-- +0.10: Clean JSON output
-- -0.30: Repeated tool call (penalty)
-
-**Math reasoning (binary):**
-- 1.0: Correct answer in \boxed{} or as final number
-- 0.0: Incorrect
-
-**Code generation:**
-- Binary pass/fail on test cases
+Reward design was tailored to the structure of each task. For single-turn tool calling, we used a three-component score on the unit interval: 0.3 points for valid JSON, 0.4 points for the correct tool name, and 0.3 points for the presence of all required argument keys. Multi-turn tool calling used a five-part reward that gave 0.25 points when the first action was a tool call, 0.30 points for producing a final natural-language answer, 0.15 points when arguments were actually populated, and 0.10 points for clean JSON output, while assigning a −0.30 penalty for repeated tool calls to suppress looping behaviour. Mathematical reasoning used a binary reward: 1.0 when the final answer was correct, either boxed or clearly stated as the terminal number, and 0.0 otherwise. Code generation also used binary reward based on pass/fail execution of the target test cases.
 
 ---
 
@@ -1786,46 +1748,21 @@ d.o. = descriptive only (`n_seeds < 5`, CIs suppressed and no p-value computed).
 
 ### 6.1 Key Findings from World-Class Suite Experiments
 
-The following findings emerge specifically from the World-Class Suite (Sections 4.5–4.5.6), based on completed and partial-but-informative runs only. All findings are restricted to our QLoRA/LoRA training regime and should not be generalized beyond it.
+The World-Class Suite (Sections 4.5–4.5.6) sharpens the main picture in three ways, albeit within the same QLoRA/LoRA regime. First, implementation framework appears to matter at least as much as nominal algorithm choice: TRL GRPO on Qwen2.5-0.5B reaches 73.4% ± 7.03% mean GSM8K accuracy, whereas Tinker GRPO reaches 99.9%, with non-overlapping bootstrap intervals and Welch's \(t=8.44\) (\(p=0.0014\)). Because this comparison still mixes framework and scale differences, it should not be read as a pure framework effect, but it does show that results produced in one stack cannot be assumed to transfer to another without careful control.
 
-**Finding WC1: Implementation framework matters more than algorithm design.**
-TRL GRPO (Qwen2.5-0.5B) achieves 73.4% ± 7.03% mean accuracy on GSM8K vs. Tinker GRPO's 99.9% (Welch's t=8.44, p=0.0014). The bootstrap CIs are non-overlapping: TRL [67.9%, 78.9%] vs. Tinker [99.3%, 100.0%]. This gap reflects both framework differences and the model scale difference (0.5B vs. 4B–235B). Practitioners should not expect TRL-trained results to replicate Tinker-trained results at matched model scale without controlling for framework differences.
-
-**Finding WC2: Algorithm selection is model-dependent, not task-dependent.**
-PPO dominates GRPO on Llama-3.1-8B-Instruct (97.5% vs. 84.4% last-10 avg, Mann-Whitney r=0.94). GRPO dominates PPO on Qwen3-8B (97.2% vs. 22.5%). Both models, same task (GSM8K), same steps (30). The model–algorithm interaction is larger than any task-level effect we have observed.
-
-**Finding WC3: Frontier MoE models show highly diverse training dynamics.**
-Qwen3-235B-A22B achieves perfect 100% last-10 in 15 steps; DeepSeek-V3.1 achieves 85% in 20 steps; Nemotron-120B reaches 87.5% peak but collapses to 16.2% last-10. The diversity is not predicted by model scale alone — it reflects instruction tuning quality, architecture design, and pre-training data composition.
-
-**Finding WC4: Dense vs. MoE is a secondary factor; instruction tuning is primary.**
-Qwen3-30B-A3B (MoE base): 32.5% last-10. Qwen3-30B-A3B-Instruct (same MoE, instruction-tuned): 100% last-10. Identical architecture, 67.5pp gap from instruction tuning alone. The MoE volatility observation (Section 5.2) concerns training dynamics, not final performance — instruction-tuned MoE models achieve the same or better final performance as dense models when given sufficient steps.
-
-**Finding WC5: Tool-use GRPO requires SFT warm-up — no exceptions.**
-Zero reward across 30 steps for both Qwen3-32B and Llama-3.1-8B-Instruct on tool-use GRPO without SFT. Qwen3-8B with SFT achieves 0.875–0.999. The SFT stage provides the bootstrapping reward signal; without it, the tool-use reward landscape has no positive signal to reinforce.
+Second, the PPO-versus-GRPO comparison becomes clearly model-dependent rather than task-dependent. On Llama-3.1-8B-Instruct, PPO exceeds GRPO (97.5% vs. 84.4% last-10 reward; Mann-Whitney \(r=0.94\)); on Qwen3-8B, the ordering reverses just as strongly (97.2% vs. 22.5%). Third, the frontier and MoE runs show that scale alone does not organize behaviour. Qwen3-235B-A22B reaches a perfect 100% last-10 reward in only 15 steps, DeepSeek-V3.1 reaches 85% in 20 steps, and Nemotron-120B peaks at 87.5% before collapsing to 16.2%. The strongest MoE contrast is within the Qwen3-30B-A3B pair: the base checkpoint reaches only 32.5% last-10 reward while the instruction-tuned version reaches 100%, indicating that instruction tuning dominates the dense-versus-MoE distinction for final performance. The same logic appears again on the tool-use track, where Qwen3-32B and Llama-3.1-8B-Instruct both remain at zero reward without SFT warm-up, while SFT-initialized Qwen3-8B reaches 0.875–0.999. Across these runs, SFT is not a minor optimization convenience but the mechanism that places the model on a reward-bearing manifold in the first place.
 
 ---
 
 ### 6.2 Implications from the 2025–2026 SOTA Landscape
 
-The new research summarized in Section 2.6 carries four concrete implications for interpreting TinkerRL-Bench's findings.
+The new research summarized in Section 2.6 has four direct implications for how TinkerRL-Bench should be read. First, the independent identification of the zero-variance failure mode by six separate groups strongly supports the external validity of our ZVF diagnostic. Those papers all describe the same basic mechanism — all completions in a group receive identical rewards, the normalized advantage becomes zero, and the gradient disappears — while our contribution is to quantify that effect across tasks and scales. In that sense, the literature and the benchmark are converging on the same bottleneck from different directions.
 
-**Implication 1: TinkerRL-Bench's ZVF diagnostic has strong external validity.**
-The simultaneous, independent identification of the zero-variance failure mode by six research groups (Section 2.6.2) — each proposing a distinct fix — confirms that ZVF is not an artifact of our experimental setup. Each paper diagnoses the same mechanistic failure: when all completions in a GRPO group receive identical rewards, the normalized advantage is zero and no gradient update occurs. Our cross-scale characterization (ZVF predicts final performance with Pearson r=−0.769, p=0.0008; task type dominates with tool-use ZVF=100% vs. GSM8K ZVF=8.5%) provides the quantitative treatment that these papers address qualitatively. The co-occurrence validates the metric and positions TinkerRL-Bench's ZVF analysis as a complement to the concurrent literature.
+Second, our implementation-gap finding is consistent with the broader open-source ecosystem. The framework-level variance decomposition in this report sits alongside the practical reality that, as of April 2026, no public benchmark has compared TRL, veRL, OpenRLHF, and other major GRPO stacks under tightly matched conditions. Those frameworks have diverged substantially in rollout backends, algorithm portfolios, and default settings, so it is unsurprising that framework choice emerges as a first-order variable rather than a nuisance factor.
 
-**Implication 2: The implementation gap finding is consistent with the GitHub ecosystem data.**
-Our finding that implementation framework explains more variance than algorithm choice (library \(\eta^2 = 0.546\), algorithm \(\eta^2 = 0.558\)) is independently corroborated by the GitHub landscape: as of April 2026, no publicly available cross-library benchmark compares GRPO performance across TRL, veRL, OpenRLHF, and other frameworks on identical models and tasks. The GitHub research (Section 7.2 source file) confirms that TRL v1.2.0, veRL v0.7.1, and OpenRLHF v0.10.1 have diverged substantially in algorithm portfolios, rollout backends, and default hyperparameters, all of which would further amplify framework-level performance gaps beyond what TinkerRL-Bench's initial comparison captured.
+Third, the framework landscape has moved materially since the core experiments were run. TRL advanced through v1.2.0 with asynchronous GRPO, memory reductions, new optimization variants, and native tool-calling support for recent Qwen and LLaMA families. veRL v0.7.1 added GSPO support, Megatron-based MoE infrastructure, SGLang rollout, per-sample temperature, and FlowGRPO training. OpenRLHF v0.10.1 expanded async RL and VLM support. As a result, future replications — especially on tool use and large MoE models — may perform differently from the runs documented here, not because the findings are invalid, but because the frameworks themselves have evolved.
 
-**Implication 3: The framework landscape has evolved significantly since our experiments.**
-Our World-Class Suite experiments were conducted on Tinker SDK v0.16.1 and TRL at an earlier version. The major framework updates between mid-2025 and April 2026 include:
-
-- TRL v1.0–1.2: asynchronous GRPO, Liger memory reduction, VESPO/DPPO/SDPO, tool-calling support for Qwen3 and LLaMA 3.1/3.2
-- veRL v0.7.1: GSPO support, Megatron MoE backend, SGLang rollout, per-sample temperature, FlowGRPO trainer
-- OpenRLHF v0.10.1: VLM support, async RL, Ray-based scaling
-
-Any replication of TinkerRL-Bench's experiments with current frameworks may show meaningfully different results, particularly for the tool-calling track (TRL v1.1+ has native tool-calling GRPO) and for MoE models (veRL's GSPO support removes the routing-replay workarounds that our Qwen3-235B-A22B experiments required).
-
-**Implication 4: The statistical hardening changes how single-seed results should be interpreted.**
-Power analysis (Section 5.15.1) establishes that single-seed Tinker experiments have zero statistical power. This does not invalidate the descriptive observations from those runs — the reward trajectories, ZVF profiles, and final performance metrics are still informative — but it means that comparative conclusions drawn from single-run contrasts (e.g., "Qwen3-32B achieves 25% vs. Qwen3.5-27B's 43.7%") cannot be assigned significance levels. The BH correction result (F29: 19/20 tests survive) applies to the subset of tests with proper multi-seed replication and does not extend to single-seed cross-model comparisons in the World-Class Suite registry.
+Fourth, the statistical hardening undertaken in this version changes how the single-seed results should be interpreted. Power analysis shows that single-run Tinker comparisons carry no inferential strength, even when the trajectories themselves are informative. The descriptive observations from those runs remain valuable for pattern-finding, but claims about significance belong only to the properly replicated subset. The Benjamini-Hochberg correction reported earlier therefore applies to the multi-seed family of tests, not to the single-seed cross-model contrasts in the World-Class Suite registry.
 
 ---
 
@@ -1833,29 +1770,9 @@ Power analysis (Section 5.15.1) establishes that single-seed Tinker experiments 
 
 ### 7.1 Gaps Closed in This Report
 
-- **Statistical and reporting hardening across the report.** This version adds formal ZVF definitions and partial-correlation analysis, a cross-framework pipeline specification, token-budget-normalized group-size analysis, framework configuration disclosure, evidence-tier partitioning for F1–F5, tool-use/code reward-design analysis with ERF, held-out sampling protocols (P1/P2/P3), base-vs-instruct paired evaluation, tighter frontier-scope wording, regenerated figures, and expanded related work on AERO/CPPO/NGRPO/Scaf-GRPO, Tree-GRPO/PRM, ST-PPO, and DAR. See §§2.7–2.8 and §§5.8.1, 5.12.1, 5.16.1, 5.17–5.19.
+This report closes a substantial portion of the gaps present in earlier drafts by hardening both the empirical record and the statistical interpretation. On the reporting side, it now includes formal ZVF definitions, partial-correlation analysis, a cross-framework pipeline specification, token-budget-normalized group-size analysis, framework configuration disclosure, evidence-tier partitioning for the headline findings, tool-use and code reward-design analysis with ERF, held-out sampling protocols (P1/P2/P3), base-vs-instruct paired evaluation, tighter frontier-scope wording, regenerated figures, and expanded related work on recent variance-mitigation and stability-aware GRPO variants. These additions make the report internally coherent and substantially more defensible as a research document rather than a running project log.
 
-- Multi-seed replication (5 seeds, confidence intervals)
-- LoRA rank ablation (rank 8/16/32/64, parameter-efficiency frontier)
-- Extended 100-step training (ceiling analysis)
-- Real vs. synthetic data comparison (xlam-60k)
-- 77+ Tinker training runs with full logs (25 original + 32 from 10x Structural Ceiling + World-Class Suite)
-- **4B scaling experiment** suggesting model-family/scale discontinuity between 3B and 4B
-- **Held-out evaluation** on 200 GSM8K test examples per seed (83.3% ± 2.2%)
-- **Five-seed replication** with cross-seed stability analysis
-- **Statistical verification**: Fisher's exact test, Levene's test, t-distribution CIs, Welch's t, Mann-Whitney U, Cohen's d, bootstrap CIs
-- **10x Structural Ceiling** (32 runs): benchmark hierarchy across 4 domains, cross-family validation (Qwen + Llama), size ladder (0.6B–8B), group saturation diagnostic (ZVF/GU), LR ablation with full 50-step data, constrained decoding ablation, reward hacking observation
-- **Architecture confound partially resolved**: capacity threshold confirmed across both Qwen and Llama families for sub-8B models
-- **MATH-500 and HumanEval** added to benchmark coverage
-- **World-Class Suite** (16+ completed experiments): 13 GRPO Tinker runs (including Kimi-K2 completion), 2 PPO Modal H100 runs, 1 KL tracking experiment (failed); PPO vs. GRPO statistical comparison; frontier model dynamics; MoE instruct vs. base comparison; SFT necessity for tool-use; TRL baseline comparison
-- **TRL GRPO baseline** (5 seeds, Qwen2.5-0.5B, GSM8K): 73.4% ± 7.03%
-- **PPO vs. GRPO comparison** with statistical effect sizes (Mann-Whitney r=0.94, Cohen's d=0.166)
-- **Kimi-K2 experiment** (NEW): Moonshot AI MoE GRPO on GSM8K completed; Peak 100%, Last-10 80%, 20 steps
-- **Scaling law analysis** (NEW): exponential saturation model fits reward trajectories (R²=0.210); three-phase pattern in 53.6% of experiments; model size correlates with learning speed (r=0.468, p=0.012)
-- **ZVF analysis** (NEW): ZVF predicts failure (r=−0.769, p=0.0008); task type dominates; model scale NOT significant
-- **Length bias analysis** (NEW): GRPO instability 0.267 vs PPO 0.785; verbosity trap GRPO 36% vs PPO 71%; Nemotron-120B highest GRPO instability
-- **2-GRPO hypothesis test** (NEW): DPO equivalence partially confirmed; G=2 cuts rollout compute 75–87.5%; observed ZVF deviates from theory
-- **Enhanced statistical analysis** (NEW): variance decomposition (algorithm η²=0.558, library η²=0.546, family η²=0.471); Cohen's d with Bonferroni correction across 5 pairwise comparisons
+On the experimental side, the report now consolidates five-seed replication, LoRA rank ablations, extended 100-step training, real-versus-synthetic tool-use comparisons, 77+ Tinker runs, a 4B scaling experiment, held-out GSM8K evaluation on 200 examples per seed, the 32-run 10x Structural Ceiling campaign, expanded benchmark coverage to MATH-500 and HumanEval, and the World-Class Suite spanning frontier GRPO, PPO baselines, and the completed Kimi-K2 run. It also adds the TRL GRPO baseline, PPO-versus-GRPO comparisons with effect sizes, scaling-law fits, ZVF-wide analysis, length-bias analysis, the 2-GRPO hypothesis test, and enhanced variance decomposition. Taken together, these additions move the report from a collection of team experiments to a unified account of the project's main empirical claims and open questions.
 
 ### 7.2 Remaining Gaps
 
@@ -2078,33 +1995,11 @@ Total Tinker spend (original + 10x): ~$105-120. World-Class Suite Tinker spend: 
 
 We applied GRPO to four domains (tool calling, GSM8K, MATH-500, HumanEval) across **77+ Tinker runs** plus Modal H100 GPU experiments. The 10x Structural Ceiling experiment (32 dedicated runs) provides systematic evidence for when GRPO works and when it fails. The World-Class Suite extends these findings to frontier scales with PPO comparison and KL tracking. Our key results:
 
-1. **Benchmark hierarchy** (32 runs): GRPO learns structural/format tasks perfectly (tool-use: 1.0, GSM8K: 0.97) but fails on genuine reasoning (MATH-500: 0.57, HumanEval: 0.00). The ceiling is where the task transitions from pattern-matching to reasoning.
+The main empirical picture is now clear. GRPO is strongest on structural tasks and weakest on semantic ones: tool-use formatting and GSM8K-style answer extraction are learnable under this regime, whereas MATH-500 and especially HumanEval remain much harder. That hierarchy is not architecture-neutral. Tool-use success is strongly Qwen-specific, while sub-8B-instruct models across both Qwen and Llama families collapse almost immediately into high-ZVF training with no usable learning signal. The most consistent prerequisite for success is therefore not RL itself but the quality of the initialization: instruction tuning moves models onto a reward-bearing manifold, and SFT warm-up is essential for tool use in particular.
 
-2. **Cross-family architecture dependence**: Tool-use success is Qwen-specific (1.0 vs. Llama 0.1 on identical task with SFT; 0% for both without SFT). GSM8K shows less family dependence (Qwen 1.0 vs. Llama-instruct 0.97).
+Within the trainable regime, the study identifies a set of practical dynamics that recur across chapters. ZVF and GU provide a usable picture of when GRPO is still receiving signal and when it has saturated; under the canonical token budget, \(G{=}32\) is the best group size, while lower learning rates prolong useful training at the cost of speed. Constrained decoding turns out not to be the hidden driver of success, which strengthens the conclusion that GRPO is genuinely learning format rather than merely being protected by the decoder. At the same time, the reward trajectories reveal instability modes that matter in practice, including reward-hacking-style collapse in Llama-8B base and markedly higher volatility in MoE systems. Most importantly, the held-out GSM8K evaluation remains negative: although training reward improves, post-RL accuracy of 83.3% ± 2.2% is not meaningfully above the 82.0% base-model control, so generalization gains are not established.
 
-3. **Model-size threshold** (cross-family): Below 8B-instruct, GRPO produces zero learning signal — confirmed across Qwen (0.6B, 1.7B) and Llama (1B, 3B) with immediate ZVF saturation (onset=step 0, ZVF>88%).
-
-4. **Instruction tuning is the prerequisite**: Base→instruct delta is +0.922 on GSM8K (Llama-8B), dwarfing any RL contribution. Instruction tuning determines MoE trainability — Qwen3-30B-A3B base (32.5%) vs. instruct (100%) at identical architecture.
-
-5. **Group saturation diagnostic** (novel): Zero-Variance Fraction (ZVF) and Gradient Utilization (GU) track when GRPO gradients vanish. G=32 is optimal (GU=54.5%, onset step 29). All group sizes converge given enough steps.
-
-6. **LR speed-saturation tradeoff**: LR=1e-5 never saturates (GU>82%) but converges slowly. LR=3e-4 recovers after transient dip — correcting the partial-data conclusion of instability.
-
-7. **Constrained decoding ablation**: No difference vs. unconstrained (0.981 vs. 0.998) — decoder confound is moot. GRPO genuinely learns format.
-
-8. **Reward hacking → collapse**: Llama-8B base broke out to 0.87 reward then catastrophically collapsed to 0.00 at step 41. Qwen3-8B PPO (final_kl=60.75) shows substantial policy drift consistent with this instability pattern.
-
-9. **Held-out generalization (negative):** GSM8K test accuracy 83.3% ± 2.2% (5 seeds × 200 examples), but base Qwen3-8B scores 82.0% without GRPO. The +1.3pp delta is not significant (\(p{=}0.26\)).
-
-10. **MoE routing volatility**: 2.43× higher step-to-step variance vs. dense (\(p = 7 \times 10^{-6}\), Levene's test). Nemotron-120B introduces a new Mode 2b (peak-then-collapse) failure pattern even in dense architecture.
-
-11. **SFT+GRPO complementarity** (pilot, N=1): SFT-initialized GRPO produced the strongest results. JSON 0%→92% under unconstrained decoding. Without SFT, tool-use GRPO produces 0% reward regardless of model size or architecture.
-
-12. **PPO vs. GRPO (completed):** PPO Llama-3.1-8B-Instruct achieves **97.5%** last-10 avg (Mann-Whitney r=0.94 over GRPO Llama's 84.4%); PPO Qwen3-8B achieves only **22.5%** vs. GRPO Qwen3-8B's 97.2% (Cohen's d=0.166). No single algorithm dominates; choice depends on the target model.
-
-13. **Frontier model results**: Qwen3-235B-A22B achieves perfect 100% last-10 in 15 steps; DeepSeek-V3.1 achieves 85% in 20 steps (starting at 0.875 on step 1). At frontier scale, RL reinforces existing capability rather than teaching new skills.
-
-14. **Implementation framework matters**: TRL baseline 73.4% ± 7.03% vs. Tinker 99.9% (Welch's t=8.44, p=0.0014). Bootstrap CIs non-overlapping: [67.9%, 78.9%] vs. [99.3%, 100.0%].
+The larger-scale experiments complicate any simple story about algorithm superiority. PPO beats GRPO on Llama-3.1-8B-Instruct, while GRPO beats PPO on Qwen3-8B, showing that algorithm choice is model-dependent rather than universally ordered. Frontier runs on Qwen3-235B-A22B, DeepSeek-V3.1, Nemotron-120B, and Kimi-K2 further show that scale does not wash out these differences. Some large models simply preserve existing capability under RL, some improve rapidly, and some peak and collapse. The framework comparison adds another layer: TRL's 73.4% ± 7.03% baseline versus Tinker's 99.9% outcome indicates that implementation details can be as consequential as the nominal RL objective itself.
 
 **Statistical caveat:** Because several comparisons are either paired over the same benchmark items or based on temporally correlated single-run trajectories, the associated p-values should be read as exploratory rather than definitive inferential results.
 
