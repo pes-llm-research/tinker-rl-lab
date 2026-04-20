@@ -96,6 +96,28 @@ if [ -f "$LOCAL_TRL_TEMPLATE" ]; then
 fi
 MAX_SCORE=$((MAX_SCORE + 5))
 
+# --- Bonus: Key experiment scripts execute successfully (10 points) ---
+EXP_SCRIPTS_RUN=0
+EXP_OK=0
+cd /Users/arvind/paper/tinker-rl-lab
+if python3 experiments/base_instruct_paired.py --quiet >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if python3 experiments/group_size_token_normalized.py --out /dev/null >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if python3 scripts/partial_correlation_zvf.py --out /dev/null >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if python3 experiments/variance_mitigation_integration.py --method grpo --dry-run >/dev/null 2>&1; then
+    EXP_OK=$((EXP_OK + 1))
+fi
+if [ "$EXP_OK" -ge 3 ]; then
+    EXP_SCRIPTS_RUN=1
+    SCORE=$((SCORE + 10))
+fi
+MAX_SCORE=$((MAX_SCORE + 10))
+
 # --- Data freshness: critical result files exist and are non-empty (10 points) ---
 DATA_FRESH=0
 DATA_FILES=(
@@ -142,3 +164,4 @@ echo "METRIC ai_scientist_runs=$AI_SCIENTIST_RUNS"
 echo "METRIC local_trl_template=$LOCAL_TRL"
 echo "METRIC data_fresh=$DATA_FRESH"
 echo "METRIC zvf_partial_results=$ZVF_PARTIAL"
+echo "METRIC exp_scripts_run=$EXP_SCRIPTS_RUN"

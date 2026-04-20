@@ -297,22 +297,53 @@ class MinimalAgent:
 
     @property
     def _prompt_impl_guideline(self):
-        impl_guideline = [
-            "CRITICAL GPU REQUIREMENTS - Your code MUST include ALL of these:",
-            "  - At the start of your code, add these lines to handle GPU/CPU:",
-            "    ```python",
-            "    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')",
-            "    print(f'Using device: {device}')",
-            "    ```",
-            "  - ALWAYS move models to device using the `.to(device)` method",
-            "  - ALWAYS move input tensors to device using the `.to(device)` method",
-            "  - ALWAYS move model related tensors to device using the `.to(device)` method",
-            "  - For optimizers, create them AFTER moving model to device",
-            "  - When using DataLoader, move batch tensors to device in training loop: `batch = {k: v.to(device) for k, v in batch.items() if isinstance(v, torch.Tensor)}`",
-            "CRITICAL MODEL INPUT GUIDELINES:",
-            "  - Always pay extra attention to the input to the model being properly normalized",
-            "  - This is extremely important because the input to the model's forward pass directly affects the output, and the loss function is computed based on the output",
-        ]
+        # Detect if the task involves Tinker SDK (remote training)
+        _is_tinker_task = False
+        if isinstance(self.task_desc, str) and "tinker" in self.task_desc.lower():
+            _is_tinker_task = True
+        elif isinstance(self.task_desc, dict):
+            _task_str = json.dumps(self.task_desc).lower()
+            if "tinker" in _task_str:
+                _is_tinker_task = True
+
+        if _is_tinker_task:
+            impl_guideline = [
+                "CRITICAL TINKER SDK REQUIREMENTS - Your code MUST follow ALL of these:",
+                "  - This experiment uses the Tinker SDK for remote model training — do NOT load models locally with AutoModelForCausalLM or similar",
+                "  - Use `import tinker` and `import tinker.types as T` to access the SDK",
+                "  - Create a ServiceClient: `svc = tinker.ServiceClient()`",
+                "  - Create a LoRA training client: `tc = svc.create_lora_training_client(base_model=MODEL, rank=LORA_RANK)`",
+                "  - Use `tc.save_weights_for_sampler()` and `tc.create_sampling_client()` for rollouts",
+                "  - Use `sc.sample()` for generating responses (rollouts)",
+                "  - Use `tc.forward_backward_custom()` + `tc.optim_step()` for gradient updates",
+                "  - The TINKER_API_KEY environment variable is already set in the execution environment",
+                "  - Do NOT use `torch.cuda` or `.to(device)` — Tinker handles device placement remotely",
+                "  - Do NOT import or use AutoModelForCausalLM for training — only use AutoTokenizer for tokenization",
+                "  - The code from 'Code To Use' section provides a complete working Tinker template — USE IT as your starting point",
+                "  - When modifying the template, keep the Tinker SDK calls intact and only change: reward_fn, curriculum, hyperparameters, SYSTEM_PROMPT, or loss function",
+            ]
+        else:
+            impl_guideline = [
+                "CRITICAL GPU REQUIREMENTS - Your code MUST include ALL of these:",
+                "  - At the start of your code, add these lines to handle GPU/CPU:",
+                "    ```python",
+                "    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')",
+                "    print(f'Using device: {device}')",
+                "    ```",
+                "  - ALWAYS move models to device using the `.to(device)` method",
+                "  - ALWAYS move input tensors to device using the `.to(device)` method",
+                "  - ALWAYS move model related tensors to device using the `.to(device)` method",
+                "  - For optimizers, create them AFTER moving model to device",
+                "  - When using DataLoader, move batch tensors to device in training loop: `batch = {k: v.to(device) for k, v in batch.items() if isinstance(v, torch.Tensor)}`",
+            ]
+
+        impl_guideline.extend(
+            [
+                "CRITICAL MODEL INPUT GUIDELINES:",
+                "  - Always pay extra attention to the input to the model being properly normalized",
+                "  - This is extremely important because the input to the model's forward pass directly affects the output, and the loss function is computed based on the output",
+            ]
+        )
         if hasattr(self.cfg.experiment, "num_syn_datasets"):
             num_syn_datasets = self.cfg.experiment.num_syn_datasets
             if num_syn_datasets > 1:
