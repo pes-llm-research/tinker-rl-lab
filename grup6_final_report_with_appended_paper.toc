@@ -1,4 +1,0 @@
-\contentsline {chapter}{Assembly Note}{i}{chapter*.1}%
-\contentsline {chapter}{Comprehensive Experiment and Results Coverage}{1}{chapter*.3}%
-\contentsline {chapter}{Base Report: \texttt {grup6.pdf}}{8}{chapter*.10}%
-\contentsline {chapter}{Appended Paper: \texttt {paper/main.pdf}}{110}{appendix*.11}%

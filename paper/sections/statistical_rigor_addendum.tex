@@ -15,6 +15,7 @@
 % =====================================================================
 
 \section{Statistical Rigor Addendum: Evidence Tiers and Survival}
+\label{sec:stat_rigor}
 \label{app:stat-rigor-addendum}
 
 This appendix addresses three interrelated reviewer concerns. \emph{(W4)}
@@ -87,16 +88,29 @@ after we drop the uninformative Tier-C rows.
 Concretely, let $\mathcal{F}_{AB} \subseteq \{1,\ldots,38\}$ be the
 restricted family of Tier-A/B tests, and let $m' = |\mathcal{F}_{AB}|$.
 We re-run BH~\citep{benjamini1995controlling} with FDR $q{=}0.05$ on
-$\mathcal{F}_{AB}$ only. A test $i \in \mathcal{F}_{AB}$ survives the
-corrected family iff
+$\mathcal{F}_{AB}$ only. Following the original step-up procedure,
+we sort the $p$-values in $\mathcal{F}_{AB}$ in ascending order
+$p^{(1)} \le \cdots \le p^{(m')}$, find the largest rank $k$ such that
 \begin{equation}
   \label{eq:bh-restricted}
-  p^{(i)} \le \frac{\mathrm{rank}(p^{(i)})}{m'}\cdot q,
+  p^{(k)} \le \frac{k}{m'}\cdot q,
 \end{equation}
-where ranks are taken within $\mathcal{F}_{AB}$. This is the procedure
-used throughout this appendix. Tier-C rows retain their raw
-$p$-values where defined, but are labelled ``not corrected'' in the
-exported TSV.
+and reject the null hypothesis for all tests of rank $i \le k$. Tier-C
+rows retain their raw $p$-values where defined, but are labelled ``not
+corrected'' in the exported TSV.
+
+\paragraph{Scope of parametric inference at Tier B.}
+At $s_g = 3$ or $4$, Welch's Satterthwaite approximation for the
+degrees of freedom is known to be unstable on the heavy-tailed reward
+distributions typical of RL training; reported $p$-values can swing by
+an order of magnitude under small perturbations of the sample variance.
+We therefore treat Tier-B rows as \emph{corroborative}: they enter the
+BH family so that Tier-A rejections are not contaminated by the larger
+Tier-C denominator, but we do not quote a Tier-B row as the sole
+support for any headline claim and we additionally compute a permutation
+$p$-value for every Tier-B comparison; whenever the permutation and
+Welch $p$-values disagree on the BH threshold, the row is
+down-ranked to ``descriptive''.
 
 \subsection{Survival table for $F_1$--$F_5$ (W4, Q5)}
 \label{sec:stat-rigor-addendum:survival}
@@ -128,7 +142,7 @@ are \emph{downgraded to descriptive} in the main text (W4).}
 \midrule
 $F_1$ & ZVF diagnostic              & no  & no  & --     & --       & downgraded (Tier-C) \\
 $F_2$ & Instruct $>$ Base            & no  & no  & --     & --       & downgraded (Tier-C) \\
-$F_3$ & PPO/GRPO heterogeneity       & yes & no  & $+22.44$ & $6.7\times 10^{-11}$ & \textbf{survives} \\
+$F_3$ & PPO/GRPO heterogeneity       & yes & no  & $+21.84$ & $6.7\times 10^{-11}$ & \textbf{survives} \\
 $F_4$ & Framework gap                & no  & no  & --     & --       & downgraded (Tier-C) \\
 $F_5$ & Frontier stability           & no  & no  & --     & --       & downgraded (Tier-C) \\
 \bottomrule
@@ -171,9 +185,12 @@ specific main-text claims whose evidentiary status we revise:
     tested effect.
   \item \textbf{PPO vs.\ GRPO on Qwen3-8B.} The single-seed rows
     $0.344$ (GRPO) and $0.350$ (PPO) do not enter the BH family.
-    The paired Welch $p$ of $0.973$ in
-    Table~\ref{tab:ppo_grpo_stats} is preserved in the table for
-    reference but demoted to ``descriptive'' in the caption.
+    The Welch $p$ of $0.973$ in
+    Table~\ref{tab:ppo_grpo_stats} (computed over independent
+    single-seed training-reward samples, \emph{not} a paired test --
+    an earlier caption misdescribed it as ``paired'')
+    is preserved in the table for reference but demoted to
+    ``descriptive'' in the caption.
   \item \textbf{Frontier stability proxy (SI/PTD).} The per-run SI
     and PTD values for all Tinker MoE runs are Tier-C and are no
     longer counted as observations in the paper-wide BH family.
@@ -183,7 +200,16 @@ The negative held-out GSM8K result (Qwen3-8B post-GRPO $83.3\%$ vs.\
 base $82.0\%$, $p{=}0.26$) is unaffected: that evaluation is
 $5$-seed on TRL with a common eval harness and is Tier-A; if
 anything, its non-significance is \emph{strengthened} by restricting
-to the Tier-A/B family.
+to the Tier-A/B family. We note two power caveats on this null. First,
+a seed-level Welch test at $n_1{=}n_2{=}5$ only detects effects of
+$|d|\gtrsim 2$, so the $+1.3$\,pp gap we observe is not separable from
+zero at this seed budget. Second, aggregating $1{,}319$ GSM8K items to
+$5$ per-seed means discards item-level power; a paired McNemar test on
+the item-level base-vs-post-GRPO predictions (same seeds, same
+evaluator) is the appropriate follow-up and is listed in the conclusion
+as the next measurement we will run before camera-ready. We do not
+currently claim the null as evidence of \emph{no} effect; we claim
+only that we cannot reject it at our seed budget.
 
 \subsection{Reproducibility artifact}
 \label{sec:stat-rigor-addendum:repro}

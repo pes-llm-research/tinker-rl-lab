@@ -72,17 +72,29 @@ slack.har
 tasks/outcome/
 
 # LaTeX build artifacts
-paper/tikz/*.aux
-paper/main.aux
-paper/main.log
-paper/main.out
-paper/main.toc
-paper/main.bbl
-paper/main.blg
-paper/main.fls
-paper/main.fdb_latexmk
-paper/main.synctex.gz
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Editor backups
+*.bak
+
+# Repomix bundles
+repomix-output.xml
+
 wandb/
 .modal/
 node_modules/
-wandb/

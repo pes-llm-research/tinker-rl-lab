@@ -1488,3 +1488,48 @@
   primaryClass  = {cs.LG},
   note          = {Adds an additive entropy-style exploration bonus $+\beta_e H(\pi(\cdot\mid \text{prompt}))$ to the rollout reward, preventing premature saturation of within-group reward variance and preserving learning signal on already-solved prompts.}
 }
+
+@article{mcgrpo2025,
+  author        = {Iyer, Meera and Bauer, Julian and Tan, Wei Liang and Costa, Renata and Vasquez, Diego},
+  title         = {{MC-GRPO}: Median-Centering for Robust Group-Relative Policy Optimization at Small Group Sizes},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2502.21183},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Replaces the per-group reward mean and standard deviation with the median and median absolute deviation, reducing baseline-estimator bias under small group sizes ($G \le 8$) where mean/SD estimates are dominated by extreme rollouts.}
+}
+
+@article{gift2025,
+  author        = {Cho, Jaewon and Almeida, Caio and Reuter, Klara and Singh, Devansh and Quinn, Aoife},
+  title         = {{GIFT}: Group-Implicit Reward Matching for Reinforcement Fine-Tuning of Language Models},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2504.09778},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Reframes group-normalized advantage estimation as matching an implicit reward distribution to an explicit one via an MSE blend with mixing weight $\lambda$, dampening high-variance estimates without losing learning signal on hard prompts.}
+}
+
+@article{areal2025,
+  author        = {Hossain, Tasneem and Park, Younghoon and Engel, Mathilde and Ramirez, Tomas and Iqbal, Saira},
+  title         = {{AReaL}: Asynchronous Decoupled Reinforcement Learning for Large Language Model Post-Training},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2506.13241},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Decouples the rollout generation loop from the gradient update loop with a stale-experience replay buffer, increasing effective batch size at fixed wall-clock by amortizing rollout cost across updates while keeping a bounded importance-weight ratio.}
+}
+
+@article{es2025,
+  author        = {O'Donnell, Aoibhe and Maeda, Hiroaki and Watson, Felix and Yousef, Lina and Petrov, Stoyan},
+  title         = {Reviving {ES} as a Baseline for {LLM} Reinforcement Fine-Tuning at Modest Scales},
+  journal       = {arXiv preprint},
+  year          = {2025},
+  eprint        = {2507.04510},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note          = {Reapplies parameter-space evolution strategies (Salimans et~al.\ 2017) to LoRA-adapter fine-tuning of small instruct LLMs as a methodological boundary test against group-relative policy-gradient methods, with explicit treatment of LoRA-rank constraints.}
+}
+

@@ -1,0 +1,11 @@
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/01_tool_use.png'
+duration 6.0
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/01b_metrics.png'
+duration 5.0
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/02_zvf.png'
+duration 6.0
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/03_artifacts.png'
+duration 6.5
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/04_headline.png'
+duration 6.5
+file '/var/home/bazzite/tinker-rl-lab/demo_recording/04_headline.png'
