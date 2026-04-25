@@ -29,9 +29,9 @@ urlcolor: blue
 papersize: a4
 toc: true
 toc-depth: 2
-mainfont: Times New Roman
-mathfont: STIX Two Math
-monofont: Menlo
+mainfont: TeX Gyre Termes
+mathfont: Latin Modern Math
+monofont: DejaVu Sans Mono
 header-includes:
   - \usepackage{booktabs}
 ---

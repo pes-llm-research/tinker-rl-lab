@@ -4,7 +4,7 @@
 
 **Project Guides:** Prof. Narayana Darapaneni (Northwestern University / Great Learning) | Mr. Anwesh Reddy Paduri (Great Learning / PES University)
 
-Arvind C R (PES2PGE24DS006), Sandhya Jeyaraj, Arumugam Chetty K, Madhu Kumara L (PES2PGE24DS176), Dhruva N Murthy, Mohammad Rafi, Anwesh Reddy Paduri, Prof. Narayana Darapaneni
+Arvind C R (PES2PGE24DS140), Sandhya Jeyaraj (PES2PGE24DS144), Arumugam Chetty K (PES2PGE24DS137), Madhu Kumara L (PES2PGE24DS176), Dhruva N Murthy (PES2PGE23DS169), Mohammad Rafi (PES2PGE24DS157), Anwesh Reddy Paduri, Prof. Narayana Darapaneni
 
 **Date:** April 19, 2026 (Updated with 16+ completed World-Class Suite results, Kimi-K2 experiment, scaling law analysis, ZVF analysis, length bias analysis, 2-GRPO hypothesis test, and enhanced statistical analysis)
 
